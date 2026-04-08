@@ -370,6 +370,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       items: [
         { label: "Side Stand Sensor", value: yesNo(true) },
         { label: "Kill Switch", value: yesNo(bike.category !== "Scooter") },
+        { label: "TCS (Traction Control System)", value: yesNo(bike.topSpeedKph >= 120) },
         {
           label: "Battery Protection (Overcharge / Thermal / Short Circuit)",
           value: "Overcharge, Thermal, Short Circuit",
@@ -594,6 +595,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       items: [
         { label: "ABS", value: abs },
         { label: "CBS (Combined Braking System)", value: yesNo(abs === "None") },
+        { label: "TCS (Traction Control System)", value: yesNo(bike.topSpeedKph >= 150) },
         { label: "Engine Kill Switch", value: yesNo(bike.category !== "Scooter") },
         { label: "Side Stand Engine Cut-off", value: yesNo(bike.category !== "Scooter") },
         { label: "Anti-theft Alarm", value: yesNo(false) },

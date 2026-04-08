@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Bike, Calculator, ListChecks, LogIn, ShoppingBag, Store } from "lucide-react";
+import { Bike, Calculator, House, ListChecks, LogIn, ShoppingBag, Store } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Home", icon: Bike },
-  { href: "/bikes", label: "Bikes", icon: ListChecks },
+  { href: "/", label: "Home", icon: House },
+  { href: "/bikes", label: "Bikes", icon: Bike },
   { href: "/compare", label: "Compare", icon: ListChecks },
   { href: "/showrooms", label: "Showroom", icon: Store },
   { href: "/calculator", label: "Calculator", icon: Calculator },
