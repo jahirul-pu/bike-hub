@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Bike,
   bikes,
@@ -24,6 +25,13 @@ type SpecCategory = {
   title: string;
   items: SpecItem[];
 };
+
+function categoryAnchor(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 function estimatedPowerFromCc(cc: number) {
   return Number((cc * 0.085).toFixed(1));
@@ -703,6 +711,10 @@ export default async function BikeDetailsPage({
       ? completeEvSpecCategories(bike, similarBikes)
       : completeIceSpecCategories(bike, similarBikes);
 
+  const defaultCategoryTitle =
+    completeSpecs.find((category) => category.title.startsWith("1."))?.title ?? completeSpecs[0]?.title;
+  const defaultCategoryKey = defaultCategoryTitle ? categoryAnchor(defaultCategoryTitle) : "basic-information";
+
   const specHeading =
     bike.powertrain === "EV"
       ? "Complete EV Bike Specification Categories"
@@ -752,11 +764,38 @@ export default async function BikeDetailsPage({
           </h2>
           <p className="mt-2 text-sm text-slate-600">{specDescription}</p>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {completeSpecs.map((category) => (
-              <SpecCategoryCard key={category.title} title={category.title} items={category.items} />
-            ))}
-          </div>
+          <Tabs
+            orientation="vertical"
+            defaultValue={defaultCategoryKey}
+            className="mt-4 grid gap-4 lg:grid-cols-[250px_1fr]"
+          >
+            <aside className="h-fit self-start rounded-2xl border border-slate-200 bg-white/90 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Categories</p>
+              <TabsList className="mt-3 h-auto w-full flex-col items-stretch gap-2 bg-transparent p-0">
+                {completeSpecs.map((category) => (
+                  <TabsTrigger
+                    key={category.title}
+                    value={categoryAnchor(category.title)}
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-xs font-medium text-slate-700 data-[state=active]:border-slate-400 data-[state=active]:bg-white"
+                  >
+                    {category.title.replace(/^\d+\.\s*/, "")}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </aside>
+
+            <div>
+              {completeSpecs.map((category) => (
+                <TabsContent
+                  key={category.title}
+                  value={categoryAnchor(category.title)}
+                  className="mt-0"
+                >
+                  <SpecCategoryCard title={category.title} items={category.items} />
+                </TabsContent>
+              ))}
+            </div>
+          </Tabs>
         </section>
 
         <section className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-5">
