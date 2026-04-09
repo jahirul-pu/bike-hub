@@ -13,6 +13,7 @@ import {
   getSimilarBikes,
   headlineMetric,
   metricForSimilarity,
+  powertrainBadgeClass,
 } from "@/lib/bikes-data";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,10 @@ function categoryAnchor(title: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function displayCategoryTitle(title: string): string {
+  return title.replace(/^\d+\.\s*/, "");
 }
 
 function estimatedPowerFromCc(cc: number) {
@@ -455,7 +460,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "2. Engine & Performance (ICE Bikes)",
+      title: "2. Engine & Performance",
       items: [
         { label: "Engine Type", value: engineType(displacement) },
         { label: "Displacement (cc)", value: `${displacement} cc` },
@@ -677,7 +682,9 @@ function SpecCategoryCard({ title, items }: SpecCategory) {
   return (
     <Card className="border-slate-200 bg-white/90">
       <CardHeader className="pb-3">
-        <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">{title}</CardTitle>
+        <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
+          {displayCategoryTitle(title)}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         {items.map((item) => (
@@ -732,7 +739,7 @@ export default async function BikeDetailsPage({
         <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="bg-slate-900 text-white hover:bg-slate-900">{bike.category}</Badge>
-            <Badge variant="outline" className="border-slate-300 text-slate-700">
+            <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
               {bike.powertrain}
             </Badge>
           </div>
@@ -780,7 +787,7 @@ export default async function BikeDetailsPage({
                     value={categoryAnchor(category.title)}
                     className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-xs font-medium text-slate-700 data-[state=active]:border-slate-400 data-[state=active]:bg-white"
                   >
-                    {category.title.replace(/^\d+\.\s*/, "")}
+                    {displayCategoryTitle(category.title)}
                   </TabsTrigger>
                 ))}
               </TabsList>

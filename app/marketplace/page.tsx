@@ -6,7 +6,7 @@ import { Bike as BikeIcon, ChevronDown, Megaphone, ShieldCheck, ShoppingBag, Use
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { bikes, Bike, formatBdt, headlineMetric } from "@/lib/bikes-data";
+import { bikes, Bike, formatBdt, headlineMetric, powertrainBadgeClass } from "@/lib/bikes-data";
 import { cn } from "@/lib/utils";
 
 type SparePartCategory = "Parts" | "Accessories" | "Additives";
@@ -205,7 +205,7 @@ function UsedBikeCard({
             {bike.brand} {bike.model}
           </CardTitle>
           <div className="flex gap-2">
-            <Badge variant="outline" className="border-slate-300 text-slate-700">
+            <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
               {bike.powertrain}
             </Badge>
             <Badge className={style.badgeClass}>{badgeLabel}</Badge>

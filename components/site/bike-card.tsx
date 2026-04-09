@@ -3,7 +3,7 @@ import { ArrowRight, Gauge, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bike, formatBdt, headlineMetric } from "@/lib/bikes-data";
+import { Bike, formatBdt, headlineMetric, powertrainBadgeClass } from "@/lib/bikes-data";
 import { cn } from "@/lib/utils";
 
 type BikeCardProps = {
@@ -16,7 +16,7 @@ export function BikeCard({ bike }: BikeCardProps) {
       <CardHeader className="pb-3">
         <div className="mb-3 flex items-center justify-between">
           <Badge className="bg-slate-900 text-white hover:bg-slate-900">{bike.category}</Badge>
-          <Badge variant="outline" className="border-slate-300 text-slate-700">
+          <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
             {bike.powertrain}
           </Badge>
         </div>

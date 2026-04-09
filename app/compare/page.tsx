@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Bike, bikes, formatBdt, Powertrain } from "@/lib/bikes-data";
+import { Bike, bikes, formatBdt, powertrainBadgeClass, Powertrain } from "@/lib/bikes-data";
 import { cn } from "@/lib/utils";
 
 type SpecRow = {
@@ -253,7 +253,7 @@ export default async function ComparePage({
         </p>
 
         <div className="mt-3 flex items-center gap-2">
-          <Badge className="bg-slate-900 text-white hover:bg-slate-900">{selectedPowertrain} only</Badge>
+          <Badge className={powertrainBadgeClass(selectedPowertrain)}>{selectedPowertrain} only</Badge>
           <Badge variant="outline" className="border-slate-300 text-slate-700">
             {selectedBikes.length} bikes
           </Badge>
@@ -280,7 +280,7 @@ export default async function ComparePage({
                     <p className="font-heading text-2xl uppercase tracking-wide text-slate-900">
                       {bike.brand} {bike.model}
                     </p>
-                    <Badge variant="outline" className="border-slate-300 text-slate-700">
+                    <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
                       {bike.powertrain}
                     </Badge>
                   </div>

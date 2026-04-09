@@ -279,6 +279,12 @@ export function formatBdt(value: number): string {
   return `BDT ${new Intl.NumberFormat("en-BD").format(value)}`;
 }
 
+export function powertrainBadgeClass(powertrain: Powertrain): string {
+  return powertrain === "ICE"
+    ? "border-red-200 bg-red-100 text-red-900 hover:bg-red-100"
+    : "border-emerald-200 bg-emerald-100 text-emerald-900 hover:bg-emerald-100";
+}
+
 export function headlineMetric(bike: Bike): string {
   if (bike.powertrain === "ICE") {
     return `${bike.displacementCc ?? "-"} cc`;
