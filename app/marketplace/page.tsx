@@ -163,9 +163,42 @@ function SparePartCard({ part }: { part: SparePartListing }) {
   );
 }
 
-function UsedBikeCard({ bike, badgeLabel }: { bike: Bike; badgeLabel: string }) {
+type UsedPriority = "certified" | "promoted" | "user-listed";
+
+const usedPriorityStyles: Record<
+  UsedPriority,
+  {
+    cardClass: string;
+    badgeClass: string;
+  }
+> = {
+  certified: {
+    cardClass: "border-emerald-300 bg-emerald-50/70 shadow-md",
+    badgeClass: "bg-emerald-600 text-white hover:bg-emerald-600",
+  },
+  promoted: {
+    cardClass: "border-amber-300 bg-amber-50/60 shadow-sm",
+    badgeClass: "bg-amber-500 text-amber-950 hover:bg-amber-500",
+  },
+  "user-listed": {
+    cardClass: "border-slate-200 bg-white/90",
+    badgeClass: "bg-slate-700 text-white hover:bg-slate-700",
+  },
+};
+
+function UsedBikeCard({
+  bike,
+  badgeLabel,
+  priority,
+}: {
+  bike: Bike;
+  badgeLabel: string;
+  priority: UsedPriority;
+}) {
+  const style = usedPriorityStyles[priority];
+
   return (
-    <Card className="border-slate-200 bg-white/90">
+    <Card className={cn("border shadow-sm", style.cardClass)}>
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
@@ -175,7 +208,7 @@ function UsedBikeCard({ bike, badgeLabel }: { bike: Bike; badgeLabel: string }) 
             <Badge variant="outline" className="border-slate-300 text-slate-700">
               {bike.powertrain}
             </Badge>
-            <Badge className="bg-slate-900 text-white hover:bg-slate-900">{badgeLabel}</Badge>
+            <Badge className={style.badgeClass}>{badgeLabel}</Badge>
           </div>
         </div>
       </CardHeader>
@@ -203,6 +236,8 @@ function UsedBikeCard({ bike, badgeLabel }: { bike: Bike; badgeLabel: string }) 
 }
 
 export default function MarketplacePage() {
+  const [activeSection, setActiveSection] = useState<"spare" | "used">("spare");
+
   const [selectedCategory, setSelectedCategory] = useState<SparePartCategory | "All">("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
   const [selectedNestedSubcategory, setSelectedNestedSubcategory] = useState<string>("All");
@@ -338,8 +373,37 @@ export default function MarketplacePage() {
         <p className="mt-3 max-w-2xl text-slate-600">
           Browse two dedicated sections for spare parts and used vehicles.
         </p>
+
+        <div className="mt-6 flex flex-wrap gap-3 md:gap-4">
+          <button
+            type="button"
+            onClick={() => setActiveSection("spare")}
+            className={cn(
+              buttonVariants({ variant: activeSection === "spare" ? "default" : "outline", size: "lg" }),
+              "min-w-[210px] justify-center text-base font-semibold",
+              activeSection === "spare" ? "bg-slate-900 text-white hover:bg-slate-700" : "border-slate-300"
+            )}
+          >
+            <Wrench className="h-4 w-4" />
+            Spare Parts
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSection("used")}
+            className={cn(
+              buttonVariants({ variant: activeSection === "used" ? "default" : "outline", size: "lg" }),
+              "min-w-[210px] justify-center text-base font-semibold",
+              activeSection === "used" ? "bg-slate-900 text-white hover:bg-slate-700" : "border-slate-300"
+            )}
+          >
+            <BikeIcon className="h-4 w-4" />
+            Used Vehicles
+          </button>
+        </div>
       </section>
 
+      {activeSection === "spare" ? (
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 font-heading text-4xl uppercase tracking-wide text-slate-900">
@@ -477,8 +541,10 @@ export default function MarketplacePage() {
           ))}
         </div>
       </section>
+      ) : null}
 
-      <section className="mt-10">
+      {activeSection === "used" ? (
+      <section className="mt-8">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 font-heading text-4xl uppercase tracking-wide text-slate-900">
             <BikeIcon className="h-7 w-7" />
@@ -490,7 +556,7 @@ export default function MarketplacePage() {
         </div>
 
         <div className="space-y-8">
-          <section>
+          <section className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
                 <ShieldCheck className="h-6 w-6" />
@@ -502,12 +568,12 @@ export default function MarketplacePage() {
             </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {bikeHubCertified.map((bike) => (
-                <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Certified" />
+                <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Certified" priority="certified" />
               ))}
             </div>
           </section>
 
-          <section>
+          <section className="rounded-2xl border border-amber-300 bg-amber-50/40 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
                 <Megaphone className="h-6 w-6" />
@@ -519,12 +585,12 @@ export default function MarketplacePage() {
             </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {promoted.map((bike) => (
-                <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Promoted" />
+                <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Promoted" priority="promoted" />
               ))}
             </div>
           </section>
 
-          <section>
+          <section className="rounded-2xl border border-slate-200 bg-white/70 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
                 <User className="h-6 w-6" />
@@ -536,12 +602,13 @@ export default function MarketplacePage() {
             </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {userListed.map((bike) => (
-                <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="User Listed" />
+                <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="User Listed" priority="user-listed" />
               ))}
             </div>
           </section>
         </div>
       </section>
+      ) : null}
     </div>
   );
 }
