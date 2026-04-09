@@ -1,10 +1,26 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bike as BikeIcon, Megaphone, ShieldCheck, ShoppingBag, User, Wrench } from "lucide-react";
+import { Bike as BikeIcon, ChevronDown, Megaphone, ShieldCheck, ShoppingBag, User, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { bikes, Bike, formatBdt, headlineMetric } from "@/lib/bikes-data";
 import { cn } from "@/lib/utils";
+
+type SparePartCategory = "Parts" | "Accessories" | "Additives";
+
+type SparePartListing = {
+  id: string;
+  name: string;
+  fitment: string;
+  condition: string;
+  priceBdt: number;
+  category: SparePartCategory;
+  subcategory: string;
+  nestedSubcategory?: string;
+};
 
 const spareParts = [
   {
@@ -13,6 +29,9 @@ const spareParts = [
     fitment: "150cc - 200cc street bikes",
     condition: "New",
     priceBdt: 6500,
+    category: "Parts",
+    subcategory: "Drivetrain",
+    nestedSubcategory: "Chain & Sprocket",
   },
   {
     id: "part-002",
@@ -20,39 +39,129 @@ const spareParts = [
     fitment: "Dual-piston caliper setup",
     condition: "New",
     priceBdt: 1800,
+    category: "Parts",
+    subcategory: "Braking",
+    nestedSubcategory: "Brake Pads",
   },
   {
     id: "part-003",
-    name: "LED Headlamp Assembly",
-    fitment: "Universal 12V motorcycle",
+    name: "Touring Windshield",
+    fitment: "Universal street and adventure bikes",
     condition: "New",
     priceBdt: 4200,
+    category: "Accessories",
+    subcategory: "Touring",
+    nestedSubcategory: "Wind Protection",
   },
   {
     id: "part-004",
-    name: "Rear Shock Absorber Pair",
-    fitment: "Scooter 110cc - 125cc",
-    condition: "Used - Excellent",
-    priceBdt: 3000,
+    name: "Phone Mount with USB",
+    fitment: "Handlebar 22mm - 32mm",
+    condition: "New",
+    priceBdt: 2100,
+    category: "Accessories",
+    subcategory: "Electronics",
+    nestedSubcategory: "Mobile Holder",
   },
   {
     id: "part-005",
-    name: "Portable EV Charger",
-    fitment: "72V electric bikes",
-    condition: "Used - Good",
-    priceBdt: 9800,
+    name: "10W40 Semi-Synthetic Engine Oil",
+    fitment: "125cc - 250cc motorcycles",
+    condition: "New",
+    priceBdt: 950,
+    category: "Additives",
+    subcategory: "Engine Oil",
+    nestedSubcategory: "Semi Synthetic",
   },
   {
     id: "part-006",
+    name: "Engine Flush Oil Treatment",
+    fitment: "All ICE engines before oil change",
+    condition: "New",
+    priceBdt: 780,
+    category: "Additives",
+    subcategory: "Engine Flush Oil",
+    nestedSubcategory: "Pre-Service Flush",
+  },
+  {
+    id: "part-007",
+    name: "Octane Booster Concentrate",
+    fitment: "Petrol bikes and scooters",
+    condition: "New",
+    priceBdt: 620,
+    category: "Additives",
+    subcategory: "Octane Booster",
+    nestedSubcategory: "Performance Boost",
+  },
+  {
+    id: "part-008",
+    name: "Fuel System Cleaner",
+    fitment: "Injector and fuel line cleaning",
+    condition: "New",
+    priceBdt: 690,
+    category: "Additives",
+    subcategory: "Fuel Cleaner",
+    nestedSubcategory: "Injector Cleaner",
+  },
+  {
+    id: "part-009",
+    name: "DOT 4 Brake Fluid",
+    fitment: "Disc brake hydraulic systems",
+    condition: "New",
+    priceBdt: 540,
+    category: "Additives",
+    subcategory: "Brake Fluid",
+    nestedSubcategory: "DOT 4",
+  },
+  {
+    id: "part-010",
     name: "Tubeless Tyre Pair",
     fitment: "Front 90/90-17 | Rear 120/80-17",
     condition: "New",
     priceBdt: 7600,
+    category: "Parts",
+    subcategory: "Tyres",
+    nestedSubcategory: "Tubeless Tyres",
   },
-];
+] satisfies SparePartListing[];
 
 const certifiedSlugs = new Set(["yamaha-r15-v4", "suzuki-vstrom-250", "ultraviolette-f77"]);
 const promotedSlugs = new Set(["honda-cb350rs", "ather-450x-gen3", "revolt-rv400-brz"]);
+
+function SparePartCard({ part }: { part: SparePartListing }) {
+  return (
+    <Card className="border-slate-200 bg-white/90">
+      <CardHeader>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
+            {part.name}
+          </CardTitle>
+          <Badge variant="outline" className="border-slate-300 text-slate-700">
+            {part.condition}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm text-slate-700">
+        <p>{part.fitment}</p>
+        <p className="font-semibold text-slate-900">{formatBdt(part.priceBdt)}</p>
+        <div className="flex gap-2">
+          <Link
+            href="/showrooms"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-slate-300")}
+          >
+            Check Availability
+          </Link>
+          <Link
+            href="/showrooms"
+            className={cn(buttonVariants({ size: "sm" }), "bg-slate-900 text-white hover:bg-slate-700")}
+          >
+            Contact Seller
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function UsedBikeCard({ bike, badgeLabel }: { bike: Bike; badgeLabel: string }) {
   return (
@@ -94,6 +203,124 @@ function UsedBikeCard({ bike, badgeLabel }: { bike: Bike; badgeLabel: string }) 
 }
 
 export default function MarketplacePage() {
+  const [selectedCategory, setSelectedCategory] = useState<SparePartCategory | "All">("All");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
+  const [selectedNestedSubcategory, setSelectedNestedSubcategory] = useState<string>("All");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hoverCategory, setHoverCategory] = useState<SparePartCategory | "All">("All");
+  const [hoverSubcategory, setHoverSubcategory] = useState<string>("All");
+  const closeMenuTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const categoryOptions: Array<SparePartCategory | "All"> = [
+    "All",
+    "Parts",
+    "Accessories",
+    "Additives",
+  ];
+
+  const hoverSubcategoryOptions = useMemo(() => {
+    const base = spareParts.filter(
+      (item) => hoverCategory === "All" || item.category === hoverCategory
+    );
+
+    return ["All", ...Array.from(new Set(base.map((item) => item.subcategory)))];
+  }, [hoverCategory]);
+
+  const hoverNestedSubcategoryOptions = useMemo(() => {
+    const base = spareParts.filter(
+      (item) =>
+        (hoverCategory === "All" || item.category === hoverCategory) &&
+        (hoverSubcategory === "All" || item.subcategory === hoverSubcategory)
+    );
+
+    const nested = Array.from(
+      new Set(base.map((item) => item.nestedSubcategory).filter((value): value is string => Boolean(value)))
+    );
+
+    return ["All", ...nested];
+  }, [hoverCategory, hoverSubcategory]);
+
+  function cancelScheduledClose() {
+    if (closeMenuTimerRef.current) {
+      clearTimeout(closeMenuTimerRef.current);
+      closeMenuTimerRef.current = null;
+    }
+  }
+
+  function openMenu() {
+    cancelScheduledClose();
+    setHoverCategory(selectedCategory);
+    setHoverSubcategory(selectedSubcategory);
+    setMenuOpen(true);
+  }
+
+  function closeMenu() {
+    cancelScheduledClose();
+    setMenuOpen(false);
+  }
+
+  function scheduleCloseMenu() {
+    cancelScheduledClose();
+    closeMenuTimerRef.current = setTimeout(() => {
+      setMenuOpen(false);
+      closeMenuTimerRef.current = null;
+    }, 180);
+  }
+
+  useEffect(() => {
+    return () => {
+      cancelScheduledClose();
+    };
+  }, []);
+
+  function selectAllProducts() {
+    setSelectedCategory("All");
+    setSelectedSubcategory("All");
+    setSelectedNestedSubcategory("All");
+    setHoverCategory("All");
+    setHoverSubcategory("All");
+    closeMenu();
+  }
+
+  function selectCategory(category: SparePartCategory | "All") {
+    setSelectedCategory(category);
+    setSelectedSubcategory("All");
+    setSelectedNestedSubcategory("All");
+    setHoverCategory(category);
+    setHoverSubcategory("All");
+    closeMenu();
+  }
+
+  function selectSubcategory(subcategory: string) {
+    setSelectedCategory(hoverCategory);
+    setSelectedSubcategory(subcategory);
+    setSelectedNestedSubcategory("All");
+    setHoverSubcategory(subcategory);
+    closeMenu();
+  }
+
+  function selectNestedSubcategory(nestedSubcategory: string) {
+    setSelectedCategory(hoverCategory);
+    setSelectedSubcategory(hoverSubcategory);
+    setSelectedNestedSubcategory(nestedSubcategory);
+    closeMenu();
+  }
+
+  const filteredSpareParts = useMemo(() => {
+    return spareParts.filter((item) => {
+      if (selectedCategory !== "All" && item.category !== selectedCategory) return false;
+      if (selectedSubcategory !== "All" && item.subcategory !== selectedSubcategory) return false;
+      if (
+        selectedNestedSubcategory !== "All" &&
+        item.nestedSubcategory !== selectedNestedSubcategory
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [selectedCategory, selectedSubcategory, selectedNestedSubcategory]);
+
   const bikeHubCertified = bikes.filter((bike) => certifiedSlugs.has(bike.slug));
   const promoted = bikes.filter((bike) => promotedSlugs.has(bike.slug) && !certifiedSlugs.has(bike.slug));
   const userListed = bikes.filter(
@@ -120,42 +347,133 @@ export default function MarketplacePage() {
             Spare Parts
           </h2>
           <Badge variant="outline" className="border-slate-300 text-slate-700">
-            {spareParts.length} listings
+            {filteredSpareParts.length} listings
           </Badge>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {spareParts.map((part) => (
-            <Card key={part.id} className="border-slate-200 bg-white/90">
-              <CardHeader>
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
-                    {part.name}
-                  </CardTitle>
-                  <Badge variant="outline" className="border-slate-300 text-slate-700">
-                    {part.condition}
-                  </Badge>
+        <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Filter Products
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div
+              className="relative pb-1"
+              onMouseEnter={openMenu}
+              onMouseLeave={scheduleCloseMenu}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  if (menuOpen) {
+                    closeMenu();
+                  } else {
+                    openMenu();
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800"
+              >
+                Browse Categories
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              {menuOpen ? (
+                <div
+                  className="absolute left-0 top-full z-30 grid w-[min(92vw,760px)] grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-xl md:grid-cols-3"
+                  onMouseEnter={openMenu}
+                  onMouseLeave={scheduleCloseMenu}
+                >
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Category</p>
+                    <div className="mt-2 space-y-1">
+                      <button
+                        type="button"
+                        onClick={selectAllProducts}
+                        onMouseEnter={() => {
+                          setHoverCategory("All");
+                          setHoverSubcategory("All");
+                        }}
+                        className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                      >
+                        All Products
+                      </button>
+
+                      {categoryOptions
+                        .filter((category) => category !== "All")
+                        .map((category) => (
+                          <button
+                            type="button"
+                            key={category}
+                            onClick={() => selectCategory(category as SparePartCategory)}
+                            onMouseEnter={() => {
+                              setHoverCategory(category as SparePartCategory);
+                              setHoverSubcategory("All");
+                            }}
+                            className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                          >
+                            {category}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Subcategory</p>
+                    <div className="mt-2 space-y-1">
+                      {hoverSubcategoryOptions.map((subcategory) => (
+                        <button
+                          type="button"
+                          key={subcategory}
+                          onClick={() => selectSubcategory(subcategory)}
+                          onMouseEnter={() => setHoverSubcategory(subcategory)}
+                          className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                        >
+                          {subcategory}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Nested Subcategory</p>
+                    <div className="mt-2 space-y-1">
+                      {hoverNestedSubcategoryOptions.map((nestedSubcategory) => (
+                        <button
+                          type="button"
+                          key={nestedSubcategory}
+                          onClick={() => selectNestedSubcategory(nestedSubcategory)}
+                          className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                        >
+                          {nestedSubcategory}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-slate-700">
-                <p>{part.fitment}</p>
-                <p className="font-semibold text-slate-900">{formatBdt(part.priceBdt)}</p>
-                <div className="flex gap-2">
-                  <Link
-                    href="/showrooms"
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-slate-300")}
-                  >
-                    Check Availability
-                  </Link>
-                  <Link
-                    href="/showrooms"
-                    className={cn(buttonVariants({ size: "sm" }), "bg-slate-900 text-white hover:bg-slate-700")}
-                  >
-                    Contact Seller
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+              ) : null}
+            </div>
+
+            <button
+              type="button"
+              onClick={selectAllProducts}
+              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+            >
+              All Products
+            </button>
+          </div>
+
+          <p className="mt-3 text-xs text-slate-600">
+            Selected: {selectedCategory} / {selectedSubcategory} / {selectedNestedSubcategory}
+          </p>
+
+          <p className="mt-3 text-xs text-slate-500">
+            Additives include subcategories such as Engine Oil, Engine Flush Oil, Octane Booster, Fuel Cleaner, and Brake Fluid.
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredSpareParts.map((part) => (
+            <SparePartCard key={part.id} part={part} />
           ))}
         </div>
       </section>
