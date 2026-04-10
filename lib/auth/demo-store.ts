@@ -39,6 +39,12 @@ const garageByEmail: Record<string, GarageProfile> = {
       model: "R15",
       year: 2023,
     },
+    deliveryAddress: {
+      line1: "House 14, Road 3",
+      area: "Nobinagar",
+      city: "Savar",
+      zone: "Savar",
+    },
     savedBikes: [
       { make: "Yamaha", model: "R15", year: 2023 },
       { make: "Honda", model: "CBR 150R", year: 2022 },
@@ -77,6 +83,12 @@ const garageByEmail: Record<string, GarageProfile> = {
       model: "Ninja 400",
       year: 2024,
     },
+    deliveryAddress: {
+      line1: "Plot 7, CDA Avenue",
+      area: "Panchlaish",
+      city: "Chattogram",
+      zone: "Nationwide",
+    },
     savedBikes: [{ make: "Kawasaki", model: "Ninja 400", year: 2024 }],
     listings: [],
     orderHistory: [
@@ -96,6 +108,7 @@ const garageByEmail: Record<string, GarageProfile> = {
       model: "Gixxer SF",
       year: 2021,
     },
+    deliveryAddress: null,
     savedBikes: [{ make: "Suzuki", model: "Gixxer SF", year: 2021 }],
     listings: [
       {
@@ -141,6 +154,7 @@ export function getGarageProfileByEmail(email: string | null | undefined): Garag
   if (!email) {
     return {
       primaryBike: null,
+      deliveryAddress: null,
       savedBikes: [],
       listings: [],
       orderHistory: [],
@@ -176,6 +190,7 @@ function ensureGarageProfile(email: string): GarageProfile {
   if (!garageByEmail[normalizedEmail]) {
     garageByEmail[normalizedEmail] = {
       primaryBike: null,
+      deliveryAddress: null,
       savedBikes: [],
       listings: [],
       orderHistory: [],

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Bike, Calculator, House, ListChecks, LogIn, ShoppingBag, Store } from "lucide-react";
+import { CartDrawer } from "@/components/site/cart-drawer";
 import { UniversalSearch } from "@/components/site/universal-search";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -97,13 +98,16 @@ export function SiteHeader() {
             className="shrink-0 justify-self-end"
             style={sideWidth ? { width: `${sideWidth}px` } : undefined}
           >
-            <Link
-              href="/login"
-              className={cn(buttonVariants(), "float-right shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
-            >
-              <LogIn className="h-4 w-4" />
-              Login
-            </Link>
+            <div className="float-right flex items-center gap-2">
+              <CartDrawer />
+              <Link
+                href="/login"
+                className={cn(buttonVariants(), "shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
+              >
+                <LogIn className="h-4 w-4" />
+                Login
+              </Link>
+            </div>
           </div>
         </div>
 

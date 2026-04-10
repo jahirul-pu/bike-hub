@@ -29,6 +29,15 @@ export type OrderRecord = {
   orderedAt: string;
 };
 
+export type DeliveryZone = "Savar" | "Nationwide";
+
+export type DeliveryAddress = {
+  line1: string;
+  area: string;
+  city: string;
+  zone: DeliveryZone;
+};
+
 export type ImsPartRecord = {
   id: string;
   itemName: string;
@@ -38,6 +47,7 @@ export type ImsPartRecord = {
 
 export type GarageProfile = {
   primaryBike: BikeProfile | null;
+  deliveryAddress: DeliveryAddress | null;
   savedBikes: BikeProfile[];
   listings: ListingRecord[];
   orderHistory: OrderRecord[];
