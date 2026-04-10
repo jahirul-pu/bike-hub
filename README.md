@@ -1,5 +1,35 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Auth Setup
+
+Auth.js (NextAuth v5 beta) has been initialized with:
+
+- Google provider
+- Email/Password provider (Credentials)
+- Route protection for `/admin/*`, `/account/*`, and `/sell/*`
+- Session role extension with `userRole` (`User`, `Admin`, `Tech`)
+
+Copy `.env.example` to `.env.local` and fill in values:
+
+```bash
+cp .env.example .env.local
+```
+
+For local testing of the credentials provider, use:
+
+- `r15@bikehub.dev / r15rider123`
+- `admin@bikehub.dev / adminpass123`
+- `tech@bikehub.dev / techpass123`
+
+## My Garage Dashboard
+
+The authenticated dashboard is available at `/account` and includes:
+
+- Primary Bike card (current ride)
+- Contextual up-sell for Yamaha R15: top-rated Motowolf parts from IMS sample data
+- Listing Status tracker for user bike sales
+- Order History tab for parts and accessories
+
 ## Getting Started
 
 First, run the development server:
