@@ -17,11 +17,14 @@ const navItems = [
 ];
 
 export function SiteHeader() {
-  const navWrapperRef = useRef<HTMLDivElement>(null);
+  const navSizerRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const loginRef = useRef<HTMLDivElement>(null);
   const [navWidth, setNavWidth] = useState<number | null>(null);
+  const [sideWidth, setSideWidth] = useState<number | null>(null);
 
   useEffect(() => {
-    const element = navWrapperRef.current;
+    const element = navSizerRef.current;
     if (!element) return;
 
     const updateNavWidth = () => {
@@ -32,7 +35,6 @@ export function SiteHeader() {
 
     const resizeObserver = new ResizeObserver(updateNavWidth);
     resizeObserver.observe(element);
-
     window.addEventListener("resize", updateNavWidth);
 
     return () => {
@@ -41,38 +43,72 @@ export function SiteHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    const logoElement = logoRef.current;
+    const loginElement = loginRef.current;
+    if (!logoElement || !loginElement) return;
+
+    const updateSideWidth = () => {
+      const logoWidth = Math.round(logoElement.getBoundingClientRect().width);
+      const loginWidth = Math.round(loginElement.getBoundingClientRect().width);
+      setSideWidth(Math.max(logoWidth, loginWidth));
+    };
+
+    updateSideWidth();
+
+    const resizeObserver = new ResizeObserver(updateSideWidth);
+    resizeObserver.observe(logoElement);
+    resizeObserver.observe(loginElement);
+    window.addEventListener("resize", updateSideWidth);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateSideWidth);
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-600 text-sm font-black text-slate-900">
-              BH
-            </span>
-            <div className="leading-tight">
-              <p className="font-heading text-xl uppercase tracking-wider text-slate-900">Bike Hub</p>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Specs and Comparison</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/login"
-            className={cn(buttonVariants(), "bg-slate-900 text-white hover:bg-slate-700")}
-          >
-            <LogIn className="h-4 w-4" />
-            Login
-          </Link>
-        </div>
-
-        <div className="-mx-2 px-2">
-          <div
-            className="mx-auto max-w-full"
-            style={navWidth ? { width: `${navWidth}px` } : undefined}
-          >
-            <UniversalSearch />
+        <div className="flex min-h-16 items-center gap-3 py-2">
+          <div ref={logoRef} className="shrink-0" style={sideWidth ? { width: `${sideWidth}px` } : undefined}>
+            <Link href="/" className="inline-flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-600 text-sm font-black text-slate-900">
+                BH
+              </span>
+              <div className="leading-tight">
+                <p className="font-heading text-lg uppercase tracking-wider text-slate-900 sm:text-xl">Bike Hub</p>
+                <p className="hidden text-[11px] uppercase tracking-[0.2em] text-slate-500 sm:block">Specs and Comparison</p>
+              </div>
+            </Link>
           </div>
 
-          <div ref={navWrapperRef} className="mx-auto mb-2 w-fit max-w-full overflow-x-auto pb-2 md:mb-0 md:pb-3">
+          <div className="min-w-0 flex-1">
+            <div
+              className="mx-auto max-w-full"
+              style={navWidth ? { width: `${navWidth}px` } : undefined}
+            >
+              <UniversalSearch />
+            </div>
+          </div>
+
+          <div
+            ref={loginRef}
+            className="shrink-0 justify-self-end"
+            style={sideWidth ? { width: `${sideWidth}px` } : undefined}
+          >
+            <Link
+              href="/login"
+              className={cn(buttonVariants(), "float-right shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
+          </div>
+        </div>
+
+        <div className="mb-2 overflow-x-auto pb-2 md:mb-0 md:pb-3">
+          <div ref={navSizerRef} className="mx-auto w-fit max-w-full">
             <nav className="flex items-center gap-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
