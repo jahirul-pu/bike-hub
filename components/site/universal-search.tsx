@@ -23,6 +23,69 @@ const typeWeight: Record<UniversalSearchType, number> = {
   Showroom: 1,
 };
 
+type SearchScope = {
+  allowedTypes: UniversalSearchType[];
+  itemPredicate?: (item: UniversalSearchItem) => boolean;
+};
+
+const bikeTypeTerms = ["bike", "bikes", "motorcycle", "motorcycles"];
+const spareTypeTerms = ["spare", "spares", "part", "parts", "accessory", "accessories", "additive", "additives"];
+const showroomTypeTerms = ["showroom", "showrooms", "dealer", "dealers"];
+
+const bikeBrands = new Set(
+  universalSearchIndex
+    .filter((item) => item.type === "Bike")
+    .map((item) => item.keywords[0]?.toLowerCase())
+    .filter((keyword): keyword is string => Boolean(keyword))
+);
+
+function itemSearchText(item: UniversalSearchItem): string {
+  return `${item.title} ${item.description} ${item.keywords.join(" ")}`.toLowerCase();
+}
+
+function detectSearchScope(query: string): SearchScope {
+  const normalizedQuery = query.trim().toLowerCase();
+  const terms = normalizedQuery.split(/\s+/).filter(Boolean);
+  const brandTerm = terms.find((term) => bikeBrands.has(term));
+
+  if (normalizedQuery.includes("engine oil")) {
+    return {
+      allowedTypes: ["Spare"],
+      itemPredicate: (item) => itemSearchText(item).includes("engine oil"),
+    };
+  }
+
+  if (bikeBrands.has(normalizedQuery)) {
+    return {
+      allowedTypes: ["Bike"],
+      itemPredicate: (item) => itemSearchText(item).includes(normalizedQuery),
+    };
+  }
+
+  if (brandTerm) {
+    return {
+      allowedTypes: ["Bike"],
+      itemPredicate: (item) => itemSearchText(item).includes(brandTerm),
+    };
+  }
+
+  if (terms.some((term) => bikeTypeTerms.includes(term))) {
+    return { allowedTypes: ["Bike"] };
+  }
+
+  if (terms.some((term) => spareTypeTerms.includes(term))) {
+    return { allowedTypes: ["Spare"] };
+  }
+
+  if (terms.some((term) => showroomTypeTerms.includes(term))) {
+    return { allowedTypes: ["Showroom"] };
+  }
+
+  return {
+    allowedTypes: ["Bike", "Category", "Spare", "Showroom"],
+  };
+}
+
 function scoreItem(item: UniversalSearchItem, query: string): number {
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) return 0;
@@ -48,17 +111,21 @@ export function UniversalSearch() {
 
   const trimmedQuery = query.trim();
   const hasQuery = trimmedQuery.length > 0;
+  const scope = useMemo(() => detectSearchScope(trimmedQuery), [trimmedQuery]);
 
   const results = useMemo(() => {
     if (!hasQuery) return [];
 
     return universalSearchIndex
+      .filter(
+        (item) => scope.allowedTypes.includes(item.type) && (scope.itemPredicate ? scope.itemPredicate(item) : true)
+      )
       .map((item) => ({ item, score: scoreItem(item, trimmedQuery) }))
       .filter((entry) => entry.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 10)
       .map((entry) => entry.item);
-  }, [hasQuery, trimmedQuery]);
+  }, [hasQuery, scope, trimmedQuery]);
 
   return (
     <div className="relative w-full">
