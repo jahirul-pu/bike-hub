@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
@@ -36,6 +37,7 @@ function formatBdt(value: number): string {
 }
 
 export function CartDrawer() {
+  const router = useRouter();
   const pathname = usePathname();
   const hydrated = useCartHydration();
   const [open, setOpen] = useState(false);
@@ -150,6 +152,11 @@ export function CartDrawer() {
 
   const removeItem = (id: string) => {
     removeItemFromCart(id);
+  };
+
+  const goToCheckout = () => {
+    setOpen(false);
+    router.push("/checkout");
   };
 
   return (
@@ -319,6 +326,7 @@ export function CartDrawer() {
             <Button
               type="button"
               size="lg"
+              onClick={goToCheckout}
               className="mt-3 h-13 w-full bg-slate-900 text-base font-bold text-white shadow-[0_18px_35px_-18px_rgba(15,23,42,0.75)] hover:bg-slate-700"
               disabled={cartItems.length === 0}
             >

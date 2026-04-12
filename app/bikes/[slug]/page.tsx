@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, SearchPlus, ChevronLeft, ChevronRight as ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { BikeGallery } from "@/components/site/bike-gallery";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -709,60 +711,58 @@ export default async function BikeDetailsPage({
 }) {
   const resolved = await params;
   const bike = getBikeBySlug(resolved.slug);
-
-  if (!bike) {
-    notFound();
-  }
-
+  if (!bike) notFound();
   const similarBikes = getSimilarBikes(bike, 3);
-  const completeSpecs =
-    bike.powertrain === "EV"
-      ? completeEvSpecCategories(bike, similarBikes)
-      : completeIceSpecCategories(bike, similarBikes);
-
-  const defaultCategoryTitle =
-    completeSpecs.find((category) => category.title.startsWith("1."))?.title ?? completeSpecs[0]?.title;
+  const completeSpecs = bike.powertrain === "EV"
+    ? completeEvSpecCategories(bike, similarBikes)
+    : completeIceSpecCategories(bike, similarBikes);
+  const defaultCategoryTitle = completeSpecs.find((category) => category.title.startsWith("1."))?.title ?? completeSpecs[0]?.title;
   const defaultCategoryKey = defaultCategoryTitle ? categoryAnchor(defaultCategoryTitle) : "basic-information";
+  const specHeading = bike.powertrain === "EV"
+    ? "Complete EV Bike Specification Categories"
+    : "Complete ICE Bike Specification Categories";
+  const specDescription = bike.powertrain === "EV"
+    ? "Dedicated EV sheet covering motor, battery, charging, smart tech, and EV market positioning."
+    : "Dedicated ICE sheet covering engine, fuel efficiency, transmission, maintenance, and competitor specs.";
 
-  const specHeading =
-    bike.powertrain === "EV"
-      ? "Complete EV Bike Specification Categories"
-      : "Complete ICE Bike Specification Categories";
-  const specDescription =
-    bike.powertrain === "EV"
-      ? "Dedicated EV sheet covering motor, battery, charging, smart tech, and EV market positioning."
-      : "Dedicated ICE sheet covering engine, fuel efficiency, transmission, maintenance, and competitor specs.";
-
+  // --- PAGE LAYOUT ---
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
+    <div className="mx-auto w-full max-w-6xl grid gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
       <main>
         <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm sm:p-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="bg-slate-900 text-white hover:bg-slate-900">{bike.category}</Badge>
-            <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
-              {bike.powertrain}
-            </Badge>
-          </div>
-
-          <h1 className="mt-3 font-heading text-5xl uppercase tracking-wide text-slate-900 sm:text-6xl">
-            {bike.brand} {bike.model}
-          </h1>
-          <p className="mt-2 max-w-3xl text-slate-600">{bike.summary}</p>
-
-          <div className="mt-5 grid gap-2 sm:grid-cols-3">
-            <div className="rounded-lg bg-slate-100 p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Price</p>
-              <p className="text-base font-semibold text-slate-900">{formatBdt(bike.priceBdt)}</p>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Gallery left */}
+            <div className="w-full max-w-lg mx-auto lg:mx-0 lg:w-[420px] flex-shrink-0">
+              <BikeGallery images={bike.images && bike.images.length > 0 ? bike.images : ["/placeholder-bike.jpg"]} />
             </div>
-            <div className="rounded-lg bg-slate-100 p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
-                {bike.powertrain === "ICE" ? "Engine CC" : "Motor Output"}
-              </p>
-              <p className="text-base font-semibold text-slate-900">{headlineMetric(bike)}</p>
-            </div>
-            <div className="rounded-lg bg-slate-100 p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
-              <p className="text-base font-semibold text-slate-900">{bike.topSpeedKph} km/h</p>
+            {/* Details right */}
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="bg-slate-900 text-white hover:bg-slate-900">{bike.category}</Badge>
+                <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
+                  {bike.powertrain}
+                </Badge>
+              </div>
+              <h1 className="mt-3 font-heading text-5xl uppercase tracking-wide text-slate-900 sm:text-6xl">
+                {bike.brand} {bike.model}
+              </h1>
+              <p className="mt-2 max-w-3xl text-slate-600">{bike.summary}</p>
+              <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                <div className="rounded-lg bg-slate-100 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Price</p>
+                  <p className="text-base font-semibold text-slate-900">{formatBdt(bike.priceBdt)}</p>
+                </div>
+                <div className="rounded-lg bg-slate-100 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                    {bike.powertrain === "ICE" ? "Engine CC" : "Motor Output"}
+                  </p>
+                  <p className="text-base font-semibold text-slate-900">{headlineMetric(bike)}</p>
+                </div>
+                <div className="rounded-lg bg-slate-100 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
+                  <p className="text-base font-semibold text-slate-900">{bike.topSpeedKph} km/h</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
