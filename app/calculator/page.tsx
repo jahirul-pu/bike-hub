@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Calculator } from "lucide-react";
 import { EvSavingsCalculator } from "@/components/site/ev-savings-calculator";
+import BikeLoanCalculator from "@/components/site/bike-loan-calculator";
 
 export const metadata: Metadata = {
   title: "Fuel vs. EV Savings Calculator | Bike Hub",
@@ -26,6 +27,9 @@ export default function CalculatorPage() {
       </section>
 
       <EvSavingsCalculator />
+      <div className="mt-10">
+        <BikeLoanCalculator />
+      </div>
     </div>
   );
 }

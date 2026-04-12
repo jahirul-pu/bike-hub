@@ -6,6 +6,7 @@ export type Bike = {
   model: string;
   category: "Commuter" | "Sport" | "Adventure" | "Scooter";
   powertrain: Powertrain;
+  images?: string[];
   priceBdt: number;
   displacementCc?: number;
   motorPowerKw?: number;

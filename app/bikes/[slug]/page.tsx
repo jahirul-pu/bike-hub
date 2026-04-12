@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight, SearchPlus, ChevronLeft, ChevronRight as ArrowRight } from "lucide-react";
+import { ChevronRight, Search, ChevronLeft, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { BikeGallery } from "@/components/site/bike-gallery";
 import { Badge } from "@/components/ui/badge";

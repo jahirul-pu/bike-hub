@@ -17,6 +17,8 @@ import {
   Tag,
   Battery,
 } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 
 /* ─── Constants (2026 Bangladesh rates) ─────────────────────────── */
@@ -386,17 +388,25 @@ export function EvSavingsCalculator() {
             </p>
           </div>
 
-          {/* Quick stat badge */}
-          <div className="flex w-fit items-center gap-3 rounded-lg bg-slate-100 p-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
-              <Leaf className="h-5 w-5" />
+          {/* Quick stat badge + CTA */}
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex w-fit items-center gap-3 rounded-lg bg-slate-100 p-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
+                <Leaf className="h-5 w-5" />
+              </div>
+              <div className="text-sm leading-tight text-slate-500">
+                <p className="uppercase tracking-wide text-xs">CO₂ Saved Avg</p>
+                <p className="font-semibold text-slate-900">
+                  <AnimatedNumber value={data.annualCO2Saved} decimals={0} suffix=" kg / yr" />
+                </p>
+              </div>
             </div>
-            <div className="text-sm leading-tight text-slate-500">
-              <p className="uppercase tracking-wide text-xs">CO₂ Saved Avg</p>
-              <p className="font-semibold text-slate-900">
-                <AnimatedNumber value={data.annualCO2Saved} decimals={0} suffix=" kg / yr" />
-              </p>
-            </div>
+
+            {data.monthlySavings > 5000 && (
+              <Link href="/marketplace?powertrain=EV">
+                <Button size="sm" variant="outline">View Certified EVs</Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

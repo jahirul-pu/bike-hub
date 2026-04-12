@@ -126,7 +126,7 @@ export async function processOrder(
   const normalizedShipping = parsed.data.shippingInfo;
 
   try {
-    const transactionResult = await prisma.$transaction(async (tx) => {
+    const transactionResult = await prisma.$transaction(async (tx: unknown) => {
       const db = tx as unknown as TransactionClient;
       const partIds = normalizedCart.map((item) => item.partId);
 
