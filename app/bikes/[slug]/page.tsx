@@ -747,20 +747,31 @@ export default async function BikeDetailsPage({
                 {bike.brand} {bike.model}
               </h1>
               <p className="mt-2 max-w-3xl text-slate-600">{bike.summary}</p>
-              <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                <div className="rounded-lg bg-slate-100 p-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Price</p>
-                  <p className="text-base font-semibold text-slate-900">{formatBdt(bike.priceBdt)}</p>
-                </div>
-                <div className="rounded-lg bg-slate-100 p-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">
-                    {bike.powertrain === "ICE" ? "Engine CC" : "Motor Output"}
-                  </p>
-                  <p className="text-base font-semibold text-slate-900">{headlineMetric(bike)}</p>
-                </div>
-                <div className="rounded-lg bg-slate-100 p-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
-                  <p className="text-base font-semibold text-slate-900">{bike.topSpeedKph} km/h</p>
+              <div className="mt-6 flex flex-col gap-4">
+                <Link
+                  href={{
+                    pathname: "/marketplace",
+                    query: { model: bike.model }
+                  }}
+                  className={cn(buttonVariants({ size: "lg" }), "w-full bg-slate-900 text-white hover:bg-slate-800 text-lg py-3 text-center")}
+                >
+                  Buy Parts
+                </Link>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="rounded-lg bg-slate-100 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Price</p>
+                    <p className="text-base font-semibold text-slate-900">{formatBdt(bike.priceBdt)}</p>
+                  </div>
+                  <div className="rounded-lg bg-slate-100 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
+                      {bike.powertrain === "ICE" ? "Engine CC" : "Motor Output"}
+                    </p>
+                    <p className="text-base font-semibold text-slate-900">{headlineMetric(bike)}</p>
+                  </div>
+                  <div className="rounded-lg bg-slate-100 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
+                    <p className="text-base font-semibold text-slate-900">{bike.topSpeedKph} km/h</p>
+                  </div>
                 </div>
               </div>
             </div>
