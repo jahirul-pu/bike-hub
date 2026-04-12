@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { universalSearchIndex, UniversalSearchItem, UniversalSearchType } from "@/lib/universal-search";
+import { detectSearchScope } from "@/lib/universal-search-intent";
 import { cn } from "@/lib/utils";
 
 const typeBadgeClass: Record<UniversalSearchType, string> = {
@@ -22,69 +23,6 @@ const typeWeight: Record<UniversalSearchType, number> = {
   Spare: 2,
   Showroom: 1,
 };
-
-type SearchScope = {
-  allowedTypes: UniversalSearchType[];
-  itemPredicate?: (item: UniversalSearchItem) => boolean;
-};
-
-const bikeTypeTerms = ["bike", "bikes", "motorcycle", "motorcycles"];
-const spareTypeTerms = ["spare", "spares", "part", "parts", "accessory", "accessories", "additive", "additives"];
-const showroomTypeTerms = ["showroom", "showrooms", "dealer", "dealers"];
-
-const bikeBrands = new Set(
-  universalSearchIndex
-    .filter((item) => item.type === "Bike")
-    .map((item) => item.keywords[0]?.toLowerCase())
-    .filter((keyword): keyword is string => Boolean(keyword))
-);
-
-function itemSearchText(item: UniversalSearchItem): string {
-  return `${item.title} ${item.description} ${item.keywords.join(" ")}`.toLowerCase();
-}
-
-function detectSearchScope(query: string): SearchScope {
-  const normalizedQuery = query.trim().toLowerCase();
-  const terms = normalizedQuery.split(/\s+/).filter(Boolean);
-  const brandTerm = terms.find((term) => bikeBrands.has(term));
-
-  if (normalizedQuery.includes("engine oil")) {
-    return {
-      allowedTypes: ["Spare"],
-      itemPredicate: (item) => itemSearchText(item).includes("engine oil"),
-    };
-  }
-
-  if (bikeBrands.has(normalizedQuery)) {
-    return {
-      allowedTypes: ["Bike"],
-      itemPredicate: (item) => itemSearchText(item).includes(normalizedQuery),
-    };
-  }
-
-  if (brandTerm) {
-    return {
-      allowedTypes: ["Bike"],
-      itemPredicate: (item) => itemSearchText(item).includes(brandTerm),
-    };
-  }
-
-  if (terms.some((term) => bikeTypeTerms.includes(term))) {
-    return { allowedTypes: ["Bike"] };
-  }
-
-  if (terms.some((term) => spareTypeTerms.includes(term))) {
-    return { allowedTypes: ["Spare"] };
-  }
-
-  if (terms.some((term) => showroomTypeTerms.includes(term))) {
-    return { allowedTypes: ["Showroom"] };
-  }
-
-  return {
-    allowedTypes: ["Bike", "Category", "Spare", "Showroom"],
-  };
-}
 
 function scoreItem(item: UniversalSearchItem, query: string): number {
   const normalizedQuery = query.trim().toLowerCase();
@@ -111,7 +49,7 @@ export function UniversalSearch() {
 
   const trimmedQuery = query.trim();
   const hasQuery = trimmedQuery.length > 0;
-  const scope = useMemo(() => detectSearchScope(trimmedQuery), [trimmedQuery]);
+  const scope = useMemo(() => detectSearchScope(trimmedQuery, universalSearchIndex), [trimmedQuery]);
 
   const results = useMemo(() => {
     if (!hasQuery) return [];
