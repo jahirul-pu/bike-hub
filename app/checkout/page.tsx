@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
 import { BadgeCheck, CreditCard, Landmark, ShieldCheck, Smartphone } from "lucide-react";
+import { processOrder } from "@/app/checkout/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCartHydration } from "@/hooks/use-cart-hydration";
@@ -66,11 +68,22 @@ function formatBdt(value: number): string {
 }
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const hydrated = useCartHydration();
   const items = useCartStore((state) => state.items);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const [isSubmitting, startTransition] = useTransition();
 
   const [shippingOption, setShippingOption] = useState<ShippingOption>("pickup");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("bkash");
+  const [shippingInfo, setShippingInfo] = useState({
+    fullName: "",
+    phone: "",
+    address: "",
+    city: "Savar",
+    postalCode: "",
+  });
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const cartItems = useMemo(() => (hydrated ? items : []), [hydrated, items]);
 
@@ -83,6 +96,41 @@ export default function CheckoutPage() {
   const taxBdt = Math.round(subtotalBdt * TAX_RATE);
   const shippingBdt = selectedShipping.feeBdt;
   const totalBdt = subtotalBdt + taxBdt + shippingBdt;
+
+  const submitCheckout = () => {
+    if (!hydrated || cartItems.length === 0 || isSubmitting) {
+      return;
+    }
+
+    setCheckoutError(null);
+
+    startTransition(async () => {
+      const result = await processOrder(
+        cartItems.map((item) => ({
+          partId: item.id,
+          quantity: item.quantity,
+        })),
+        {
+          fullName: shippingInfo.fullName,
+          phone: shippingInfo.phone,
+          address: shippingInfo.address,
+          city: shippingInfo.city,
+          postalCode: shippingInfo.postalCode || undefined,
+          deliveryOption: shippingOption,
+        }
+      );
+
+      if (!result.success) {
+        setCheckoutError(result.message);
+        return;
+      }
+
+      clearCart();
+      router.push(
+        `/checkout/thank-you?orderId=${encodeURIComponent(result.orderId)}&paymentMethod=${encodeURIComponent(paymentMethod)}`
+      );
+    });
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -110,6 +158,10 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   placeholder="Jahirul Islam"
+                  value={shippingInfo.fullName}
+                  onChange={(event) =>
+                    setShippingInfo((current) => ({ ...current, fullName: event.target.value }))
+                  }
                   className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
                 />
               </label>
@@ -119,6 +171,38 @@ export default function CheckoutPage() {
                 <input
                   type="tel"
                   placeholder="01XXXXXXXXX"
+                  value={shippingInfo.phone}
+                  onChange={(event) =>
+                    setShippingInfo((current) => ({ ...current, phone: event.target.value }))
+                  }
+                  className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                />
+              </label>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="space-y-1.5 text-sm text-slate-700">
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">City</span>
+                <input
+                  type="text"
+                  placeholder="Savar"
+                  value={shippingInfo.city}
+                  onChange={(event) =>
+                    setShippingInfo((current) => ({ ...current, city: event.target.value }))
+                  }
+                  className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                />
+              </label>
+
+              <label className="space-y-1.5 text-sm text-slate-700">
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Postal Code (Optional)</span>
+                <input
+                  type="text"
+                  placeholder="1340"
+                  value={shippingInfo.postalCode}
+                  onChange={(event) =>
+                    setShippingInfo((current) => ({ ...current, postalCode: event.target.value }))
+                  }
                   className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
                 />
               </label>
@@ -129,6 +213,10 @@ export default function CheckoutPage() {
               <textarea
                 rows={4}
                 placeholder="House, Road, Area, District"
+                value={shippingInfo.address}
+                onChange={(event) =>
+                  setShippingInfo((current) => ({ ...current, address: event.target.value }))
+                }
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
               />
             </label>
@@ -259,11 +347,18 @@ export default function CheckoutPage() {
             <Button
               type="button"
               size="lg"
-              disabled={!hydrated || cartItems.length === 0}
+              onClick={submitCheckout}
+              disabled={!hydrated || cartItems.length === 0 || isSubmitting}
               className="h-11 w-full bg-slate-900 text-base font-semibold text-white hover:bg-slate-700"
             >
-              Confirm and Pay
+              {isSubmitting ? "Processing Order..." : "Confirm and Pay"}
             </Button>
+
+            {checkoutError ? (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {checkoutError}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       </div>
