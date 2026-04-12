@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bike as BikeIcon, ChevronDown, Megaphone, ShieldCheck, ShoppingBag, User, Wrench } from "lucide-react";
+import { Bike as BikeIcon, ChevronDown, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, User, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { bikes, Bike, formatBdt, headlineMetric, powertrainBadgeClass } from "@/lib/bikes-data";
+import { useCartStore } from "@/store/useCartStore";
 import { cn } from "@/lib/utils";
 
 type SparePartCategory = "Parts" | "Accessories" | "Additives";
@@ -128,7 +129,49 @@ const spareParts = [
 const certifiedSlugs = new Set(["yamaha-r15-v4", "suzuki-vstrom-250", "ultraviolette-f77"]);
 const promotedSlugs = new Set(["honda-cb350rs", "ather-450x-gen3", "revolt-rv400-brz"]);
 
-function SparePartCard({ part }: { part: SparePartListing }) {
+function escapeSvgText(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function makeSpareThumb(part: SparePartListing): string {
+  const hueByCategory: Record<SparePartCategory, number> = {
+    Parts: 212,
+    Accessories: 165,
+    Additives: 36,
+  };
+
+  const hue = hueByCategory[part.category];
+  const bg = `hsl(${hue} 72% 94%)`;
+  const accent = `hsl(${hue} 48% 24%)`;
+  const label = escapeSvgText(part.name.toUpperCase().slice(0, 14));
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" fill="none">
+      <rect width="160" height="160" rx="20" fill="${bg}"/>
+      <rect x="16" y="16" width="128" height="128" rx="14" fill="white" opacity="0.75"/>
+      <circle cx="48" cy="104" r="15" stroke="${accent}" stroke-width="6"/>
+      <circle cx="108" cy="104" r="15" stroke="${accent}" stroke-width="6"/>
+      <path d="M42 98h18l13-20h24l13 20h10l-9-28H49l-7 28z" fill="${accent}" opacity="0.88"/>
+      <text x="80" y="43" text-anchor="middle" fill="${accent}" font-family="Arial, sans-serif" font-size="11" font-weight="700">${label}</text>
+      <text x="80" y="58" text-anchor="middle" fill="${accent}" font-family="Arial, sans-serif" font-size="10" font-weight="600">${escapeSvgText(part.category.toUpperCase())}</text>
+    </svg>
+  `;
+
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+function SparePartCard({
+  part,
+  onAddToCart,
+}: {
+  part: SparePartListing;
+  onAddToCart: (part: SparePartListing) => void;
+}) {
   return (
     <Card className="border-slate-200 bg-white/90">
       <CardHeader>
@@ -144,19 +187,15 @@ function SparePartCard({ part }: { part: SparePartListing }) {
       <CardContent className="space-y-3 text-sm text-slate-700">
         <p>{part.fitment}</p>
         <p className="font-semibold text-slate-900">{formatBdt(part.priceBdt)}</p>
-        <div className="flex gap-2">
-          <Link
-            href="/showrooms"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-slate-300")}
-          >
-            Check Availability
-          </Link>
-          <Link
-            href="/showrooms"
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => onAddToCart(part)}
             className={cn(buttonVariants({ size: "sm" }), "bg-slate-900 text-white hover:bg-slate-700")}
           >
-            Contact Seller
-          </Link>
+            <ShoppingCart className="h-4 w-4" />
+            Add to Cart
+          </button>
         </div>
       </CardContent>
     </Card>
@@ -237,6 +276,7 @@ function UsedBikeCard({
 
 export default function MarketplacePage() {
   const [activeSection, setActiveSection] = useState<"spare" | "used">("spare");
+  const addItem = useCartStore((state) => state.addItem);
 
   const [selectedCategory, setSelectedCategory] = useState<SparePartCategory | "All">("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
@@ -361,6 +401,16 @@ export default function MarketplacePage() {
   const userListed = bikes.filter(
     (bike) => !certifiedSlugs.has(bike.slug) && !promotedSlugs.has(bike.slug)
   );
+
+  const addSparePartToCart = (part: SparePartListing) => {
+    addItem({
+      id: part.id,
+      name: part.name,
+      price: part.priceBdt,
+      quantity: 1,
+      image: makeSpareThumb(part),
+    });
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -537,7 +587,7 @@ export default function MarketplacePage() {
 
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredSpareParts.map((part) => (
-            <SparePartCard key={part.id} part={part} />
+            <SparePartCard key={part.id} part={part} onAddToCart={addSparePartToCart} />
           ))}
         </div>
       </section>

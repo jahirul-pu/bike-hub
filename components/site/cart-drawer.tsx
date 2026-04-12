@@ -7,15 +7,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useCartHydration } from "@/hooks/use-cart-hydration";
+import { CartItem, useCartStore } from "@/store/useCartStore";
 import { cn } from "@/lib/utils";
-
-type CartItem = {
-  id: string;
-  name: string;
-  unitPriceBdt: number;
-  quantity: number;
-  imageSrc: string;
-};
 
 type DeliveryApiResponse = {
   isLoggedIn: boolean;
@@ -36,49 +30,6 @@ type DeliveryState =
       addressSummary: string;
     };
 
-function makeBikeThumb(label: string, hue: number): string {
-  const bg = `hsl(${hue} 68% 94%)`;
-  const stripe = `hsl(${hue} 74% 82%)`;
-  const accent = `hsl(${hue} 52% 26%)`;
-  const encodedLabel = label.toUpperCase().slice(0, 18);
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" fill="none">
-      <rect width="160" height="160" rx="18" fill="${bg}"/>
-      <rect x="16" y="16" width="128" height="128" rx="14" fill="${stripe}"/>
-      <path d="M40 105h10l14-25h31l11 25h12l-13-30h7c5 0 8-5 6-9l-5-10h-10l4 9H89l-8-15h-9l8 15H63l-9 16h-7z" fill="${accent}"/>
-      <circle cx="57" cy="111" r="13" stroke="${accent}" stroke-width="6"/>
-      <circle cx="106" cy="111" r="13" stroke="${accent}" stroke-width="6"/>
-      <text x="80" y="34" text-anchor="middle" fill="${accent}" font-family="Arial, sans-serif" font-size="14" font-weight="700">${encodedLabel}</text>
-    </svg>
-  `;
-
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-}
-
-const initialItems: CartItem[] = [
-  {
-    id: "cart-r15-v4",
-    name: "Yamaha R15 V4",
-    unitPriceBdt: 650000,
-    quantity: 1,
-    imageSrc: makeBikeThumb("R15 V4", 206),
-  },
-  {
-    id: "cart-vstrom",
-    name: "Suzuki V-Strom 250",
-    unitPriceBdt: 530000,
-    quantity: 1,
-    imageSrc: makeBikeThumb("V-Strom", 156),
-  },
-  {
-    id: "cart-450x",
-    name: "Ather 450X Gen 3",
-    unitPriceBdt: 340000,
-    quantity: 1,
-    imageSrc: makeBikeThumb("450X", 34),
-  },
-];
 
 function formatBdt(value: number): string {
   return `BDT ${new Intl.NumberFormat("en-BD").format(value)}`;
@@ -86,22 +37,27 @@ function formatBdt(value: number): string {
 
 export function CartDrawer() {
   const pathname = usePathname();
+  const hydrated = useCartHydration();
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<CartItem[]>(initialItems);
+  const items = useCartStore((state) => state.items);
+  const removeItemFromCart = useCartStore((state) => state.removeItem);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const clearCart = useCartStore((state) => state.clearCart);
   const [delivery, setDelivery] = useState<DeliveryState>({ status: "idle" });
+  const cartItems = useMemo<CartItem[]>(() => (hydrated ? items : []), [hydrated, items]);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
   const itemCount = useMemo(
-    () => items.reduce((total, item) => total + item.quantity, 0),
-    [items]
+    () => cartItems.reduce((total, item) => total + item.quantity, 0),
+    [cartItems]
   );
 
   const subtotal = useMemo(
-    () => items.reduce((total, item) => total + item.unitPriceBdt * item.quantity, 0),
-    [items]
+    () => cartItems.reduce((total, item) => total + item.price * item.quantity, 0),
+    [cartItems]
   );
 
   useEffect(() => {
@@ -184,26 +140,16 @@ export function CartDrawer() {
       ? delivery.message
       : null;
 
-  const increaseQty = (id: string) => {
-    setItems((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+  const increaseQty = (id: string, quantity: number) => {
+    updateQuantity(id, quantity + 1);
   };
 
-  const decreaseQty = (id: string) => {
-    setItems((current) =>
-      current.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-          : item
-      )
-    );
+  const decreaseQty = (id: string, quantity: number) => {
+    updateQuantity(id, Math.max(1, quantity - 1));
   };
 
   const removeItem = (id: string) => {
-    setItems((current) => current.filter((item) => item.id !== id));
+    removeItemFromCart(id);
   };
 
   return (
@@ -241,13 +187,13 @@ export function CartDrawer() {
 
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
-            {items.length === 0 ? (
+            {cartItems.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
                 Your cart is empty. Add an item to continue.
               </div>
             ) : (
-              items.map((item, index) => {
-                const lineTotal = item.unitPriceBdt * item.quantity;
+              cartItems.map((item, index) => {
+                const lineTotal = item.price * item.quantity;
 
                 return (
                   <article
@@ -259,7 +205,7 @@ export function CartDrawer() {
                     style={open ? { animationDelay: `${index * 70}ms` } : undefined}
                   >
                     <Image
-                      src={item.imageSrc}
+                      src={item.image}
                       alt={item.name}
                       width={84}
                       height={84}
@@ -271,7 +217,7 @@ export function CartDrawer() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="truncate text-sm font-semibold text-slate-900">{item.name}</p>
-                          <p className="mt-0.5 text-xs text-slate-500">{formatBdt(item.unitPriceBdt)}</p>
+                          <p className="mt-0.5 text-xs text-slate-500">{formatBdt(item.price)}</p>
                         </div>
 
                         <Button
@@ -294,7 +240,7 @@ export function CartDrawer() {
                             size="icon-sm"
                             aria-label={`Decrease quantity for ${item.name}`}
                             className="rounded-full"
-                            onClick={() => decreaseQty(item.id)}
+                            onClick={() => decreaseQty(item.id, item.quantity)}
                           >
                             <Minus className="h-3.5 w-3.5" />
                           </Button>
@@ -307,7 +253,7 @@ export function CartDrawer() {
                             size="icon-sm"
                             aria-label={`Increase quantity for ${item.name}`}
                             className="rounded-full"
-                            onClick={() => increaseQty(item.id)}
+                            onClick={() => increaseQty(item.id, item.quantity)}
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </Button>
@@ -361,9 +307,20 @@ export function CartDrawer() {
 
             <Button
               type="button"
+              variant="ghost"
+              size="sm"
+              onClick={clearCart}
+              disabled={cartItems.length === 0}
+              className="mt-2 h-8 px-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600 hover:bg-transparent hover:text-slate-900"
+            >
+              Clear cart
+            </Button>
+
+            <Button
+              type="button"
               size="lg"
               className="mt-3 h-13 w-full bg-slate-900 text-base font-bold text-white shadow-[0_18px_35px_-18px_rgba(15,23,42,0.75)] hover:bg-slate-700"
-              disabled={items.length === 0}
+              disabled={cartItems.length === 0}
             >
               Proceed to Checkout
             </Button>
