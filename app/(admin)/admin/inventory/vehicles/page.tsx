@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { Plus } from 'lucide-react';
 import * as React from 'react';
+import { AddVehicleModal } from './add-vehicle-modal';
 
 export default async function VehiclesPage() {
   const pendingBikes = await db.vehicle.findMany({
@@ -16,9 +17,7 @@ export default async function VehiclesPage() {
           <h2 className="text-2xl font-bold">Pending Vehicle Certifications</h2>
           <p className="text-slate-500">Vehicles awaiting certification approval</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-          <Plus size={18} /> Add Vehicle
-        </button>
+        <AddVehicleModal />
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">

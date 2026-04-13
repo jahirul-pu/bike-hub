@@ -727,7 +727,7 @@ export default async function BikeDetailsPage({
 
   // --- PAGE LAYOUT ---
   return (
-    <div className="mx-auto w-full max-w-6xl grid gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
+    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <main>
         <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm sm:p-6">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -832,44 +832,6 @@ export default async function BikeDetailsPage({
           </Link>
         </section>
       </main>
-
-      <aside>
-        <Card className="sticky top-20 border-slate-200 bg-white/90">
-          <CardHeader>
-            <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
-              Quick Comparison
-            </CardTitle>
-            <p className="text-xs text-slate-500">
-              Suggestions ranked by nearest price and {bike.powertrain === "ICE" ? "engine cc" : "motor output"}.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {similarBikes.map((candidate) => (
-              <Link
-                key={candidate.slug}
-                href={`/bikes/${candidate.slug}`}
-                className="block rounded-lg border border-slate-200 bg-slate-50 p-3 transition hover:border-slate-400"
-              >
-                <p className="font-semibold text-slate-900">
-                  {candidate.brand} {candidate.model}
-                </p>
-                <p className="mt-1 text-xs text-slate-600">{headlineMetric(candidate)}</p>
-                <p className="mt-1 text-sm font-medium text-slate-900">{formatBdt(candidate.priceBdt)}</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Similarity metric: {metricForSimilarity(candidate)} {candidate.powertrain === "ICE" ? "cc" : "W"}
-                </p>
-              </Link>
-            ))}
-
-            <Link
-              href={`/compare?bikes=${[bike.slug, ...similarBikes.map((item) => item.slug)].join(",")}`}
-              className={cn(buttonVariants(), "w-full bg-slate-900 text-white hover:bg-slate-700")}
-            >
-              Compare These Bikes
-            </Link>
-          </CardContent>
-        </Card>
-      </aside>
     </div>
   );
 }
