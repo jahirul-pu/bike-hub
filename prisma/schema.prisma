@@ -10,7 +10,8 @@ datasource db {
 model Vehicle {
   id                  String      @id @default(cuid())
   slug                String?     @unique
-  brand               String?
+  brandId             String?
+  brand               Brand?      @relation(fields: [brandId], references: [id])
   model               String?
   name                String?
   category            String?
@@ -97,4 +98,15 @@ model Part {
   retailPrice Float?
   price       Float?
   createdAt   DateTime @default(now())
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  powertrain  String   // 'ICE', 'EV', or 'BOTH'
+  origin      String?  // e.g. "Japan", "India", "Bangladesh"
+  description String?
+  createdAt   DateTime @default(now())
+  vehicles    Vehicle[]
 }
