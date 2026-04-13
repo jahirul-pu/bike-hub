@@ -44,6 +44,18 @@ export type Bike = {
   rearSuspension?: string;
   securityFeatures?: string;
   appSupport?: string;
+
+  // --- Features & Electronics ---
+  displayType?: string;
+  headlightType?: string;
+  bluetoothConnectivity?: string;
+  gpsTracking?: string;
+  navigation?: string;
+  keylessStart?: string;
+  usbChargingPort?: string;
+  otaUpdates?: string;
+  tractionControl?: string;
+  cruiseControl?: string;
 };
 
 export const bikes: Bike[] = [
@@ -299,6 +311,15 @@ export const bikes: Bike[] = [
     ridingModes: "Eco, TTFR, Sports",
     securityFeatures: "Geo-fencing",
     appSupport: "Yes",
+    displayType: "TFT",
+    bluetoothConnectivity: "Yes",
+    gpsTracking: "Yes",
+    navigation: "No",
+    keylessStart: "Yes",
+    usbChargingPort: "Yes",
+    otaUpdates: "Yes",
+    tractionControl: "No",
+    cruiseControl: "Yes",
   },
 ];
 

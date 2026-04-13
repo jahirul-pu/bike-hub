@@ -34,7 +34,43 @@ model Vehicle {
   frontTyre           String?
   rearTyre            String?
   summary             String?
+  images              String?     // JSON-encoded string[] of image URLs
 
+  // ─── EV Motor ───
+  peakPowerKw         Float?
+  voltageV            Float?
+  ampHours            Float?
+  batteryType         String?
+
+  // ─── EV Dimensions ───
+  lengthMm            Float?
+  widthMm             Float?
+  heightMm            Float?
+  underseatStorage    String?
+
+  // ─── Brakes & Suspension ───
+  frontBrake          String?
+  rearBrake           String?
+  absType             String?
+  frontSuspension     String?
+  rearSuspension      String?
+
+  // ─── Smart Features & Electronics ───
+  ridingModes         String?
+  securityFeatures    String?
+  appSupport          String?
+  displayType         String?
+  headlightType       String?
+  bluetoothConnectivity String?
+  gpsTracking         String?
+  navigation          String?
+  keylessStart        String?
+  usbChargingPort     String?
+  otaUpdates          String?
+  tractionControl     String?
+  cruiseControl       String?
+
+  // ─── Vehicle / Marketplace ───
   vin                 String?
   chassis             String?
   certificationStatus String      @default("PENDING_APPROVAL")

@@ -68,10 +68,22 @@ function parseFormFields(formData: FormData) {
     frontSuspension: str('frontSuspension'),
     rearSuspension: str('rearSuspension'),
 
-    // EV - smart
+    // Smart features
     ridingModes: str('ridingModes'),
     securityFeatures: str('securityFeatures'),
     appSupport: str('appSupport'),
+
+    // Features & Electronics
+    displayType: str('displayType'),
+    headlightType: str('headlightType'),
+    bluetoothConnectivity: str('bluetoothConnectivity'),
+    gpsTracking: str('gpsTracking'),
+    navigation: str('navigation'),
+    keylessStart: str('keylessStart'),
+    usbChargingPort: str('usbChargingPort'),
+    otaUpdates: str('otaUpdates'),
+    tractionControl: str('tractionControl'),
+    cruiseControl: str('cruiseControl'),
   };
 }
 
@@ -102,7 +114,7 @@ function buildBikeEntryString(slug: string, f: ReturnType<typeof parseFormFields
     lines.push(`    images: [${imgArr}],`);
   }
 
-  // ICE fields
+  // ICE-only fields
   if (f.powertrain === 'ICE') {
     if (f.displacementCc != null) lines.push(`    displacementCc: ${f.displacementCc},`);
     if (f.mileageKmpl != null) lines.push(`    mileageKmpl: ${f.mileageKmpl},`);
@@ -110,7 +122,7 @@ function buildBikeEntryString(slug: string, f: ReturnType<typeof parseFormFields
     if (f.gearbox) lines.push(`    gearbox: "${f.gearbox}",`);
   }
 
-  // EV fields
+  // EV-only fields (battery & motor)
   if (f.powertrain === 'EV') {
     if (f.motorPowerKw != null) lines.push(`    motorPowerKw: ${f.motorPowerKw},`);
     if (f.peakPowerKw != null) lines.push(`    peakPowerKw: ${f.peakPowerKw},`);
@@ -121,19 +133,32 @@ function buildBikeEntryString(slug: string, f: ReturnType<typeof parseFormFields
     if (f.chargingTime0100) lines.push(`    chargingTime0100: "${f.chargingTime0100}",`);
     if (f.batteryCycleLife) lines.push(`    batteryCycleLife: "${f.batteryCycleLife}",`);
     if (f.ipRating) lines.push(`    ipRating: "${f.ipRating}",`);
-    if (f.lengthMm != null) lines.push(`    lengthMm: ${f.lengthMm},`);
-    if (f.widthMm != null) lines.push(`    widthMm: ${f.widthMm},`);
-    if (f.heightMm != null) lines.push(`    heightMm: ${f.heightMm},`);
-    if (f.underseatStorage) lines.push(`    underseatStorage: "${f.underseatStorage}",`);
-    if (f.frontBrake) lines.push(`    frontBrake: "${f.frontBrake}",`);
-    if (f.rearBrake) lines.push(`    rearBrake: "${f.rearBrake}",`);
-    if (f.absType) lines.push(`    absType: "${f.absType}",`);
-    if (f.frontSuspension) lines.push(`    frontSuspension: "${f.frontSuspension}",`);
-    if (f.rearSuspension) lines.push(`    rearSuspension: "${f.rearSuspension}",`);
-    if (f.ridingModes) lines.push(`    ridingModes: "${f.ridingModes}",`);
-    if (f.securityFeatures) lines.push(`    securityFeatures: "${f.securityFeatures}",`);
-    if (f.appSupport) lines.push(`    appSupport: "${f.appSupport}",`);
   }
+
+  // Shared fields — saved for ALL powertrains
+  if (f.lengthMm != null) lines.push(`    lengthMm: ${f.lengthMm},`);
+  if (f.widthMm != null) lines.push(`    widthMm: ${f.widthMm},`);
+  if (f.heightMm != null) lines.push(`    heightMm: ${f.heightMm},`);
+  if (f.underseatStorage) lines.push(`    underseatStorage: "${f.underseatStorage}",`);
+  if (f.frontBrake) lines.push(`    frontBrake: "${f.frontBrake}",`);
+  if (f.rearBrake) lines.push(`    rearBrake: "${f.rearBrake}",`);
+  if (f.absType) lines.push(`    absType: "${f.absType}",`);
+  if (f.frontSuspension) lines.push(`    frontSuspension: "${f.frontSuspension}",`);
+  if (f.rearSuspension) lines.push(`    rearSuspension: "${f.rearSuspension}",`);
+  if (f.ridingModes) lines.push(`    ridingModes: "${f.ridingModes}",`);
+  if (f.securityFeatures) lines.push(`    securityFeatures: "${f.securityFeatures}",`);
+  if (f.appSupport) lines.push(`    appSupport: "${f.appSupport}",`);
+
+  if (f.displayType) lines.push(`    displayType: "${f.displayType}",`);
+  if (f.headlightType) lines.push(`    headlightType: "${f.headlightType}",`);
+  if (f.bluetoothConnectivity) lines.push(`    bluetoothConnectivity: "${f.bluetoothConnectivity}",`);
+  if (f.gpsTracking) lines.push(`    gpsTracking: "${f.gpsTracking}",`);
+  if (f.navigation) lines.push(`    navigation: "${f.navigation}",`);
+  if (f.keylessStart) lines.push(`    keylessStart: "${f.keylessStart}",`);
+  if (f.usbChargingPort) lines.push(`    usbChargingPort: "${f.usbChargingPort}",`);
+  if (f.otaUpdates) lines.push(`    otaUpdates: "${f.otaUpdates}",`);
+  if (f.tractionControl) lines.push(`    tractionControl: "${f.tractionControl}",`);
+  if (f.cruiseControl) lines.push(`    cruiseControl: "${f.cruiseControl}",`);
 
   lines.push(`  },`);
   return lines.join('\n');

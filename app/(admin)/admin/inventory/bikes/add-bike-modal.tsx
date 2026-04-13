@@ -339,22 +339,18 @@ function BikeForm({
           <input type="number" step="0.1" required name="wheelbaseMm" defaultValue={n(bike?.wheelbaseMm)} placeholder="1325" className={inputClass} />
         </Field>
 
-        {powertrain === 'EV' && (
-          <>
-            <Field label="Length (mm)">
-              <input type="number" step="0.1" name="lengthMm" defaultValue={n(bike?.lengthMm)} placeholder="1860" className={inputClass} />
-            </Field>
-            <Field label="Width (mm)">
-              <input type="number" step="0.1" name="widthMm" defaultValue={n(bike?.widthMm)} placeholder="700" className={inputClass} />
-            </Field>
-            <Field label="Height (mm)">
-              <input type="number" step="0.1" name="heightMm" defaultValue={n(bike?.heightMm)} placeholder="1160" className={inputClass} />
-            </Field>
-            <Field label="Underseat Storage">
-              <input type="text" name="underseatStorage" defaultValue={d(bike?.underseatStorage)} placeholder="e.g. 22L / Helmet-fit" className={inputClass} />
-            </Field>
-          </>
-        )}
+        <Field label="Length (mm)">
+          <input type="number" step="0.1" name="lengthMm" defaultValue={n(bike?.lengthMm)} placeholder="1860" className={inputClass} />
+        </Field>
+        <Field label="Width (mm)">
+          <input type="number" step="0.1" name="widthMm" defaultValue={n(bike?.widthMm)} placeholder="700" className={inputClass} />
+        </Field>
+        <Field label="Height (mm)">
+          <input type="number" step="0.1" name="heightMm" defaultValue={n(bike?.heightMm)} placeholder="1160" className={inputClass} />
+        </Field>
+        <Field label="Underseat Storage">
+          <input type="text" name="underseatStorage" defaultValue={d(bike?.underseatStorage)} placeholder="e.g. 22L / Helmet-fit" className={inputClass} />
+        </Field>
 
         {/* ═══ 5. BRAKES, SUSPENSION & TYRES ═══ */}
         <SectionHeader title={`${powertrain === 'EV' ? '5' : '4'}. Brakes, Suspension & Tyres`} color="cyan" />
@@ -366,47 +362,105 @@ function BikeForm({
           <input type="text" required name="rearTyre" defaultValue={d(bike?.rearTyre)} placeholder="140/70-17" className={inputClass} />
         </Field>
 
-        {powertrain === 'EV' && (
-          <>
-            <Field label="Front Brake">
-              <input type="text" name="frontBrake" defaultValue={d(bike?.frontBrake)} placeholder="e.g. Disc 220mm" className={inputClass} />
-            </Field>
-            <Field label="Rear Brake">
-              <input type="text" name="rearBrake" defaultValue={d(bike?.rearBrake)} placeholder="e.g. Drum 130mm" className={inputClass} />
-            </Field>
-            <Field label="ABS / CBS">
-              <select name="absType" defaultValue={bike?.absType ?? 'CBS'} className={inputClass}>
-                <option value="None">None</option>
-                <option value="CBS">CBS</option>
-                <option value="Single Channel">Single Channel ABS</option>
-                <option value="Dual Channel">Dual Channel ABS</option>
-              </select>
-            </Field>
-            <Field label="Front Suspension">
-              <input type="text" name="frontSuspension" defaultValue={d(bike?.frontSuspension)} placeholder="e.g. Telescopic Fork" className={inputClass} />
-            </Field>
-            <Field label="Rear Suspension">
-              <input type="text" name="rearSuspension" defaultValue={d(bike?.rearSuspension)} placeholder="e.g. Mono-shock" className={inputClass} />
-            </Field>
-          </>
-        )}
+        <Field label="Front Brake">
+          <input type="text" name="frontBrake" defaultValue={d(bike?.frontBrake)} placeholder="e.g. Disc 300mm" className={inputClass} />
+        </Field>
+        <Field label="Rear Brake">
+          <input type="text" name="rearBrake" defaultValue={d(bike?.rearBrake)} placeholder="e.g. Drum 130mm" className={inputClass} />
+        </Field>
+        <Field label="ABS / CBS">
+          <select name="absType" defaultValue={bike?.absType ?? 'None'} className={inputClass}>
+            <option value="None">None</option>
+            <option value="CBS">CBS</option>
+            <option value="Single Channel">Single Channel ABS</option>
+            <option value="Dual Channel">Dual Channel ABS</option>
+          </select>
+        </Field>
+        <Field label="Front Suspension">
+          <input type="text" name="frontSuspension" defaultValue={d(bike?.frontSuspension)} placeholder="e.g. Telescopic Fork" className={inputClass} />
+        </Field>
+        <Field label="Rear Suspension">
+          <input type="text" name="rearSuspension" defaultValue={d(bike?.rearSuspension)} placeholder="e.g. Mono-shock" className={inputClass} />
+        </Field>
 
-        {/* ═══ 6. EV SMART FEATURES ═══ */}
-        {powertrain === 'EV' && (
-          <>
-            <SectionHeader title="6. Smart Features & Security" color="indigo" />
+        {/* ═══ SMART FEATURES & ELECTRONICS ═══ */}
+        <SectionHeader title={`${powertrain === 'EV' ? '6' : '5'}. Smart Features & Electronics`} color="indigo" />
 
-            <Field label="Riding Modes">
-              <input type="text" name="ridingModes" defaultValue={d(bike?.ridingModes)} placeholder="e.g. Eco, Normal, Sport" className={inputClass} />
-            </Field>
-            <Field label="Security Features">
-              <input type="text" name="securityFeatures" defaultValue={d(bike?.securityFeatures)} placeholder="e.g. Geo-fencing, Anti-theft alarm, Kill switch" className={inputClass} />
-            </Field>
-            <Field label="App Support">
-              <input type="text" name="appSupport" defaultValue={d(bike?.appSupport)} placeholder="e.g. iOS + Android, GPS tracking, OTA updates" className={inputClass} />
-            </Field>
-          </>
-        )}
+        <Field label="Riding Modes">
+          <input type="text" name="ridingModes" defaultValue={d(bike?.ridingModes)} placeholder="e.g. Eco, Normal, Sport" className={inputClass} />
+        </Field>
+        <Field label="Security Features">
+          <input type="text" name="securityFeatures" defaultValue={d(bike?.securityFeatures)} placeholder="e.g. Anti-theft alarm, Kill switch" className={inputClass} />
+        </Field>
+        <Field label="App Support">
+          <input type="text" name="appSupport" defaultValue={d(bike?.appSupport)} placeholder="e.g. iOS + Android" className={inputClass} />
+        </Field>
+
+        {/* ─── New Detailed Fields ─── */}
+        <Field label="Display Type">
+          <input type="text" name="displayType" defaultValue={d(bike?.displayType)} placeholder="e.g. Digital LCD, TFT" className={inputClass} />
+        </Field>
+        <Field label="Headlight Type">
+          <input type="text" name="headlightType" defaultValue={d(bike?.headlightType)} placeholder="e.g. LED Projector, Halogen" className={inputClass} />
+        </Field>
+        <Field label="Bluetooth Connectivity">
+          <select name="bluetoothConnectivity" defaultValue={bike?.bluetoothConnectivity ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Optional">Optional</option>
+          </select>
+        </Field>
+        <Field label="GPS Tracking">
+          <select name="gpsTracking" defaultValue={bike?.gpsTracking ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </Field>
+        <Field label="Navigation">
+          <select name="navigation" defaultValue={bike?.navigation ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Turn-by-Turn">Turn-by-Turn</option>
+          </select>
+        </Field>
+        <Field label="Keyless Start">
+          <select name="keylessStart" defaultValue={bike?.keylessStart ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </Field>
+        <Field label="USB Charging Port">
+          <select name="usbChargingPort" defaultValue={bike?.usbChargingPort ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </Field>
+        <Field label="OTA Updates">
+          <select name="otaUpdates" defaultValue={bike?.otaUpdates ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </Field>
+        <Field label="Traction Control">
+          <select name="tractionControl" defaultValue={bike?.tractionControl ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </Field>
+        <Field label="Cruise Control">
+          <select name="cruiseControl" defaultValue={bike?.cruiseControl ?? ''} className={inputClass}>
+            <option value="">Unknown</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </Field>
 
       </div>
 

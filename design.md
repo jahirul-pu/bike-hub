@@ -20,6 +20,40 @@ These guidelines are intended for every automated agent and human contributor to
 
 ---
 
+## Interactive Composition Rules
+
+- Never nest interactive elements:
+  - button inside button ❌
+  - link inside button ❌
+
+- When using headless UI (Dialog, Dropdown, etc):
+  - Use `asChild` with a single interactive root
+  - That root must be the actual clickable element
+
+Correct:
+<DialogTrigger asChild>
+  <Button />
+</DialogTrigger>
+
+Incorrect:
+<DialogTrigger asChild>
+  <button>
+    <Button />
+  </button>
+</DialogTrigger>
+
+
+⚙️ Add “Primitive Wrapping Rule” (This will save you later)
+## Primitive Wrapping Rule
+
+All UI primitives (Button, Link, Card clickable areas):
+
+- Must be the outermost interactive element
+- Must not wrap another interactive element
+- `Button` primitive must render a native <button> element internally — do not wrap or nest buttons
+
+---
+
 ## Architecture & component rules
 
 - **Single responsibility.** Each component should do one thing (presentational vs. container separation).

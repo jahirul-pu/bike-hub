@@ -309,14 +309,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "7. Transmission",
-      items: [
-        { label: "Gear Type (Automatic / Direct Drive)", value: "Direct Drive" },
-        { label: "Transmission Type (Single Speed)", value: "Single Speed" },
-      ],
-    },
-    {
-      title: "8. Dimensions & Weight",
+      title: "7. Dimensions & Weight",
       items: [
         { label: "Length (mm)", value: `${geometry.length} mm` },
         { label: "Width (mm)", value: `${geometry.width} mm` },
@@ -330,7 +323,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "9. Suspension",
+      title: "8. Suspension",
       items: [
         { label: "Front Suspension", value: bike.frontSuspension ?? (bike.category === "Sport" ? "USD" : "Telescopic") },
         {
@@ -340,7 +333,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "10. Brakes & Wheels",
+      title: "9. Brakes & Wheels",
       items: [
         { label: "Front Brake", value: bike.frontBrake ?? (bike.topSpeedKph >= 95 ? "Disc" : "Drum") },
         { label: "Rear Brake", value: bike.rearBrake ?? (bike.topSpeedKph >= 120 ? "Disc" : "Drum") },
@@ -352,35 +345,36 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "11. Features & Smart Tech",
+      title: "10. Features & Smart Tech",
       items: [
-        { label: "Digital Display (LCD / TFT)", value: bike.priceBdt >= 500000 ? "TFT" : "LCD" },
-        { label: "Bluetooth Connectivity", value: yesNo(true) },
+        { label: "Digital Display (LCD / TFT)", value: bike.displayType ?? (bike.priceBdt >= 500000 ? "TFT" : "LCD") },
+        { label: "Bluetooth Connectivity", value: bike.bluetoothConnectivity ?? yesNo(true) },
         { label: "Mobile App Integration", value: bike.appSupport ? `Yes (${bike.appSupport})` : yesNo(true) },
-        { label: "GPS Tracking", value: yesNo(bike.priceBdt >= 350000) },
-        { label: "Navigation", value: yesNo(bike.priceBdt >= 330000) },
-        { label: "Geo-fencing", value: yesNo(bike.priceBdt >= 330000) },
-        { label: "Anti-theft System", value: yesNo(true) },
-        { label: "Keyless Start", value: yesNo(bike.priceBdt >= 350000) },
-        { label: "USB Charging Port", value: yesNo(true) },
-        { label: "OTA Updates", value: yesNo(bike.priceBdt >= 500000) },
+        { label: "GPS Tracking", value: bike.gpsTracking ?? yesNo(bike.priceBdt >= 350000) },
+        { label: "Navigation", value: bike.navigation ?? yesNo(bike.priceBdt >= 330000) },
+        { label: "Geo-fencing", value: bike.securityFeatures?.toLowerCase().includes('geo') ? "Yes" : yesNo(bike.priceBdt >= 330000) },
+        { label: "Anti-theft System", value: bike.securityFeatures?.toLowerCase().includes('theft') ? "Yes" : yesNo(true) },
+        { label: "Keyless Start", value: bike.keylessStart ?? yesNo(bike.priceBdt >= 350000) },
+        { label: "USB Charging Port", value: bike.usbChargingPort ?? yesNo(true) },
+        { label: "OTA Updates", value: bike.otaUpdates ?? yesNo(bike.priceBdt >= 500000) },
+        { label: "Cruise Control", value: bike.cruiseControl ?? yesNo(bike.priceBdt >= 500000) },
       ],
     },
     {
-      title: "12. Lighting",
+      title: "11. Lighting",
       items: [
-        { label: "Headlight (LED / Projector)", value: bike.priceBdt >= 500000 ? "Projector LED" : "LED" },
+        { label: "Headlight (LED / Projector)", value: bike.headlightType ?? (bike.priceBdt >= 500000 ? "Projector LED" : "LED") },
         { label: "DRL", value: yesNo(true) },
         { label: "Tail Light", value: "LED" },
         { label: "Indicators", value: "LED" },
       ],
     },
     {
-      title: "13. Safety",
+      title: "12. Safety",
       items: [
         { label: "Side Stand Sensor", value: yesNo(true) },
         { label: "Kill Switch", value: yesNo(bike.category !== "Scooter") },
-        { label: "TCS (Traction Control System)", value: yesNo(bike.topSpeedKph >= 120) },
+        { label: "TCS (Traction Control System)", value: bike.tractionControl ?? yesNo(bike.topSpeedKph >= 120) },
         {
           label: "Battery Protection (Overcharge / Thermal / Short Circuit)",
           value: "Overcharge, Thermal, Short Circuit",
@@ -389,7 +383,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "14. Cost & Ownership",
+      title: "13. Cost & Ownership",
       items: [
         { label: "Cost per Charge (BDT)", value: `BDT ${costPerCharge}` },
         { label: "Cost per km", value: `BDT ${costPerKm}` },
@@ -445,26 +439,16 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "4. Transmission",
+      title: "3. Transmission",
       items: [
         {
           label: "Gear Type",
-          value:
-            bike.powertrain === "EV"
-              ? "Automatic"
-              : bike.gearbox?.toLowerCase().includes("cvt")
-                ? "CVT"
-                : "Manual",
+          value: bike.gearbox?.toLowerCase().includes("cvt") ? "CVT" : "Manual",
         },
-        { label: "Number of Gears", value: `${gears}` },
+        { label: "Number of Gears", value: bike.gearbox?.match(/\d+/) ? `${bike.gearbox.match(/\d+/)} Speed` : "5 Speed" },
         {
           label: "Clutch Type",
-          value:
-            bike.powertrain === "EV"
-              ? "N/A (direct drive)"
-              : bike.gearbox?.toLowerCase().includes("cvt")
-                ? "Automatic centrifugal"
-                : "Wet multi-plate",
+          value: bike.gearbox?.toLowerCase().includes("cvt") ? "Automatic centrifugal" : "Wet multi-plate",
         },
         {
           label: "Final Drive",
@@ -473,7 +457,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "5. Fuel & Efficiency",
+      title: "4. Fuel & Efficiency",
       items: [
         { label: "Fuel Type", value: "Petrol" },
         {
@@ -491,11 +475,11 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "6. Dimensions & Weight",
+      title: "5. Dimensions & Weight",
       items: [
-        { label: "Length (mm)", value: `${geometry.length} mm` },
-        { label: "Width (mm)", value: `${geometry.width} mm` },
-        { label: "Height (mm)", value: `${geometry.height} mm` },
+        { label: "Length (mm)", value: `${bike.lengthMm ?? geometry.length} mm` },
+        { label: "Width (mm)", value: `${bike.widthMm ?? geometry.width} mm` },
+        { label: "Height (mm)", value: `${bike.heightMm ?? geometry.height} mm` },
         { label: "Wheelbase (mm)", value: `${bike.wheelbaseMm} mm` },
         { label: "Ground Clearance (mm)", value: `${bike.groundClearanceMm} mm` },
         { label: "Seat Height (mm)", value: `${bike.seatHeightMm} mm` },
@@ -503,7 +487,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "7. Chassis & Suspension",
+      title: "6. Chassis & Suspension",
       items: [
         {
           label: "Frame Type",
@@ -511,26 +495,26 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
         },
         {
           label: "Front Suspension",
-          value: bike.category === "Sport" ? "USD Fork" : "Telescopic Fork",
+          value: bike.frontSuspension ?? (bike.category === "Sport" ? "USD Fork" : "Telescopic Fork"),
         },
         {
           label: "Rear Suspension",
-          value: bike.category === "Scooter" ? "Twin shock" : "Mono-shock",
+          value: bike.rearSuspension ?? (bike.category === "Scooter" ? "Twin shock" : "Mono-shock"),
         },
       ],
     },
     {
-      title: "8. Brakes & Wheels",
+      title: "7. Brakes & Wheels",
       items: [
         {
           label: "Front Brake (Disc/Drum + size)",
-          value: bike.topSpeedKph >= 110 ? "Disc 300 mm" : "Disc 240 mm",
+          value: bike.frontBrake ?? (bike.topSpeedKph >= 110 ? "Disc 300 mm" : "Disc 240 mm"),
         },
         {
           label: "Rear Brake",
-          value: bike.topSpeedKph >= 120 ? "Disc 230 mm" : "Drum 130 mm",
+          value: bike.rearBrake ?? (bike.topSpeedKph >= 120 ? "Disc 230 mm" : "Drum 130 mm"),
         },
-        { label: "ABS", value: abs },
+        { label: "ABS", value: bike.absType ?? abs },
         { label: "Front Tyre Size", value: bike.frontTyre },
         { label: "Rear Tyre Size", value: bike.rearTyre },
         { label: "Wheel Type", value: "Alloy" },
@@ -538,25 +522,25 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "9. Features & Electronics",
+      title: "8. Features & Electronics",
       items: [
-        { label: "Instrument Console", value: consoleType(bike) },
-        { label: "Bluetooth Connectivity", value: yesNo(bike.priceBdt >= 320000) },
-        { label: "Navigation", value: yesNo(bike.priceBdt >= 450000) },
-        { label: "Riding Modes", value: yesNo(bike.topSpeedKph >= 140) },
-        { label: "Traction Control", value: yesNo(bike.topSpeedKph >= 150) },
-        { label: "Cruise Control", value: yesNo(bike.category === "Adventure" || bike.priceBdt > 800000) },
+        { label: "Instrument Console", value: bike.displayType ?? consoleType(bike) },
+        { label: "Bluetooth Connectivity", value: bike.bluetoothConnectivity ?? yesNo(bike.priceBdt >= 320000) },
+        { label: "Navigation", value: bike.navigation ?? yesNo(bike.priceBdt >= 450000) },
+        { label: "Riding Modes", value: bike.ridingModes ?? yesNo(bike.topSpeedKph >= 140) },
+        { label: "Traction Control", value: bike.tractionControl ?? yesNo(bike.topSpeedKph >= 150) },
+        { label: "Cruise Control", value: bike.cruiseControl ?? yesNo(bike.category === "Adventure" || bike.priceBdt > 800000) },
         { label: "Quick Shifter", value: yesNo(bike.category === "Sport" && bike.priceBdt > 700000) },
-        { label: "USB Charging Port", value: yesNo(true) },
-        { label: "Mobile App Support", value: yesNo(bike.priceBdt >= 400000) },
+        { label: "USB Charging Port", value: bike.usbChargingPort ?? yesNo(true) },
+        { label: "Mobile App Support", value: bike.appSupport ? `Yes (${bike.appSupport})` : yesNo(bike.priceBdt >= 400000) },
       ],
     },
     {
-      title: "10. Lighting",
+      title: "9. Lighting",
       items: [
         {
           label: "Headlight Type",
-          value: bike.priceBdt >= 300000 ? "LED Projector" : "Halogen",
+          value: bike.headlightType ?? (bike.priceBdt >= 300000 ? "LED Projector" : "Halogen"),
         },
         { label: "DRL", value: yesNo(bike.priceBdt >= 280000) },
         { label: "Tail Light Type", value: "LED" },
@@ -564,18 +548,18 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "11. Safety",
+      title: "10. Safety",
       items: [
-        { label: "ABS", value: abs },
-        { label: "CBS (Combined Braking System)", value: yesNo(abs === "None") },
+        { label: "ABS", value: bike.absType ?? abs },
+        { label: "CBS (Combined Braking System)", value: yesNo((bike.absType ?? abs) === "None") },
         { label: "TCS (Traction Control System)", value: yesNo(bike.topSpeedKph >= 150) },
         { label: "Engine Kill Switch", value: yesNo(bike.category !== "Scooter") },
         { label: "Side Stand Engine Cut-off", value: yesNo(bike.category !== "Scooter") },
-        { label: "Anti-theft Alarm", value: yesNo(false) },
+        { label: "Anti-theft Alarm", value: bike.securityFeatures ? "Yes" : yesNo(false) },
       ],
     },
     {
-      title: "14. Pros & Cons (Review Layer)",
+      title: "11. Pros & Cons (Review Layer)",
       items: [
         {
           label: "Pros",
@@ -588,7 +572,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "15. Ratings & Reviews",
+      title: "12. Ratings & Reviews",
       items: [
         { label: "User Rating", value: `${rating.user} / 5` },
         { label: "Expert Rating", value: `${rating.expert} / 5` },
@@ -596,7 +580,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "16. Ownership & Cost",
+      title: "13. Ownership & Cost",
       items: [
         { label: "Insurance Cost (estimated)", value: formatBdt(Math.round(bike.priceBdt * 0.03)) },
         { label: "Maintenance Cost", value: `${formatBdt(annualMaintenance(bike))} per year` },
@@ -779,17 +763,9 @@ export default async function BikeDetailsPage({
         </section>
 
         <section className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-5">
-          <h2 className="font-heading text-3xl uppercase tracking-wide text-amber-900">Check Local Price</h2>
-          <p className="mt-2 text-sm text-amber-900/80">
-            Price varies by city, registration costs, and stock allocation. See your nearest official outlet for final on-road pricing.
+          <p className="text-sm text-amber-900/80">
+            Disclaimer: this information may not be 100% accurate — please verify pricing and availability with official showrooms.
           </p>
-          <Link
-            href="/showrooms"
-            className={cn(buttonVariants(), "mt-4 bg-amber-600 text-white hover:bg-amber-500")}
-          >
-            Open Showroom Directory
-            <ChevronRight className="h-4 w-4" />
-          </Link>
         </section>
       </main>
     </div>
