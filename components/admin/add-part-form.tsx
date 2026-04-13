@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import type { Path } from "react-hook-form";
 import * as z from "zod";
 import { X, Plus } from "lucide-react";
 import { createPart } from "@/app/(admin)/admin/inventory/parts/actions";
@@ -39,8 +40,8 @@ export default function AddPartForm({ onSuccess }: { onSuccess: () => void }) {
       const flat = parsed.error.flatten();
       for (const [key, msgs] of Object.entries(flat.fieldErrors)) {
         if (msgs && msgs.length) {
-          // set error on the corresponding field (loose cast)
-          setError(key as any, { type: "manual", message: msgs[0] } as any);
+          // set error on the corresponding field
+          setError(key as Path<z.infer<typeof formSchema>>, { type: "manual", message: msgs[0] ?? "" });
         }
       }
       return;

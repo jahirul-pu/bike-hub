@@ -3,9 +3,9 @@ import { Plus } from 'lucide-react';
 import * as React from 'react';
 
 export default async function PartsPage() {
-  const parts = (await db.part.findMany({
+  const parts = await db.part.findMany({
     orderBy: { createdAt: 'desc' },
-  })) as any[];
+  });
 
   return (
     <div className="p-8 ml-64">

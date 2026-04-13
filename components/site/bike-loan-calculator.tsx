@@ -73,7 +73,7 @@ export default function BikeLoanCalculator() {
             <label className="mr-2 text-xs text-slate-500">Loan type</label>
             <select
               value={loanType}
-              onChange={(e) => setLoanType(e.target.value as any)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLoanType(e.target.value as "bank" | "inHouse")}
               className="rounded-md border border-input bg-transparent px-2 py-1 text-sm"
             >
               <option value="bank">Standard Bank Loan</option>

@@ -3,11 +3,11 @@ import { Plus } from 'lucide-react';
 import * as React from 'react';
 
 export default async function VehiclesPage() {
-  const pendingBikes = (await db.vehicle.findMany({
+  const pendingBikes = await db.vehicle.findMany({
     where: { certificationStatus: 'PENDING_APPROVAL' },
     include: { inspection: true },
     orderBy: { createdAt: 'desc' },
-  })) as any[];
+  });
 
   return (
     <div className="p-8 ml-64">

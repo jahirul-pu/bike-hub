@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { LayoutDashboard, Bike, Package, ClipboardCheck, ShoppingCart } from "lucide-react"
 
-const navItems: { name: string; href: string; icon: React.ComponentType<any> }[] = [
+const navItems: { name: string; href: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Parts Inventory", href: "/admin/inventory/parts", icon: Package },
   { name: "Vehicle Hub", href: "/admin/inventory/vehicles", icon: Bike },
