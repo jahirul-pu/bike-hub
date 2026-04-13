@@ -2,66 +2,103 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
-export async function createVehicle(formData: FormData) {
-  const model = formData.get('model') as string;
-  const brand = formData.get('brand') as string;
-  const category = formData.get('category') as string;
-  const powertrain = formData.get('powertrain') as string;
-  const summary = formData.get('summary') as string;
-  const priceBdt = parseFloat(formData.get('priceBdt') as string) || 0;
-  
-  const chassis = formData.get('chassis') as string;
-  const askingPrice = parseFloat(formData.get('askingPrice') as string) || 0;
+const VehicleInputSchema = z.object({
+  model: z.string().min(1),
+  brand: z.string().optional(),
+  make: z.string().optional(),
+  category: z.string().optional(),
+  powertrain: z.string().optional(),
+  powerSource: z.string().optional(),
+  summary: z.string().optional(),
+  description: z.string().optional(),
+  priceBdt: z.coerce.number().optional(),
+  askingPrice: z.coerce.number().optional(),
+  chassis: z.string().optional(),
+  vin: z.string().optional(),
+  displacementCc: z.coerce.number().optional(),
+  engineDisplacement: z.coerce.number().optional(),
+  motorPowerKw: z.coerce.number().optional(),
+  topSpeedKph: z.coerce.number().optional(),
+  mileageKmpl: z.coerce.number().optional(),
+  rangeKm: z.coerce.number().optional(),
+  maxRangeKm: z.coerce.number().optional(),
+  fuelTankLiters: z.coerce.number().optional(),
+  chargingTime0100: z.string().optional(),
+});
 
-  if (!model || !chassis) {
-    throw new Error('Model and chassis are required.');
+function normalizeInput(input: FormData | Record<string, unknown>) {
+  if (input instanceof FormData) {
+    return Object.fromEntries(input.entries());
   }
 
-  // Parse optional float conversions carefully
-  const displacementCc = parseFloat(formData.get('displacementCc') as string) || null;
-  const motorPowerKw = parseFloat(formData.get('motorPowerKw') as string) || null;
-  const topSpeedKph = parseFloat(formData.get('topSpeedKph') as string) || null;
-  const mileageKmpl = parseFloat(formData.get('mileageKmpl') as string) || null;
-  const rangeKm = parseFloat(formData.get('rangeKm') as string) || null;
-  const fuelTankLiters = parseFloat(formData.get('fuelTankLiters') as string) || null;
-  const chargingTime0100 = formData.get('chargingTime0100') as string || null;
+  return input;
+}
 
-  // Generate unique slug
-  const baseSlug = `${brand}-${model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-  const generatedSlug = `${baseSlug}-${chassis.substring(0, 5)}`.toLowerCase();
+function slugify(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+}
 
-  await db.vehicle.create({
-    data: {
-      slug: generatedSlug,
-      brand,
-      model,
-      name: model,
-      category,
-      powertrain: powertrain || 'ICE',
-      summary,
-      priceBdt,
-      displacementCc,
-      motorPowerKw,
-      topSpeedKph,
-      mileageKmpl,
-      rangeKm,
-      fuelTankLiters,
-      chargingTime0100,
-      
-      vin: chassis,
-      chassis: chassis,
-      askingPrice,
-      certificationStatus: 'PENDING_APPROVAL',
-      inspection: {
-        create: {
-          status: 'Processing',
-        }
-      }
-    },
-  });
+export async function createVehicle(input: FormData | Record<string, unknown>) {
+  try {
+    const parsed = VehicleInputSchema.parse(normalizeInput(input));
+    const brandName = parsed.brand || parsed.make;
+    const chassis = parsed.chassis || parsed.vin;
 
-  revalidatePath('/admin/inventory/vehicles');
-  revalidatePath('/admin');
-  revalidatePath('/');
+    if (!brandName || !chassis) {
+      return { success: false, error: 'Brand/make and chassis/VIN are required.' };
+    }
+
+    const powertrain = parsed.powertrain || parsed.powerSource || 'ICE';
+    const baseSlug = slugify(`${brandName}-${parsed.model}`);
+    const generatedSlug = `${baseSlug}-${chassis.substring(0, 5).toLowerCase()}`;
+
+    await db.vehicle.create({
+      data: {
+        slug: generatedSlug,
+        brand: {
+          connectOrCreate: {
+            where: { slug: slugify(brandName) },
+            create: {
+              name: brandName,
+              slug: slugify(brandName),
+              powertrain: powertrain === 'EV' ? 'EV' : 'ICE',
+            },
+          },
+        },
+        model: parsed.model,
+        name: parsed.model,
+        category: parsed.category || 'Commuter',
+        powertrain,
+        summary: parsed.summary || parsed.description || null,
+        priceBdt: parsed.priceBdt ?? parsed.askingPrice ?? 0,
+        displacementCc: parsed.displacementCc ?? parsed.engineDisplacement ?? null,
+        motorPowerKw: parsed.motorPowerKw ?? null,
+        topSpeedKph: parsed.topSpeedKph ?? null,
+        mileageKmpl: parsed.mileageKmpl ?? null,
+        rangeKm: parsed.rangeKm ?? parsed.maxRangeKm ?? null,
+        fuelTankLiters: parsed.fuelTankLiters ?? null,
+        chargingTime0100: parsed.chargingTime0100 || null,
+        vin: parsed.vin || chassis,
+        chassis,
+        askingPrice: parsed.askingPrice ?? 0,
+        certificationStatus: 'PENDING_APPROVAL',
+        inspection: {
+          create: {
+            status: 'Processing',
+          },
+        },
+      },
+    });
+
+    revalidatePath('/admin/inventory/vehicles');
+    revalidatePath('/admin');
+    revalidatePath('/');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Vehicle creation failed:', error);
+    return { success: false, error: 'Failed to create vehicle' };
+  }
 }

@@ -7,24 +7,24 @@ import { z } from "zod";
 const PartSchema = z.object({
   name: z.string().min(2, "Name is required"),
   sku: z.string().min(3, "SKU is required"),
-  brand: z.string().min(2, "Brand is required"),
   purchasePrice: z.number().min(0),
   retailPrice: z.number().min(0),
   stock: z.number().int().min(0),
-  fitment: z.array(z.string()),
+  fitment: z.array(z.string()).optional(),
 });
 
 export async function createPart(data: z.infer<typeof PartSchema>) {
   try {
+    const parsed = PartSchema.parse(data);
+
     await db.part.create({
       data: {
-        name: data.name,
-        sku: data.sku,
-        brand: data.brand,
-        purchasePrice: data.purchasePrice,
-        retailPrice: data.retailPrice,
-        stock: data.stock,
-        fitment: data.fitment,
+        name: parsed.name,
+        sku: parsed.sku,
+        // Persist purchase cost in the existing fallback price column.
+        price: parsed.purchasePrice,
+        retailPrice: parsed.retailPrice,
+        stock: parsed.stock,
       },
     });
 

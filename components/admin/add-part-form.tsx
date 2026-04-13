@@ -10,7 +10,6 @@ import { createPart } from "@/app/(admin)/admin/inventory/parts/actions";
 const formSchema = z.object({
   name: z.string().min(2),
   sku: z.string().min(3),
-  brand: z.string().min(2),
   purchasePrice: z.coerce.number(),
   retailPrice: z.coerce.number(),
   stock: z.coerce.number(),

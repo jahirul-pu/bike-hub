@@ -1,6 +1,3 @@
-// Some Prisma v7 typings can cause a named-export mismatch during type-checking.
-// Silence the specific import error and keep runtime behavior intact.
-// @ts-expect-error - Prisma v7 export mismatch during type-check
 import { PrismaClient } from "@prisma/client";
 
 declare global {

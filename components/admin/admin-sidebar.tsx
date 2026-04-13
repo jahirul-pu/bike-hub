@@ -2,19 +2,22 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { LayoutDashboard, Bike, Package, ClipboardCheck, ShoppingCart } from "lucide-react"
+import { CarFront, ClipboardCheck, LayoutDashboard, Bike, Package, ShoppingCart, Tags, type LucideIcon } from "lucide-react"
 
-const navItems: { name: string; href: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[] = [
+const navItems: { name: string; href: string; icon: LucideIcon }[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Bike Catalog", href: "/admin/inventory/bikes", icon: Bike },
   { name: "Parts Inventory", href: "/admin/inventory/parts", icon: Package },
-  { name: "Vehicle Hub", href: "/admin/inventory/vehicles", icon: Bike },
+  { name: "Vehicle Hub", href: "/admin/inventory/vehicles", icon: CarFront },
   { name: "Certification Lab", href: "/admin/certification", icon: ClipboardCheck },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
+  { name: "Brands", href: "/admin/brands", icon: Tags },
 ]
 
 export default function AdminSidebar() {
   return (
-    <aside className="w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 p-4 border-r border-slate-800">
+    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 overflow-y-auto border-r border-slate-800 bg-slate-900 text-white">
+      <div className="p-4">
       <div className="mb-8 px-2">
         <h1 className="text-xl font-bold text-blue-400 tracking-wider">PLANET LORD</h1>
         <p className="text-xs text-slate-400 uppercase">Savar Hub Admin</p>
@@ -31,6 +34,7 @@ export default function AdminSidebar() {
           </Link>
         ))}
       </nav>
+      </div>
     </aside>
   )
 }

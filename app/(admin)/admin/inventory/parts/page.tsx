@@ -8,7 +8,7 @@ export default async function PartsPage() {
   });
 
   return (
-    <div className="p-8 ml-64">
+    <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-2xl font-bold">Parts Inventory</h2>
