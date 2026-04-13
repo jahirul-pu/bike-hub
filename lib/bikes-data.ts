@@ -26,6 +26,36 @@ export type Bike = {
   frontTyre: string;
   rearTyre: string;
   summary: string;
+
+  // ─── EV-extended fields ───
+  voltageV?: number;
+  ampHours?: number;
+  peakPowerKw?: number;
+  batteryType?: string;
+  ridingModes?: string;
+  underseatStorage?: string;
+  lengthMm?: number;
+  widthMm?: number;
+  heightMm?: number;
+  frontBrake?: string;
+  rearBrake?: string;
+  absType?: string;
+  frontSuspension?: string;
+  rearSuspension?: string;
+  securityFeatures?: string;
+  appSupport?: string;
+
+  // --- Features & Electronics ---
+  displayType?: string;
+  headlightType?: string;
+  bluetoothConnectivity?: string;
+  gpsTracking?: string;
+  navigation?: string;
+  keylessStart?: string;
+  usbChargingPort?: string;
+  otaUpdates?: string;
+  tractionControl?: string;
+  cruiseControl?: string;
 };
 
 export const bikes: Bike[] = [
@@ -242,6 +272,54 @@ export const bikes: Bike[] = [
     frontTyre: "90/90-12",
     rearTyre: "90/90-12",
     summary: "Comfort-focused smart scooter with broad service support.",
+  },
+  {
+    slug: "yadea-gt60",
+    brand: "Yadea",
+    model: "GT60",
+    category: "Scooter" as const,
+    powertrain: "EV" as const,
+    priceBdt: 167000,
+    topSpeedKph: 70,
+    torqueNm: 120,
+    weightKg: 120,
+    seatHeightMm: 734,
+    wheelbaseMm: 1296,
+    groundClearanceMm: 132,
+    frontTyre: "90/80-12",
+    rearTyre: "100/80-10",
+    summary: "The Yadea GT60 is positioned as a high-performance, compact electric commuter, specifically designed with a focus on durability (the \"GT\" line DNA) and modern tech features like keyless entry.",
+    images: ["/bikes/product_image_gt_60693555b22ae5f-1776073320057.webp"],
+    motorPowerKw: 1.5,
+    peakPowerKw: 2.5,
+    rangeKm: 120,
+    batteryType: "Lead-acid",
+    voltageV: 72,
+    ampHours: 38,
+    chargingTime0100: "6–8 hours",
+    batteryCycleLife: "800 – 1,000",
+    ipRating: "IP67",
+    lengthMm: 1952,
+    widthMm: 718,
+    heightMm: 1123,
+    underseatStorage: "32L",
+    frontBrake: "Disk",
+    rearBrake: "Disk",
+    absType: "None",
+    frontSuspension: "Hydraulic Fork",
+    rearSuspension: "Dual Shock Absorber",
+    ridingModes: "Eco, TTFR, Sports",
+    securityFeatures: "Geo-fencing",
+    appSupport: "Yes",
+    displayType: "TFT",
+    bluetoothConnectivity: "Yes",
+    gpsTracking: "Yes",
+    navigation: "No",
+    keylessStart: "Yes",
+    usbChargingPort: "Yes",
+    otaUpdates: "Yes",
+    tractionControl: "No",
+    cruiseControl: "Yes",
   },
 ];
 

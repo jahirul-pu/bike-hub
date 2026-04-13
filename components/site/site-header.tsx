@@ -14,7 +14,7 @@ const navItems = [
   { href: "/compare", label: "Compare", icon: ListChecks },
   { href: "/showrooms", label: "Showroom", icon: Store },
   { href: "/calculator", label: "Calculator", icon: Calculator },
-  { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
+  { href: "/marketplace", label: "Marketplace", icon: ShoppingBag, highlight: true },
 ];
 
 export function SiteHeader() {
@@ -122,8 +122,11 @@ export function SiteHeader() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      buttonVariants({ variant: "ghost", size: "sm" }),
-                      "shrink-0 gap-2 text-slate-700"
+                      buttonVariants({ variant: item.highlight ? "default" : "ghost", size: "sm" }),
+                      "shrink-0 gap-2",
+                      item.highlight
+                        ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-400/30 animate-pulse hover:shadow-lg hover:shadow-orange-500/30 hover:from-amber-400 hover:to-orange-500 transition-all duration-300"
+                        : "text-slate-700"
                     )}
                   >
                     <Icon className="h-4 w-4" />

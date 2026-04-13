@@ -1,72 +1,67 @@
-"use server";
+'use server';
 
-import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
-import * as z from "zod";
+import { db } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
-const vehicleSchema = z.discriminatedUnion("powerSource", [
-  z.object({
-    powerSource: z.literal("ICE"),
-    make: z.string().min(1),
-    model: z.string().min(1),
-    year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
-    vin: z.string().min(1),
-    askingPrice: z.coerce.number().min(0),
-    condition: z.enum(["Mint", "Good", "Fair", "Poor"]),
-    description: z.string().optional(),
-    engineDisplacement: z.coerce.number().min(50),
-    fuelSystem: z.enum(["Carburetor", "FI"]),
-    transmission: z.enum(["Manual", "Automatic"]),
-  }),
-  z.object({
-    powerSource: z.literal("EV"),
-    make: z.string().min(1),
-    model: z.string().min(1),
-    year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
-    vin: z.string().min(1),
-    askingPrice: z.coerce.number().min(0),
-    condition: z.enum(["Mint", "Good", "Fair", "Poor"]),
-    description: z.string().optional(),
-    batteryCapacity: z.coerce.number().min(0.1),
-    maxRangeKm: z.coerce.number().min(1),
-    motorPowerKw: z.coerce.number().min(0.1),
-  }),
-]);
+export async function createVehicle(formData: FormData) {
+  const model = formData.get('model') as string;
+  const brand = formData.get('brand') as string;
+  const category = formData.get('category') as string;
+  const powertrain = formData.get('powertrain') as string;
+  const summary = formData.get('summary') as string;
+  const priceBdt = parseFloat(formData.get('priceBdt') as string) || 0;
+  
+  const chassis = formData.get('chassis') as string;
+  const askingPrice = parseFloat(formData.get('askingPrice') as string) || 0;
 
-export async function createVehicle(data: unknown) {
-  const parsed = vehicleSchema.safeParse(data);
-  if (!parsed.success) {
-    return { success: false, error: "Validation failed", details: parsed.error.flatten() };
+  if (!model || !chassis) {
+    throw new Error('Model and chassis are required.');
   }
 
-  try {
-    const payload: any = {
-      make: parsed.data.make,
-      model: parsed.data.model,
-      year: parsed.data.year,
-      vin: parsed.data.vin,
-      askingPrice: parsed.data.askingPrice,
-      condition: parsed.data.condition,
-      description: parsed.data.description ?? null,
-      powerSource: parsed.data.powerSource,
-      certificationStatus: "PENDING_APPROVAL",
-    };
+  // Parse optional float conversions carefully
+  const displacementCc = parseFloat(formData.get('displacementCc') as string) || null;
+  const motorPowerKw = parseFloat(formData.get('motorPowerKw') as string) || null;
+  const topSpeedKph = parseFloat(formData.get('topSpeedKph') as string) || null;
+  const mileageKmpl = parseFloat(formData.get('mileageKmpl') as string) || null;
+  const rangeKm = parseFloat(formData.get('rangeKm') as string) || null;
+  const fuelTankLiters = parseFloat(formData.get('fuelTankLiters') as string) || null;
+  const chargingTime0100 = formData.get('chargingTime0100') as string || null;
 
-    if (parsed.data.powerSource === "ICE") {
-      payload.engineDisplacement = parsed.data.engineDisplacement;
-      payload.fuelSystem = parsed.data.fuelSystem;
-      payload.transmission = parsed.data.transmission;
-    } else {
-      payload.batteryCapacity = parsed.data.batteryCapacity;
-      payload.maxRangeKm = parsed.data.maxRangeKm;
-      payload.motorPowerKw = parsed.data.motorPowerKw;
-    }
+  // Generate unique slug
+  const baseSlug = `${brand}-${model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  const generatedSlug = `${baseSlug}-${chassis.substring(0, 5)}`.toLowerCase();
 
-    await db.vehicle.create({ data: payload });
-    revalidatePath("/admin/inventory/vehicles");
-    return { success: true };
-  } catch (error) {
-    console.error("createVehicle error:", error);
-    return { success: false, error: "Failed to create vehicle" };
-  }
+  await db.vehicle.create({
+    data: {
+      slug: generatedSlug,
+      brand,
+      model,
+      name: model,
+      category,
+      powertrain: powertrain || 'ICE',
+      summary,
+      priceBdt,
+      displacementCc,
+      motorPowerKw,
+      topSpeedKph,
+      mileageKmpl,
+      rangeKm,
+      fuelTankLiters,
+      chargingTime0100,
+      
+      vin: chassis,
+      chassis: chassis,
+      askingPrice,
+      certificationStatus: 'PENDING_APPROVAL',
+      inspection: {
+        create: {
+          status: 'Processing',
+        }
+      }
+    },
+  });
+
+  revalidatePath('/admin/inventory/vehicles');
+  revalidatePath('/admin');
+  revalidatePath('/');
 }

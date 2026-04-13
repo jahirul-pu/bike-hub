@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Vehicle {
+  id                  String      @id @default(cuid())
+  slug                String?     @unique
+  brandId             String?
+  brand               Brand?      @relation(fields: [brandId], references: [id])
+  model               String?
+  name                String?
+  category            String?
+  powertrain          String      @default("ICE")
+  priceBdt            Float?
+  displacementCc      Float?
+  motorPowerKw        Float?
+  topSpeedKph         Float?
+  mileageKmpl         Float?
+  rangeKm             Float?
+  chargingTime0100    String?
+  batteryCycleLife    String?
+  ipRating            String?
+  fuelTankLiters      Float?
+  gearbox             String?
+  torqueNm            Float?
+  weightKg            Float?
+  seatHeightMm        Float?
+  wheelbaseMm         Float?
+  groundClearanceMm   Float?
+  frontTyre           String?
+  rearTyre            String?
+  summary             String?
+  images              String?     // JSON-encoded string[] of image URLs
+
+  // ─── EV Motor ───
+  peakPowerKw         Float?
+  voltageV            Float?
+  ampHours            Float?
+  batteryType         String?
+
+  // ─── EV Dimensions ───
+  lengthMm            Float?
+  widthMm             Float?
+  heightMm            Float?
+  underseatStorage    String?
+
+  // ─── Brakes & Suspension ───
+  frontBrake          String?
+  rearBrake           String?
+  absType             String?
+  frontSuspension     String?
+  rearSuspension      String?
+
+  // ─── Smart Features & Electronics ───
+  ridingModes         String?
+  securityFeatures    String?
+  appSupport          String?
+  displayType         String?
+  headlightType       String?
+  bluetoothConnectivity String?
+  gpsTracking         String?
+  navigation          String?
+  keylessStart        String?
+  usbChargingPort     String?
+  otaUpdates          String?
+  tractionControl     String?
+  cruiseControl       String?
+
+  // ─── Vehicle / Marketplace ───
+  vin                 String?
+  chassis             String?
+  certificationStatus String      @default("PENDING_APPROVAL")
+  askingPrice         Float?
+  price               Float?
+  createdAt           DateTime    @default(now())
+  
+  inspection          Inspection?
+}
+
+model Inspection {
+  id           String   @id @default(cuid())
+  status       String   @default("Pending")
+  technicianId String?
+  vehicleId    String   @unique
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id])
+}
+
+model Part {
+  id          String   @id @default(cuid())
+  name        String
+  sku         String   @unique
+  stock       Int      @default(0)
+  retailPrice Float?
+  price       Float?
+  createdAt   DateTime @default(now())
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  powertrain  String   // 'ICE', 'EV', or 'BOTH'
+  origin      String?  // e.g. "Japan", "India", "Bangladesh"
+  description String?
+  createdAt   DateTime @default(now())
+  vehicles    Vehicle[]
+}

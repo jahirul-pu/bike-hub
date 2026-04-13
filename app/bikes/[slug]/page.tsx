@@ -209,7 +209,7 @@ function evSegment(bike: Bike): string {
 function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategory[] {
   const launchYear = launchYearFromBike(bike);
   const motorPower = bike.motorPowerKw ?? 4;
-  const peakPower = Number((motorPower * 1.25).toFixed(1));
+  const peakPower = bike.peakPowerKw ?? Number((motorPower * 1.25).toFixed(1));
   const chargingHours = parseHours(bike.chargingTime0100) ?? 5;
   const charging80 = Number((chargingHours * 0.8).toFixed(1));
   const batteryKwh = batteryCapacityKwh(bike);
@@ -261,9 +261,11 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
     {
       title: "3. Battery",
       items: [
-        { label: "Battery Type (Lithium-ion / LFP / Lead-acid)", value: "Lithium-ion" },
-        { label: "Battery Capacity (kWh / Ah)", value: `${batteryKwh} kWh` },
-        { label: "Voltage (V)", value: "72V" },
+        { label: "Battery Type", value: bike.batteryType ?? "Lithium-ion" },
+        { label: "Battery Capacity (kWh)", value: `${batteryKwh} kWh` },
+        { label: "Battery Capacity (Ah)", value: bike.ampHours ? `${bike.ampHours} Ah` : "N/A" },
+        { label: "Voltage (V)", value: bike.voltageV ? `${bike.voltageV}V` : "72V" },
+        { label: "Battery Lifecycle", value: bike.batteryCycleLife ? `${bike.batteryCycleLife} (N.B: at 25°C ideal condition)` : "1000 Cycles (N.B: at 25°C ideal condition)" },
         { label: "Number of Batteries", value: batteryKwh >= 8 ? "2" : "1" },
         { label: "Removable Battery (Yes/No)", value: yesNo(bike.category === "Scooter") },
         { label: "Swappable Battery (Yes/No)", value: yesNo(bike.category === "Scooter" && bike.priceBdt < 500000) },
@@ -301,20 +303,13 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       items: [
         { label: "Controller Type", value: "FOC Controller" },
         { label: "Regenerative Braking (Yes/No)", value: yesNo(true) },
-        { label: "Riding Modes", value: "Eco, Normal, Sport" },
+        { label: "Riding Modes", value: bike.ridingModes ?? "Eco, Normal, Sport" },
         { label: "Reverse Mode", value: yesNo(bike.category === "Scooter") },
         { label: "Smart BMS (Battery Management System)", value: yesNo(true) },
       ],
     },
     {
-      title: "7. Transmission",
-      items: [
-        { label: "Gear Type (Automatic / Direct Drive)", value: "Direct Drive" },
-        { label: "Transmission Type (Single Speed)", value: "Single Speed" },
-      ],
-    },
-    {
-      title: "8. Dimensions & Weight",
+      title: "7. Dimensions & Weight",
       items: [
         { label: "Length (mm)", value: `${geometry.length} mm` },
         { label: "Width (mm)", value: `${geometry.width} mm` },
@@ -322,25 +317,26 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
         { label: "Wheelbase (mm)", value: `${bike.wheelbaseMm} mm` },
         { label: "Ground Clearance (mm)", value: `${bike.groundClearanceMm} mm` },
         { label: "Seat Height (mm)", value: `${bike.seatHeightMm} mm` },
+        { label: "Underseat Storage", value: bike.underseatStorage ?? (bike.category === "Scooter" ? "20L" : "N/A") },
         { label: "Kerb Weight (kg)", value: `${bike.weightKg} kg` },
         { label: "Payload Capacity (kg)", value: bike.category === "Scooter" ? "150 kg" : "180 kg" },
       ],
     },
     {
-      title: "9. Suspension",
+      title: "8. Suspension",
       items: [
-        { label: "Front Suspension (Telescopic / USD)", value: bike.category === "Sport" ? "USD" : "Telescopic" },
+        { label: "Front Suspension", value: bike.frontSuspension ?? (bike.category === "Sport" ? "USD" : "Telescopic") },
         {
-          label: "Rear Suspension (Mono-shock / Dual shock)",
-          value: bike.category === "Scooter" ? "Dual shock" : "Mono-shock",
+          label: "Rear Suspension",
+          value: bike.rearSuspension ?? (bike.category === "Scooter" ? "Dual shock" : "Mono-shock"),
         },
       ],
     },
     {
-      title: "10. Brakes & Wheels",
+      title: "9. Brakes & Wheels",
       items: [
-        { label: "Front Brake (Disc/Drum)", value: bike.topSpeedKph >= 95 ? "Disc" : "Drum" },
-        { label: "Rear Brake", value: bike.topSpeedKph >= 120 ? "Disc" : "Drum" },
+        { label: "Front Brake", value: bike.frontBrake ?? (bike.topSpeedKph >= 95 ? "Disc" : "Drum") },
+        { label: "Rear Brake", value: bike.rearBrake ?? (bike.topSpeedKph >= 120 ? "Disc" : "Drum") },
         { label: "ABS / CBS", value: abs === "None" ? "CBS" : abs },
         { label: "Tyre Type (Tubeless / Tube)", value: "Tubeless" },
         { label: "Front Tyre Size", value: bike.frontTyre },
@@ -349,35 +345,36 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "11. Features & Smart Tech",
+      title: "10. Features & Smart Tech",
       items: [
-        { label: "Digital Display (LCD / TFT)", value: bike.priceBdt >= 500000 ? "TFT" : "LCD" },
-        { label: "Bluetooth Connectivity", value: yesNo(true) },
-        { label: "Mobile App Integration", value: yesNo(true) },
-        { label: "GPS Tracking", value: yesNo(bike.priceBdt >= 350000) },
-        { label: "Navigation", value: yesNo(bike.priceBdt >= 330000) },
-        { label: "Geo-fencing", value: yesNo(bike.priceBdt >= 330000) },
-        { label: "Anti-theft System", value: yesNo(true) },
-        { label: "Keyless Start", value: yesNo(bike.priceBdt >= 350000) },
-        { label: "USB Charging Port", value: yesNo(true) },
-        { label: "OTA Updates", value: yesNo(bike.priceBdt >= 500000) },
+        { label: "Digital Display (LCD / TFT)", value: bike.displayType ?? (bike.priceBdt >= 500000 ? "TFT" : "LCD") },
+        { label: "Bluetooth Connectivity", value: bike.bluetoothConnectivity ?? yesNo(true) },
+        { label: "Mobile App Integration", value: bike.appSupport ? `Yes (${bike.appSupport})` : yesNo(true) },
+        { label: "GPS Tracking", value: bike.gpsTracking ?? yesNo(bike.priceBdt >= 350000) },
+        { label: "Navigation", value: bike.navigation ?? yesNo(bike.priceBdt >= 330000) },
+        { label: "Geo-fencing", value: bike.securityFeatures?.toLowerCase().includes('geo') ? "Yes" : yesNo(bike.priceBdt >= 330000) },
+        { label: "Anti-theft System", value: bike.securityFeatures?.toLowerCase().includes('theft') ? "Yes" : yesNo(true) },
+        { label: "Keyless Start", value: bike.keylessStart ?? yesNo(bike.priceBdt >= 350000) },
+        { label: "USB Charging Port", value: bike.usbChargingPort ?? yesNo(true) },
+        { label: "OTA Updates", value: bike.otaUpdates ?? yesNo(bike.priceBdt >= 500000) },
+        { label: "Cruise Control", value: bike.cruiseControl ?? yesNo(bike.priceBdt >= 500000) },
       ],
     },
     {
-      title: "12. Lighting",
+      title: "11. Lighting",
       items: [
-        { label: "Headlight (LED / Projector)", value: bike.priceBdt >= 500000 ? "Projector LED" : "LED" },
+        { label: "Headlight (LED / Projector)", value: bike.headlightType ?? (bike.priceBdt >= 500000 ? "Projector LED" : "LED") },
         { label: "DRL", value: yesNo(true) },
         { label: "Tail Light", value: "LED" },
         { label: "Indicators", value: "LED" },
       ],
     },
     {
-      title: "13. Safety",
+      title: "12. Safety",
       items: [
         { label: "Side Stand Sensor", value: yesNo(true) },
         { label: "Kill Switch", value: yesNo(bike.category !== "Scooter") },
-        { label: "TCS (Traction Control System)", value: yesNo(bike.topSpeedKph >= 120) },
+        { label: "TCS (Traction Control System)", value: bike.tractionControl ?? yesNo(bike.topSpeedKph >= 120) },
         {
           label: "Battery Protection (Overcharge / Thermal / Short Circuit)",
           value: "Overcharge, Thermal, Short Circuit",
@@ -386,51 +383,14 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "14. Warranty & Service",
-      items: [
-        { label: "Battery Warranty (Years / km)", value: "3 years / 30,000 km" },
-        { label: "Motor Warranty", value: "3 years" },
-        { label: "Vehicle Warranty", value: "2 years / 24,000 km" },
-        { label: "Service Interval", value: "Every 6 months" },
-      ],
-    },
-    {
-      title: "15. Cost & Ownership",
+      title: "13. Cost & Ownership",
       items: [
         { label: "Cost per Charge (BDT)", value: `BDT ${costPerCharge}` },
         { label: "Cost per km", value: `BDT ${costPerKm}` },
         { label: "Estimated Monthly Cost", value: formatBdt(monthlyCost) },
         { label: "Maintenance Cost", value: `${formatBdt(annualCost)} per year` },
       ],
-    },
-    {
-      title: "16. Colors & Variants",
-      items: [
-        { label: "Available Colors", value: colorPalette(bike) },
-        { label: "Variant Differences", value: variantDifferences(bike) },
-      ],
-    },
-    {
-      title: "17. Media",
-      items: [
-        { label: "Images", value: "8 high-resolution images" },
-        { label: "Videos", value: "2 walkaround videos" },
-        { label: "360° View", value: yesNo(bike.priceBdt >= 350000) },
-      ],
-    },
-    {
-      title: "18. Comparisons & Market",
-      items: [
-        {
-          label: "Competitors",
-          value:
-            similarBikes.length === 0
-              ? "No similar bikes found"
-              : similarBikes.map((candidate) => `${candidate.brand} ${candidate.model}`).join(" | "),
-        },
-        { label: "Segment (Budget / Premium / Performance EV)", value: evSegment(bike) },
-      ],
-    },
+    }
   ];
 }
 
@@ -479,26 +439,16 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "4. Transmission",
+      title: "3. Transmission",
       items: [
         {
           label: "Gear Type",
-          value:
-            bike.powertrain === "EV"
-              ? "Automatic"
-              : bike.gearbox?.toLowerCase().includes("cvt")
-                ? "CVT"
-                : "Manual",
+          value: bike.gearbox?.toLowerCase().includes("cvt") ? "CVT" : "Manual",
         },
-        { label: "Number of Gears", value: `${gears}` },
+        { label: "Number of Gears", value: bike.gearbox?.match(/\d+/) ? `${bike.gearbox.match(/\d+/)} Speed` : "5 Speed" },
         {
           label: "Clutch Type",
-          value:
-            bike.powertrain === "EV"
-              ? "N/A (direct drive)"
-              : bike.gearbox?.toLowerCase().includes("cvt")
-                ? "Automatic centrifugal"
-                : "Wet multi-plate",
+          value: bike.gearbox?.toLowerCase().includes("cvt") ? "Automatic centrifugal" : "Wet multi-plate",
         },
         {
           label: "Final Drive",
@@ -507,7 +457,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "5. Fuel & Efficiency",
+      title: "4. Fuel & Efficiency",
       items: [
         { label: "Fuel Type", value: "Petrol" },
         {
@@ -525,11 +475,11 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "6. Dimensions & Weight",
+      title: "5. Dimensions & Weight",
       items: [
-        { label: "Length (mm)", value: `${geometry.length} mm` },
-        { label: "Width (mm)", value: `${geometry.width} mm` },
-        { label: "Height (mm)", value: `${geometry.height} mm` },
+        { label: "Length (mm)", value: `${bike.lengthMm ?? geometry.length} mm` },
+        { label: "Width (mm)", value: `${bike.widthMm ?? geometry.width} mm` },
+        { label: "Height (mm)", value: `${bike.heightMm ?? geometry.height} mm` },
         { label: "Wheelbase (mm)", value: `${bike.wheelbaseMm} mm` },
         { label: "Ground Clearance (mm)", value: `${bike.groundClearanceMm} mm` },
         { label: "Seat Height (mm)", value: `${bike.seatHeightMm} mm` },
@@ -537,7 +487,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "7. Chassis & Suspension",
+      title: "6. Chassis & Suspension",
       items: [
         {
           label: "Frame Type",
@@ -545,26 +495,26 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
         },
         {
           label: "Front Suspension",
-          value: bike.category === "Sport" ? "USD Fork" : "Telescopic Fork",
+          value: bike.frontSuspension ?? (bike.category === "Sport" ? "USD Fork" : "Telescopic Fork"),
         },
         {
           label: "Rear Suspension",
-          value: bike.category === "Scooter" ? "Twin shock" : "Mono-shock",
+          value: bike.rearSuspension ?? (bike.category === "Scooter" ? "Twin shock" : "Mono-shock"),
         },
       ],
     },
     {
-      title: "8. Brakes & Wheels",
+      title: "7. Brakes & Wheels",
       items: [
         {
           label: "Front Brake (Disc/Drum + size)",
-          value: bike.topSpeedKph >= 110 ? "Disc 300 mm" : "Disc 240 mm",
+          value: bike.frontBrake ?? (bike.topSpeedKph >= 110 ? "Disc 300 mm" : "Disc 240 mm"),
         },
         {
           label: "Rear Brake",
-          value: bike.topSpeedKph >= 120 ? "Disc 230 mm" : "Drum 130 mm",
+          value: bike.rearBrake ?? (bike.topSpeedKph >= 120 ? "Disc 230 mm" : "Drum 130 mm"),
         },
-        { label: "ABS", value: abs },
+        { label: "ABS", value: bike.absType ?? abs },
         { label: "Front Tyre Size", value: bike.frontTyre },
         { label: "Rear Tyre Size", value: bike.rearTyre },
         { label: "Wheel Type", value: "Alloy" },
@@ -572,25 +522,25 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "9. Features & Electronics",
+      title: "8. Features & Electronics",
       items: [
-        { label: "Instrument Console", value: consoleType(bike) },
-        { label: "Bluetooth Connectivity", value: yesNo(bike.priceBdt >= 320000) },
-        { label: "Navigation", value: yesNo(bike.priceBdt >= 450000) },
-        { label: "Riding Modes", value: yesNo(bike.topSpeedKph >= 140) },
-        { label: "Traction Control", value: yesNo(bike.topSpeedKph >= 150) },
-        { label: "Cruise Control", value: yesNo(bike.category === "Adventure" || bike.priceBdt > 800000) },
+        { label: "Instrument Console", value: bike.displayType ?? consoleType(bike) },
+        { label: "Bluetooth Connectivity", value: bike.bluetoothConnectivity ?? yesNo(bike.priceBdt >= 320000) },
+        { label: "Navigation", value: bike.navigation ?? yesNo(bike.priceBdt >= 450000) },
+        { label: "Riding Modes", value: bike.ridingModes ?? yesNo(bike.topSpeedKph >= 140) },
+        { label: "Traction Control", value: bike.tractionControl ?? yesNo(bike.topSpeedKph >= 150) },
+        { label: "Cruise Control", value: bike.cruiseControl ?? yesNo(bike.category === "Adventure" || bike.priceBdt > 800000) },
         { label: "Quick Shifter", value: yesNo(bike.category === "Sport" && bike.priceBdt > 700000) },
-        { label: "USB Charging Port", value: yesNo(true) },
-        { label: "Mobile App Support", value: yesNo(bike.priceBdt >= 400000) },
+        { label: "USB Charging Port", value: bike.usbChargingPort ?? yesNo(true) },
+        { label: "Mobile App Support", value: bike.appSupport ? `Yes (${bike.appSupport})` : yesNo(bike.priceBdt >= 400000) },
       ],
     },
     {
-      title: "10. Lighting",
+      title: "9. Lighting",
       items: [
         {
           label: "Headlight Type",
-          value: bike.priceBdt >= 300000 ? "LED Projector" : "Halogen",
+          value: bike.headlightType ?? (bike.priceBdt >= 300000 ? "LED Projector" : "Halogen"),
         },
         { label: "DRL", value: yesNo(bike.priceBdt >= 280000) },
         { label: "Tail Light Type", value: "LED" },
@@ -598,34 +548,18 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "11. Safety",
+      title: "10. Safety",
       items: [
-        { label: "ABS", value: abs },
-        { label: "CBS (Combined Braking System)", value: yesNo(abs === "None") },
+        { label: "ABS", value: bike.absType ?? abs },
+        { label: "CBS (Combined Braking System)", value: yesNo((bike.absType ?? abs) === "None") },
         { label: "TCS (Traction Control System)", value: yesNo(bike.topSpeedKph >= 150) },
         { label: "Engine Kill Switch", value: yesNo(bike.category !== "Scooter") },
         { label: "Side Stand Engine Cut-off", value: yesNo(bike.category !== "Scooter") },
-        { label: "Anti-theft Alarm", value: yesNo(false) },
+        { label: "Anti-theft Alarm", value: bike.securityFeatures ? "Yes" : yesNo(false) },
       ],
     },
     {
-      title: "12. Warranty & Service",
-      items: [
-        { label: "Warranty (Years / km)", value: "2 years / 20,000 km" },
-        { label: "Free Service Schedule", value: "500 km, 3,000 km, 6,000 km" },
-        { label: "Service Interval", value: "Every 3,000 km" },
-      ],
-    },
-    {
-      title: "13. Colors & Variants",
-      items: [
-        { label: "Available Colors", value: colorPalette(bike) },
-        { label: "Special Editions", value: specialEdition(bike) },
-        { label: "Variant Differences", value: variantDifferences(bike) },
-      ],
-    },
-    {
-      title: "14. Pros & Cons (Review Layer)",
+      title: "11. Pros & Cons (Review Layer)",
       items: [
         {
           label: "Pros",
@@ -638,7 +572,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "15. Ratings & Reviews",
+      title: "12. Ratings & Reviews",
       items: [
         { label: "User Rating", value: `${rating.user} / 5` },
         { label: "Expert Rating", value: `${rating.expert} / 5` },
@@ -646,35 +580,13 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "16. Ownership & Cost",
+      title: "13. Ownership & Cost",
       items: [
         { label: "Insurance Cost (estimated)", value: formatBdt(Math.round(bike.priceBdt * 0.03)) },
         { label: "Maintenance Cost", value: `${formatBdt(annualMaintenance(bike))} per year` },
         { label: "Resale Value", value: `${formatBdt(resaleValue3Years(bike))} after 3 years` },
       ],
-    },
-    {
-      title: "17. Media",
-      items: [
-        { label: "Images", value: "10 high-resolution images" },
-        { label: "Videos", value: "2 walkaround videos" },
-        { label: "360° View", value: yesNo(bike.priceBdt >= 350000) },
-      ],
-    },
-    {
-      title: "18. Competitors",
-      items: [
-        {
-          label: "Similar Bikes",
-          value:
-            similarBikes.length === 0
-              ? "No similar bikes found"
-              : similarBikes.map((candidate) => `${candidate.brand} ${candidate.model}`).join(" | "),
-        },
-        { label: "Price Comparison", value: competitorPriceLine(bike, similarBikes) },
-        { label: "Spec Comparison", value: competitorSpecLine(bike, similarBikes) },
-      ],
-    },
+    }
   ];
 
   return categories;
@@ -727,7 +639,7 @@ export default async function BikeDetailsPage({
 
   // --- PAGE LAYOUT ---
   return (
-    <div className="mx-auto w-full max-w-6xl grid gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
+    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <main>
         <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm sm:p-6">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -771,6 +683,38 @@ export default async function BikeDetailsPage({
                   <div className="rounded-lg bg-slate-100 p-3">
                     <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
                     <p className="text-base font-semibold text-slate-900">{bike.topSpeedKph} km/h</p>
+                  </div>
+                </div>
+
+                {/* Warranty & Service */}
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Warranty & Service</p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {bike.powertrain === "EV" ? "Battery Warranty" : "Vehicle Warranty"}
+                      </p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {bike.powertrain === "EV" ? "Motor Warranty" : "Free Services"}
+                      </p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {bike.powertrain === "EV" ? "3 years" : "500 / 3k / 6k km"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Color & Variants */}
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Color & Variants</p>
+                  <div className="mt-2">
+                    <p className="text-[11px] uppercase tracking-wide text-slate-400">Available Colors</p>
+                    <p className="text-sm font-medium text-slate-900">{colorPalette(bike)}</p>
                   </div>
                 </div>
               </div>
@@ -819,57 +763,11 @@ export default async function BikeDetailsPage({
         </section>
 
         <section className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-5">
-          <h2 className="font-heading text-3xl uppercase tracking-wide text-amber-900">Check Local Price</h2>
-          <p className="mt-2 text-sm text-amber-900/80">
-            Price varies by city, registration costs, and stock allocation. See your nearest official outlet for final on-road pricing.
+          <p className="text-sm text-amber-900/80">
+            Disclaimer: this information may not be 100% accurate — please verify pricing and availability with official showrooms.
           </p>
-          <Link
-            href="/showrooms"
-            className={cn(buttonVariants(), "mt-4 bg-amber-600 text-white hover:bg-amber-500")}
-          >
-            Open Showroom Directory
-            <ChevronRight className="h-4 w-4" />
-          </Link>
         </section>
       </main>
-
-      <aside>
-        <Card className="sticky top-20 border-slate-200 bg-white/90">
-          <CardHeader>
-            <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
-              Quick Comparison
-            </CardTitle>
-            <p className="text-xs text-slate-500">
-              Suggestions ranked by nearest price and {bike.powertrain === "ICE" ? "engine cc" : "motor output"}.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {similarBikes.map((candidate) => (
-              <Link
-                key={candidate.slug}
-                href={`/bikes/${candidate.slug}`}
-                className="block rounded-lg border border-slate-200 bg-slate-50 p-3 transition hover:border-slate-400"
-              >
-                <p className="font-semibold text-slate-900">
-                  {candidate.brand} {candidate.model}
-                </p>
-                <p className="mt-1 text-xs text-slate-600">{headlineMetric(candidate)}</p>
-                <p className="mt-1 text-sm font-medium text-slate-900">{formatBdt(candidate.priceBdt)}</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Similarity metric: {metricForSimilarity(candidate)} {candidate.powertrain === "ICE" ? "cc" : "W"}
-                </p>
-              </Link>
-            ))}
-
-            <Link
-              href={`/compare?bikes=${[bike.slug, ...similarBikes.map((item) => item.slug)].join(",")}`}
-              className={cn(buttonVariants(), "w-full bg-slate-900 text-white hover:bg-slate-700")}
-            >
-              Compare These Bikes
-            </Link>
-          </CardContent>
-        </Card>
-      </aside>
     </div>
   );
 }
