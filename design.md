@@ -71,6 +71,36 @@ export default Button
 - **No hard-coded colors or spacing.** Use tokens (CSS variables or Tailwind config) so themes and accessibility changes are easy.
 - **Theming.** Support dark/light via CSS variables (`:root` / `.dark`) and prefer those variables in component styles.
 
+### Design Tokens Contract Layer
+
+## Design Tokens (source of truth)
+
+### Colors
+- --color-bg-primary
+- --color-bg-secondary
+- --color-text-primary
+- --color-text-muted
+- --color-border
+- --color-accent
+
+### Spacing (8pt system)
+- --space-1: 4px
+- --space-2: 8px
+- --space-3: 12px
+- --space-4: 16px
+- --space-6: 24px
+- --space-8: 32px
+
+### Radius
+- --radius-sm
+- --radius-md
+- --radius-lg
+
+### Shadows
+- --shadow-sm
+- --shadow-md
+- --shadow-lg
+
 ---
 
 ## Accessibility (required)
@@ -136,6 +166,121 @@ Checklist for visual PRs:
 
 ---
 
+## Layout System
+
+- Use a consistent max-width container (e.g., 1200px).
+- Use a 12-column grid for complex layouts.
+- Standard page padding:
+  - mobile: px-4
+  - tablet: px-6
+  - desktop: px-8
+
+### Vertical rhythm
+- Section spacing: space-y-12
+- Component spacing: space-y-6
+- Element spacing: space-y-2 / space-y-3
+## Change log
+
+## Component Variants Pattern
+
+All components should support variants when applicable. Variants enable consistent UI permutations and make styling predictable across the app.
+
+- **Size:** `sm | md | lg`
+- **Variant:** `primary | secondary | ghost | danger`
+- **State:** `default | loading | disabled`
+
+Examples:
+- `<Button variant="primary" size="md" />`
+- `<Card variant="outlined" />`
+
+Guidelines:
+- Implement variants as props that map to CSS utility classes or design tokens rather than ad-hoc inline styles.
+- Keep the variant logic inside the component (or a small helper) so consumers only pass props.
+- Document available variants in the component's README or Storybook story.
+- Ensure each variant maintains accessibility (focus states, contrast, and ARIA where applicable).
+
+
 ## Change log
 
 - 1.0 — Initial guidelines derived from repository patterns and agent customization SKILL.
+
+---
+
+## Interaction States
+
+All interactive elements must define the following states and provide clear visual affordances for each:
+
+- **default** — base appearance
+- **hover** — pointer hover state (use color + subtle elevation/opacity)
+- **active** — pressed state (slightly reduced scale or inset shadow)
+- **focus** — keyboard focus ring (visible, high-contrast outline or ring)
+- **disabled** — reduced opacity + no pointer interactions
+- **loading** — show spinner or skeleton and disable interactions while async
+
+Avoid state changes that rely on color alone; pair color with at least one of:
+- opacity
+- scale
+- shadow/elevation
+
+State tokens example (map to CSS variables):
+- --state-hover-opacity
+- --state-active-scale
+- --state-focus-ring
+- --state-disabled-opacity
+
+---
+
+## Composition Patterns
+
+Prefer building UI using composition and slots. Break components into small, focused pieces that can be assembled by consumers.
+
+Example:
+
+```tsx
+<Card>
+  <CardHeader />
+  <CardContent />
+  <CardFooter />
+</Card>
+```
+
+Avoid monolithic components that bundle too many responsibilities. Favor small composable primitives and light wrapper components that orchestrate them.
+
+## Visual Consistency Rules
+
+- **Border radius must come from tokens only** — use `--radius-*` values; do not hard-code corner radii.
+- **Avoid mixing sharp + rounded elements in same section** — pick a visual language per section and apply consistently.
+- **Icons must use consistent stroke width** — prefer a single stroke size (e.g., 1.5/2px) across UI icons.
+- **Shadows must follow elevation scale** — use `--shadow-sm|md|lg` tokens; do not add ad-hoc or random shadows.
+
+## Data Display
+
+- Use **tables** for structured comparisons (columns, sortable where appropriate).
+- Use **cards** for exploratory browsing and summary views.
+- Use **badges** for status indicators (e.g., `new`, `popular`, `electric`). Keep badge sizes and colors consistent via tokens.
+- Use **progress bars** for ratings or scores (e.g., performance score). Prefer accessible `aria-valuenow` and textual fallbacks.
+
+## Navigation Guidelines
+
+- Primary actions must be visible without scrolling.
+- Navigation depth should not exceed 3 levels.
+- Highlight active state clearly (use tokens for active color and strong focus).
+- Use breadcrumbs for deep pages to provide context and a clear path back.
+
+## Agent Decision Priority
+
+When an automated agent (or contributor) modifies UI, follow this priority to keep the codebase consistent and minimal:
+
+1. Reuse existing component
+2. Extend with a variant
+3. Compose new structure from primitives
+4. Create a new component only if necessary
+
+If multiple options exist, choose the simplest solution that preserves consistency.
+
+## Design Philosophy
+
+The system prioritizes clarity, consistency, and composability. Every UI element should be predictable, reusable, and scalable. Avoid visual noise — prefer structured layouts and purposeful patterns over decorative complexity so the interface remains maintainable and accessible as the product grows.
+
+
+
