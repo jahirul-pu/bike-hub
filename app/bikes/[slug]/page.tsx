@@ -209,7 +209,7 @@ function evSegment(bike: Bike): string {
 function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategory[] {
   const launchYear = launchYearFromBike(bike);
   const motorPower = bike.motorPowerKw ?? 4;
-  const peakPower = Number((motorPower * 1.25).toFixed(1));
+  const peakPower = bike.peakPowerKw ?? Number((motorPower * 1.25).toFixed(1));
   const chargingHours = parseHours(bike.chargingTime0100) ?? 5;
   const charging80 = Number((chargingHours * 0.8).toFixed(1));
   const batteryKwh = batteryCapacityKwh(bike);
@@ -261,9 +261,11 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
     {
       title: "3. Battery",
       items: [
-        { label: "Battery Type (Lithium-ion / LFP / Lead-acid)", value: "Lithium-ion" },
-        { label: "Battery Capacity (kWh / Ah)", value: `${batteryKwh} kWh` },
-        { label: "Voltage (V)", value: "72V" },
+        { label: "Battery Type", value: bike.batteryType ?? "Lithium-ion" },
+        { label: "Battery Capacity (kWh)", value: `${batteryKwh} kWh` },
+        { label: "Battery Capacity (Ah)", value: bike.ampHours ? `${bike.ampHours} Ah` : "N/A" },
+        { label: "Voltage (V)", value: bike.voltageV ? `${bike.voltageV}V` : "72V" },
+        { label: "Battery Lifecycle", value: bike.batteryCycleLife ? `${bike.batteryCycleLife} (N.B: at 25°C ideal condition)` : "1000 Cycles (N.B: at 25°C ideal condition)" },
         { label: "Number of Batteries", value: batteryKwh >= 8 ? "2" : "1" },
         { label: "Removable Battery (Yes/No)", value: yesNo(bike.category === "Scooter") },
         { label: "Swappable Battery (Yes/No)", value: yesNo(bike.category === "Scooter" && bike.priceBdt < 500000) },
@@ -301,7 +303,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       items: [
         { label: "Controller Type", value: "FOC Controller" },
         { label: "Regenerative Braking (Yes/No)", value: yesNo(true) },
-        { label: "Riding Modes", value: "Eco, Normal, Sport" },
+        { label: "Riding Modes", value: bike.ridingModes ?? "Eco, Normal, Sport" },
         { label: "Reverse Mode", value: yesNo(bike.category === "Scooter") },
         { label: "Smart BMS (Battery Management System)", value: yesNo(true) },
       ],
@@ -322,6 +324,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
         { label: "Wheelbase (mm)", value: `${bike.wheelbaseMm} mm` },
         { label: "Ground Clearance (mm)", value: `${bike.groundClearanceMm} mm` },
         { label: "Seat Height (mm)", value: `${bike.seatHeightMm} mm` },
+        { label: "Underseat Storage", value: bike.underseatStorage ?? (bike.category === "Scooter" ? "20L" : "N/A") },
         { label: "Kerb Weight (kg)", value: `${bike.weightKg} kg` },
         { label: "Payload Capacity (kg)", value: bike.category === "Scooter" ? "150 kg" : "180 kg" },
       ],
@@ -329,18 +332,18 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
     {
       title: "9. Suspension",
       items: [
-        { label: "Front Suspension (Telescopic / USD)", value: bike.category === "Sport" ? "USD" : "Telescopic" },
+        { label: "Front Suspension", value: bike.frontSuspension ?? (bike.category === "Sport" ? "USD" : "Telescopic") },
         {
-          label: "Rear Suspension (Mono-shock / Dual shock)",
-          value: bike.category === "Scooter" ? "Dual shock" : "Mono-shock",
+          label: "Rear Suspension",
+          value: bike.rearSuspension ?? (bike.category === "Scooter" ? "Dual shock" : "Mono-shock"),
         },
       ],
     },
     {
       title: "10. Brakes & Wheels",
       items: [
-        { label: "Front Brake (Disc/Drum)", value: bike.topSpeedKph >= 95 ? "Disc" : "Drum" },
-        { label: "Rear Brake", value: bike.topSpeedKph >= 120 ? "Disc" : "Drum" },
+        { label: "Front Brake", value: bike.frontBrake ?? (bike.topSpeedKph >= 95 ? "Disc" : "Drum") },
+        { label: "Rear Brake", value: bike.rearBrake ?? (bike.topSpeedKph >= 120 ? "Disc" : "Drum") },
         { label: "ABS / CBS", value: abs === "None" ? "CBS" : abs },
         { label: "Tyre Type (Tubeless / Tube)", value: "Tubeless" },
         { label: "Front Tyre Size", value: bike.frontTyre },
@@ -353,7 +356,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       items: [
         { label: "Digital Display (LCD / TFT)", value: bike.priceBdt >= 500000 ? "TFT" : "LCD" },
         { label: "Bluetooth Connectivity", value: yesNo(true) },
-        { label: "Mobile App Integration", value: yesNo(true) },
+        { label: "Mobile App Integration", value: bike.appSupport ? `Yes (${bike.appSupport})` : yesNo(true) },
         { label: "GPS Tracking", value: yesNo(bike.priceBdt >= 350000) },
         { label: "Navigation", value: yesNo(bike.priceBdt >= 330000) },
         { label: "Geo-fencing", value: yesNo(bike.priceBdt >= 330000) },
@@ -386,51 +389,14 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
       ],
     },
     {
-      title: "14. Warranty & Service",
-      items: [
-        { label: "Battery Warranty (Years / km)", value: "3 years / 30,000 km" },
-        { label: "Motor Warranty", value: "3 years" },
-        { label: "Vehicle Warranty", value: "2 years / 24,000 km" },
-        { label: "Service Interval", value: "Every 6 months" },
-      ],
-    },
-    {
-      title: "15. Cost & Ownership",
+      title: "14. Cost & Ownership",
       items: [
         { label: "Cost per Charge (BDT)", value: `BDT ${costPerCharge}` },
         { label: "Cost per km", value: `BDT ${costPerKm}` },
         { label: "Estimated Monthly Cost", value: formatBdt(monthlyCost) },
         { label: "Maintenance Cost", value: `${formatBdt(annualCost)} per year` },
       ],
-    },
-    {
-      title: "16. Colors & Variants",
-      items: [
-        { label: "Available Colors", value: colorPalette(bike) },
-        { label: "Variant Differences", value: variantDifferences(bike) },
-      ],
-    },
-    {
-      title: "17. Media",
-      items: [
-        { label: "Images", value: "8 high-resolution images" },
-        { label: "Videos", value: "2 walkaround videos" },
-        { label: "360° View", value: yesNo(bike.priceBdt >= 350000) },
-      ],
-    },
-    {
-      title: "18. Comparisons & Market",
-      items: [
-        {
-          label: "Competitors",
-          value:
-            similarBikes.length === 0
-              ? "No similar bikes found"
-              : similarBikes.map((candidate) => `${candidate.brand} ${candidate.model}`).join(" | "),
-        },
-        { label: "Segment (Budget / Premium / Performance EV)", value: evSegment(bike) },
-      ],
-    },
+    }
   ];
 }
 
@@ -609,22 +575,6 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
       ],
     },
     {
-      title: "12. Warranty & Service",
-      items: [
-        { label: "Warranty (Years / km)", value: "2 years / 20,000 km" },
-        { label: "Free Service Schedule", value: "500 km, 3,000 km, 6,000 km" },
-        { label: "Service Interval", value: "Every 3,000 km" },
-      ],
-    },
-    {
-      title: "13. Colors & Variants",
-      items: [
-        { label: "Available Colors", value: colorPalette(bike) },
-        { label: "Special Editions", value: specialEdition(bike) },
-        { label: "Variant Differences", value: variantDifferences(bike) },
-      ],
-    },
-    {
       title: "14. Pros & Cons (Review Layer)",
       items: [
         {
@@ -652,29 +602,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
         { label: "Maintenance Cost", value: `${formatBdt(annualMaintenance(bike))} per year` },
         { label: "Resale Value", value: `${formatBdt(resaleValue3Years(bike))} after 3 years` },
       ],
-    },
-    {
-      title: "17. Media",
-      items: [
-        { label: "Images", value: "10 high-resolution images" },
-        { label: "Videos", value: "2 walkaround videos" },
-        { label: "360° View", value: yesNo(bike.priceBdt >= 350000) },
-      ],
-    },
-    {
-      title: "18. Competitors",
-      items: [
-        {
-          label: "Similar Bikes",
-          value:
-            similarBikes.length === 0
-              ? "No similar bikes found"
-              : similarBikes.map((candidate) => `${candidate.brand} ${candidate.model}`).join(" | "),
-        },
-        { label: "Price Comparison", value: competitorPriceLine(bike, similarBikes) },
-        { label: "Spec Comparison", value: competitorSpecLine(bike, similarBikes) },
-      ],
-    },
+    }
   ];
 
   return categories;
@@ -771,6 +699,38 @@ export default async function BikeDetailsPage({
                   <div className="rounded-lg bg-slate-100 p-3">
                     <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
                     <p className="text-base font-semibold text-slate-900">{bike.topSpeedKph} km/h</p>
+                  </div>
+                </div>
+
+                {/* Warranty & Service */}
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Warranty & Service</p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {bike.powertrain === "EV" ? "Battery Warranty" : "Vehicle Warranty"}
+                      </p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {bike.powertrain === "EV" ? "Motor Warranty" : "Free Services"}
+                      </p>
+                      <p className="text-sm font-medium text-slate-900">
+                        {bike.powertrain === "EV" ? "3 years" : "500 / 3k / 6k km"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Color & Variants */}
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Color & Variants</p>
+                  <div className="mt-2">
+                    <p className="text-[11px] uppercase tracking-wide text-slate-400">Available Colors</p>
+                    <p className="text-sm font-medium text-slate-900">{colorPalette(bike)}</p>
                   </div>
                 </div>
               </div>

@@ -277,6 +277,7 @@ export const bikes: Bike[] = [
     frontTyre: "90/80-12",
     rearTyre: "100/80-10",
     summary: "The Yadea GT60 is positioned as a high-performance, compact electric commuter, specifically designed with a focus on durability (the \"GT\" line DNA) and modern tech features like keyless entry.",
+    images: ["/bikes/product_image_gt_60693555b22ae5f-1776073320057.webp"],
     motorPowerKw: 1.5,
     peakPowerKw: 2.5,
     rangeKm: 120,

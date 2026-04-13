@@ -12,12 +12,20 @@ function parseFormFields(formData: FormData) {
     return isNaN(v) ? undefined : v;
   };
 
+  // Images
+  let images: string[] = [];
+  try {
+    const imagesRaw = formData.get('images') as string;
+    if (imagesRaw) images = JSON.parse(imagesRaw);
+  } catch { /* ignore */ }
+
   return {
     brand: formData.get('brand') as string,
     model: formData.get('model') as string,
     category: formData.get('category') as string,
     powertrain: formData.get('powertrain') as string,
     summary: formData.get('summary') as string,
+    images,
     priceBdt: num('priceBdt') ?? 0,
     topSpeedKph: num('topSpeedKph') ?? 0,
     torqueNm: num('torqueNm') ?? 0,
@@ -87,6 +95,12 @@ function buildBikeEntryString(slug: string, f: ReturnType<typeof parseFormFields
     `    rearTyre: "${f.rearTyre}",`,
     `    summary: "${f.summary.replace(/"/g, '\\"').replace(/\n/g, ' ')}",`,
   ];
+
+  // Images
+  if (f.images && f.images.length > 0) {
+    const imgArr = f.images.map((img: string) => `"${img}"`).join(', ');
+    lines.push(`    images: [${imgArr}],`);
+  }
 
   // ICE fields
   if (f.powertrain === 'ICE') {
