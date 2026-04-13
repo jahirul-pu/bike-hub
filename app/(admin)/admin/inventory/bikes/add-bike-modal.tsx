@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
-import { ExternalLink, Pencil, Plus } from 'lucide-react';
+import { ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Bike } from '@/lib/bikes-data';
 import {
   Dialog,
@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { createBikeCatalogEntry, updateBikeCatalogEntry } from './actions';
+import { createBikeCatalogEntry, deleteBikeCatalogEntry, updateBikeCatalogEntry } from './actions';
 
 function Field({
   label,
@@ -387,5 +387,37 @@ export function EditBikeModal({ bike }: { bike: Bike }) {
         <BikeForm bike={bike} onSubmit={handleUpdate} loading={loading} submitLabel="Save Changes" />
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function DeleteBikeButton({ bike }: { bike: Bike }) {
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    const confirmed = window.confirm(`Delete ${bike.brand} ${bike.model} from the bike catalog?`);
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await deleteBikeCatalogEntry(bike.slug);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to delete bike');
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={deleting}
+      onClick={handleDelete}
+      className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+      title="Delete"
+    >
+      <Trash2 size={15} />
+    </button>
   );
 }

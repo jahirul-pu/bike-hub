@@ -181,3 +181,40 @@ export async function updateBikeCatalogEntry(formData: FormData) {
   revalidatePath('/admin/inventory/bikes');
   revalidatePath('/');
 }
+
+export async function deleteBikeCatalogEntry(slug: string) {
+  if (!slug) {
+    throw new Error('Slug is required.');
+  }
+
+  const bikesDataPath = getBikesDataPath();
+  let content = readFileSync(bikesDataPath, 'utf-8');
+
+  const slugLine = `slug: "${slug}"`;
+  const slugIndex = content.indexOf(slugLine);
+  if (slugIndex === -1) {
+    throw new Error(`Could not find bike with slug "${slug}" in bikes-data.ts`);
+  }
+
+  let blockStart = content.lastIndexOf('\n  {', slugIndex);
+  if (blockStart === -1) {
+    blockStart = content.lastIndexOf('  {', slugIndex);
+  } else {
+    blockStart += 1;
+  }
+
+  let blockEnd = content.indexOf('\n  },', slugIndex);
+  if (blockEnd === -1) {
+    throw new Error('Could not find closing bracket for bike entry');
+  }
+  blockEnd += '\n  },'.length;
+
+  let nextContent = `${content.slice(0, blockStart)}${content.slice(blockEnd)}`;
+  nextContent = nextContent.replace(/\n{3,}/g, '\n\n');
+  writeFileSync(bikesDataPath, nextContent, 'utf-8');
+
+  revalidatePath('/bikes');
+  revalidatePath(`/bikes/${slug}`);
+  revalidatePath('/admin/inventory/bikes');
+  revalidatePath('/');
+}

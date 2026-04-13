@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { bikes } from '@/lib/bikes-data';
-import { AddBikeModal, EditBikeModal } from './add-bike-modal';
+import { AddBikeModal, DeleteBikeButton, EditBikeModal } from './add-bike-modal';
 
 export default function BikeCatalogPage() {
   return (
@@ -72,7 +72,10 @@ export default function BikeCatalogPage() {
                   </Link>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <EditBikeModal bike={bike} />
+                  <div className="flex justify-end gap-2">
+                    <EditBikeModal bike={bike} />
+                    <DeleteBikeButton bike={bike} />
+                  </div>
                 </td>
               </tr>
             ))}
