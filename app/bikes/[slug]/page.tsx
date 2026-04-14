@@ -63,9 +63,7 @@ function bikeTypeLabel(bike: Bike): string {
   return bike.category === "Scooter" ? "Scooter" : `${bike.category} Motorcycle`;
 }
 
-function onRoadPrice(price: number) {
-  return Math.round(price * 1.12);
-}
+
 
 function geometryByCategory(category: Bike["category"]) {
   const map: Record<Bike["category"], { length: number; width: number; height: number }> = {
@@ -248,8 +246,6 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
           value: bike.category === "Scooter" ? "Electric Scooter" : "Electric Bike",
         },
         { label: "Launch Year", value: String(launchYear) },
-        { label: "Status (Available / Upcoming / Discontinued)", value: "Available" },
-        { label: "Price (BDT)", value: formatBdt(bike.priceBdt) },
       ],
     },
     {
@@ -396,8 +392,6 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
 
 function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategory[] {
   const launchYear = launchYearFromBike(bike);
-  const showroom = bike.priceBdt;
-  const onRoad = onRoadPrice(bike.priceBdt);
   const displacement = bike.displacementCc ?? 125;
   const geometry = geometryByCategory(bike.category);
   const gears = gearCount(bike);
@@ -412,12 +406,6 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
         { label: "Variant / Trim", value: "Standard" },
         { label: "Bike Type", value: bikeTypeLabel(bike) },
         { label: "Launch Year", value: String(launchYear) },
-        { label: "Status", value: "Available" },
-        { label: "Price (BDT)", value: formatBdt(bike.priceBdt) },
-        {
-          label: "Showroom Price vs On-road Price",
-          value: `${formatBdt(showroom)} vs ${formatBdt(onRoad)}`,
-        },
       ],
     },
     {
