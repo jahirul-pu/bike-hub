@@ -188,22 +188,7 @@ function variantDifferences(bike: Bike): string {
   return "Standard vs ABS: braking package and console upgrades";
 }
 
-function ratings(bike: Bike) {
-  const user = Number((4 + (bike.topSpeedKph % 11) / 20).toFixed(1));
-  const expert = Number((4.1 + (bike.priceBdt % 7) / 20).toFixed(1));
-  const reviews = 80 + Math.round(bike.priceBdt / 12000);
-  return { user, expert, reviews };
-}
 
-function annualMaintenance(bike: Bike): number {
-  if (bike.powertrain === "EV") return 8000 + Math.round((bike.motorPowerKw ?? 4) * 500);
-  return 12000 + Math.round((bike.displacementCc ?? 125) * 20);
-}
-
-function resaleValue3Years(bike: Bike): number {
-  const multiplier = bike.powertrain === "EV" ? 0.56 : 0.62;
-  return Math.round(bike.priceBdt * multiplier);
-}
 
 function competitorPriceLine(base: Bike, candidates: Bike[]) {
   if (candidates.length === 0) return "No close competitors available";
@@ -249,10 +234,6 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
   const normalRange = Math.round(certifiedRange * 0.9);
   const sportRange = Math.round(certifiedRange * 0.72);
   const energyUse = Math.round((batteryKwh * 1000) / Math.max(certifiedRange, 1));
-  const annualCost = annualMaintenance(bike);
-  const costPerCharge = Number((batteryKwh * 8).toFixed(1));
-  const costPerKm = Number((costPerCharge / Math.max(realWorldRange, 1)).toFixed(2));
-  const monthlyCost = Math.round(costPerKm * 600 + annualCost / 12);
   const abs = absType(bike);
 
   return [
@@ -409,15 +390,6 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
         },
         { label: "Water Resistance Rating (IP67 etc.)", value: bike.ipRating ?? "IP67" },
       ],
-    },
-    {
-      title: "13. Cost & Ownership",
-      items: [
-        { label: "Cost per Charge (BDT)", value: `BDT ${costPerCharge}` },
-        { label: "Cost per km", value: `BDT ${costPerKm}` },
-        { label: "Estimated Monthly Cost", value: formatBdt(monthlyCost) },
-        { label: "Maintenance Cost", value: `${formatBdt(annualCost)} per year` },
-      ],
     }
   ];
 }
@@ -429,7 +401,6 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
   const displacement = bike.displacementCc ?? 125;
   const geometry = geometryByCategory(bike.category);
   const gears = gearCount(bike);
-  const rating = ratings(bike);
   const abs = absType(bike);
 
   const categories: SpecCategory[] = [
@@ -584,35 +555,6 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
         { label: "Engine Kill Switch", value: bike.engineKillSwitch ?? yesNo(bike.category !== "Scooter") },
         { label: "Side Stand Engine Cut-off", value: bike.sideStandCutOff ?? yesNo(bike.category !== "Scooter") },
         { label: "Anti-theft Alarm", value: bike.securityFeatures ?? yesNo(false) },
-      ],
-    },
-    {
-      title: "11. Pros & Cons (Review Layer)",
-      items: [
-        {
-          label: "Pros",
-          value: "Strong highway stability, predictable handling, service reach",
-        },
-        {
-          label: "Cons",
-          value: "Higher fuel dependency, regular engine maintenance",
-        },
-      ],
-    },
-    {
-      title: "12. Ratings & Reviews",
-      items: [
-        { label: "User Rating", value: `${rating.user} / 5` },
-        { label: "Expert Rating", value: `${rating.expert} / 5` },
-        { label: "Review Count", value: `${rating.reviews}` },
-      ],
-    },
-    {
-      title: "13. Ownership & Cost",
-      items: [
-        { label: "Insurance Cost (estimated)", value: formatBdt(Math.round(bike.priceBdt * 0.03)) },
-        { label: "Maintenance Cost", value: `${formatBdt(annualMaintenance(bike))} per year` },
-        { label: "Resale Value", value: `${formatBdt(resaleValue3Years(bike))} after 3 years` },
       ],
     }
   ];
