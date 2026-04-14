@@ -186,7 +186,18 @@ function BikeForm({
               <input type="number" step="0.1" name="displacementCc" defaultValue={numberValue(bike?.displacementCc)} className={inputClass} />
             </Field>
             <Field label="Engine Type">
-              <input type="text" name="engineType" defaultValue={textValue(bike?.engineType)} placeholder="e.g. Single-cylinder" className={inputClass} />
+              <select name="engineType" defaultValue={bike?.engineType ?? 'SOHC'} className={inputClass}>
+                <option value="SOHC">SOHC</option>
+                <option value="DOHC">DOHC</option>
+              </select>
+            </Field>
+            <Field label="No. of Cylinders">
+              <select name="noOfCylinders" defaultValue={bike?.noOfCylinders ?? 'Single Cylinder'} className={inputClass}>
+                <option value="Single Cylinder">Single Cylinder</option>
+                <option value="Dual Cylinder">Dual Cylinder</option>
+                <option value="Three Cylinder">Three Cylinder</option>
+                <option value="Four Cylinder">Four Cylinder</option>
+              </select>
             </Field>
             <Field label="Max Power (HP / PS @ RPM)">
               <input type="text" name="maxPower" defaultValue={textValue(bike?.maxPower)} placeholder="e.g. 13.2 HP @ 8,000 RPM" className={inputClass} />

@@ -411,7 +411,8 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
     {
       title: "2. Engine & Performance",
       items: [
-        { label: "Engine Type", value: bike.engineType ?? engineType(displacement) },
+        { label: "Engine Type", value: bike.engineType ?? "SOHC" },
+        { label: "No. of Cylinders", value: bike.noOfCylinders ?? "Single Cylinder" },
         { label: "Displacement (cc)", value: `${displacement} cc` },
         {
           label: "Max Power (HP / PS @ RPM)",

@@ -87,6 +87,7 @@ export type Bike = {
 
   // --- Engine extras (ICE) ---
   engineType?: string;
+  noOfCylinders?: string;
   maxPower?: string;
   maxTorque?: string;
   coolingSystem?: string;
@@ -123,9 +124,11 @@ export const bikes: Bike[] = [
     finalDrive: "Chain",
     fuelType: "Petrol",
     frameType: "USD",
+    engineType: "SOHC",
+    noOfCylinders: "Single Cylinder",
     maxPower: "18.9 HP @ 10000 RPM",
-    coolingSystem: "Liquid Cooled",
-    fuelSystem: "FI",
+    coolingSystem: "Air Cooled",
+    fuelSystem: "Fuel Injected",
     frontBrake: "Disc 220 mm",
     rearBrake: "Disc 220 mm",
     absType: "Dual Channel",

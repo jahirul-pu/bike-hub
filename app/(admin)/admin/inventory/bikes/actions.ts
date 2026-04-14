@@ -98,6 +98,7 @@ function parseFormFields(formData: FormData) {
     reserveFuelCapacity: str('reserveFuelCapacity'),
     // Engine extras (ICE)
     engineType: str('engineType'),
+    noOfCylinders: str('noOfCylinders'),
     maxPower: str('maxPower'),
     maxTorque: str('maxTorque'),
     coolingSystem: str('coolingSystem'),
@@ -152,6 +153,7 @@ function buildBikeEntryString(slug: string, fields: ReturnType<typeof parseFormF
     if (fields.reserveFuelCapacity) lines.push(`    reserveFuelCapacity: "${fields.reserveFuelCapacity}",`);
     if (fields.frameType) lines.push(`    frameType: "${fields.frameType}",`);
     if (fields.engineType) lines.push(`    engineType: "${fields.engineType.replace(/"/g, '\\"')}",`);
+    if (fields.noOfCylinders) lines.push(`    noOfCylinders: "${fields.noOfCylinders.replace(/"/g, '\\"')}",`);
     if (fields.maxPower) lines.push(`    maxPower: "${fields.maxPower.replace(/"/g, '\\"')}",`);
     if (fields.maxTorque) lines.push(`    maxTorque: "${fields.maxTorque.replace(/"/g, '\\"')}",`);
     if (fields.coolingSystem) lines.push(`    coolingSystem: "${fields.coolingSystem.replace(/"/g, '\\"')}",`);
