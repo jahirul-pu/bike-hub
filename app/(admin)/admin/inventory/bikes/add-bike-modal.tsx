@@ -195,7 +195,11 @@ function BikeForm({
               <input type="text" name="maxTorque" defaultValue={textValue(bike?.maxTorque)} placeholder="e.g. 14.2 Nm @ 6,500 RPM" className={inputClass} />
             </Field>
             <Field label="Cooling System">
-              <input type="text" name="coolingSystem" defaultValue={textValue(bike?.coolingSystem)} placeholder="e.g. Air-cooled" className={inputClass} />
+              <select name="coolingSystem" defaultValue={bike?.coolingSystem ?? 'Air Cooled'} className={inputClass}>
+                <option value="Air Cooled">Air Cooled</option>
+                <option value="Liquid Cooled">Liquid Cooled</option>
+                <option value="Oil Cooled">Oil Cooled</option>
+              </select>
             </Field>
             <Field label="Fuel System">
               <input type="text" name="fuelSystem" defaultValue={textValue(bike?.fuelSystem)} placeholder="e.g. Fuel Injection" className={inputClass} />
