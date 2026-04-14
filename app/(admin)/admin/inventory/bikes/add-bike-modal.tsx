@@ -202,7 +202,10 @@ function BikeForm({
               </select>
             </Field>
             <Field label="Fuel System">
-              <input type="text" name="fuelSystem" defaultValue={textValue(bike?.fuelSystem)} placeholder="e.g. Fuel Injection" className={inputClass} />
+              <select name="fuelSystem" defaultValue={bike?.fuelSystem ?? 'Fuel Injected'} className={inputClass}>
+                <option value="Fuel Injected">Fuel Injected</option>
+                <option value="Carburator">Carburator</option>
+              </select>
             </Field>
             <Field label="Compression Ratio">
               <input type="text" name="compressionRatio" defaultValue={textValue(bike?.compressionRatio)} placeholder="e.g. 11.6:1" className={inputClass} />
