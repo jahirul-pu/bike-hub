@@ -218,7 +218,7 @@ function evSegment(bike: Bike): string {
 }
 
 function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategory[] {
-  const launchYear = launchYearFromBike(bike);
+  const launchYear = bike.launchYear ?? launchYearFromBike(bike);
   const motorPower = bike.motorPowerKw ?? 4;
   const peakPower = bike.peakPowerKw ?? Number((motorPower * 1.25).toFixed(1));
   const chargingHours = parseHours(bike.chargingTime0100) ?? 5;
@@ -391,7 +391,7 @@ function completeEvSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategor
 }
 
 function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCategory[] {
-  const launchYear = launchYearFromBike(bike);
+  const launchYear = bike.launchYear ?? launchYearFromBike(bike);
   const displacement = bike.displacementCc ?? 125;
   const geometry = geometryByCategory(bike.category);
   const gears = gearCount(bike);

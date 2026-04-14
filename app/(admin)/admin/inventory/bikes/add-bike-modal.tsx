@@ -147,6 +147,9 @@ function BikeForm({
         <Field label="Price (BDT)">
           <input type="number" required name="priceBdt" defaultValue={numberValue(bike?.priceBdt)} className={inputClass} />
         </Field>
+        <Field label="Launch Year">
+          <input type="number" name="launchYear" defaultValue={numberValue(bike?.launchYear)} placeholder="e.g. 2024" className={inputClass} />
+        </Field>
         <Field label="Summary" span={3}>
           <textarea
             name="summary"

@@ -29,6 +29,7 @@ function parseFormFields(formData: FormData) {
     powertrain: formData.get('powertrain') as string,
     summary: formData.get('summary') as string,
     colors,
+    launchYear: num('launchYear'),
     priceBdt: num('priceBdt') ?? 0,
     topSpeedKph: num('topSpeedKph') ?? 0,
     torqueNm: num('torqueNm') ?? 0,
@@ -117,6 +118,8 @@ function buildBikeEntryString(slug: string, fields: ReturnType<typeof parseFormF
     `    rearTyre: "${fields.rearTyre}",`,
     `    summary: "${fields.summary.replace(/"/g, '\\"').replace(/\n/g, ' ')}",`,
   ];
+
+  if (fields.launchYear) lines.push(`    launchYear: ${fields.launchYear},`);
 
   if (fields.images.length > 0) {
     const imgArr = fields.images.map((url) => `"${url}"`).join(', ');
