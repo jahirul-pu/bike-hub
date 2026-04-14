@@ -17,12 +17,18 @@ function parseFormFields(formData: FormData) {
     if (raw) images = JSON.parse(raw);
   } catch { /* ignore */ }
 
+  const colors = ((formData.get('colors') as string) || '')
+    .split(',')
+    .map((color) => color.trim())
+    .filter(Boolean);
+
   return {
     brand: formData.get('brand') as string,
     model: formData.get('model') as string,
     category: formData.get('category') as string,
     powertrain: formData.get('powertrain') as string,
     summary: formData.get('summary') as string,
+    colors,
     priceBdt: num('priceBdt') ?? 0,
     topSpeedKph: num('topSpeedKph') ?? 0,
     torqueNm: num('torqueNm') ?? 0,
@@ -115,6 +121,11 @@ function buildBikeEntryString(slug: string, fields: ReturnType<typeof parseFormF
   if (fields.images.length > 0) {
     const imgArr = fields.images.map((url) => `"${url}"`).join(', ');
     lines.push(`    images: [${imgArr}],`);
+  }
+
+  if (fields.colors.length > 0) {
+    const colorArr = fields.colors.map((color) => `"${color.replace(/"/g, '\\"')}"`).join(', ');
+    lines.push(`    colors: [${colorArr}],`);
   }
 
   // ICE-only fields

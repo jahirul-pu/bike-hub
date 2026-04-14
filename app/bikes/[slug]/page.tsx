@@ -140,6 +140,10 @@ function absType(bike: Bike): string {
 }
 
 function colorPalette(bike: Bike): string {
+  if (bike.colors && bike.colors.length > 0) {
+    return bike.colors.join(", ");
+  }
+
   if (bike.category === "Sport") return "Racing Blue, Matte Black, Silver";
   if (bike.category === "Adventure") return "Forest Green, Desert Sand, Black";
   if (bike.category === "Scooter") return "Pearl White, Red, Cyan, Gray";
@@ -674,6 +678,16 @@ export default async function BikeDetailsPage({
       Icon: bike.powertrain === "EV" ? BatteryCharging : Fuel,
     },
   ];
+  const warrantyItems = [
+    {
+      label: bike.powertrain === "EV" ? "Battery" : "Warranty",
+      value: bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km",
+    },
+    {
+      label: bike.powertrain === "EV" ? "Motor" : "Service",
+      value: bike.powertrain === "EV" ? "3 years" : "500 / 3k / 6k km",
+    },
+  ];
 
   // --- PAGE LAYOUT ---
   return (
@@ -743,43 +757,30 @@ export default async function BikeDetailsPage({
                 </div>
                 <p className="max-w-3xl text-slate-600">{bike.summary}</p>
 
-                <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Colors</p>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {colors.map((color) => (
-                        <div key={color.name} className="flex items-center gap-2 rounded-full bg-white px-2.5 py-1.5 shadow-sm">
-                          <span
-                            className="h-4 w-4 rounded-full border border-slate-200"
-                            style={{ backgroundColor: color.hex }}
-                            aria-hidden="true"
-                          />
-                          <span className="text-sm font-medium text-slate-700">{color.name}</span>
-                        </div>
-                      ))}
-                    </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Colors</p>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    {colors.map((color) => (
+                      <div key={color.name} className="flex items-center gap-2 rounded-full bg-white px-2.5 py-1.5 shadow-sm">
+                        <span
+                          className="h-4 w-4 rounded-full border border-slate-200"
+                          style={{ backgroundColor: color.hex }}
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm font-medium text-slate-700">{color.name}</span>
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Warranty</p>
-                    <div className="mt-3 grid gap-2">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-wide text-slate-400">
-                          {bike.powertrain === "EV" ? "Battery Warranty" : "Vehicle Warranty"}
-                        </p>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km"}
-                        </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-200 pt-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Warranty</p>
+                    {warrantyItems.map((item) => (
+                      <div key={item.label} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                          {item.label}
+                        </span>
+                        <span className="font-semibold text-slate-900">{item.value}</span>
                       </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-wide text-slate-400">
-                          {bike.powertrain === "EV" ? "Motor Warranty" : "Free Services"}
-                        </p>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {bike.powertrain === "EV" ? "3 years" : "500 / 3k / 6k km"}
-                        </p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>

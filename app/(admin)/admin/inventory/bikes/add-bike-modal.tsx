@@ -156,6 +156,14 @@ function BikeForm({
             className={`${inputClass} h-16`}
           />
         </Field>
+        <Field label="Colors (comma separated)" span={3}>
+          <input
+            name="colors"
+            defaultValue={bike?.colors?.join(', ')}
+            placeholder="Pearl White, Red, Cyan, Gray"
+            className={inputClass}
+          />
+        </Field>
 
         {/* ═══════════════════════════════════════════════════
             2. ENGINE / MOTOR & PERFORMANCE
