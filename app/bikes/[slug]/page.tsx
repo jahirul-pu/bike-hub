@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight, Search, ChevronLeft, ArrowRight } from "lucide-react";
+import { ChevronRight, Search, ChevronLeft, ArrowRight, Zap, Gauge, BatteryCharging, Fuel } from "lucide-react";
 import Image from "next/image";
 import { BikeGallery } from "@/components/site/bike-gallery";
 import { Badge } from "@/components/ui/badge";
@@ -661,13 +661,17 @@ export default async function BikeDetailsPage({
     ? "Dedicated EV sheet covering motor, battery, charging, smart tech, and EV market positioning."
     : "Dedicated ICE sheet covering engine, fuel efficiency, transmission, maintenance, and competitor specs.";
   const colors = swatchPalette(colorPalette(bike));
-  const keySpecs = [
-    { label: "Type", value: bikeTypeLabel(bike) },
-    { label: bike.powertrain === "ICE" ? "Engine" : "Motor", value: headlineMetric(bike) },
-    { label: "Top Speed", value: `${bike.topSpeedKph} km/h` },
+  const primarySpecs = [
+    {
+      label: bike.powertrain === "ICE" ? "Engine" : "Motor",
+      value: headlineMetric(bike),
+      Icon: Zap,
+    },
+    { label: "Top Speed", value: `${bike.topSpeedKph} km/h`, Icon: Gauge },
     {
       label: bike.powertrain === "ICE" ? "Mileage" : "Range",
       value: bike.powertrain === "ICE" ? `${bike.mileageKmpl} km/l` : `${bike.rangeKm} km`,
+      Icon: bike.powertrain === "EV" ? BatteryCharging : Fuel,
     },
   ];
 
@@ -710,18 +714,32 @@ export default async function BikeDetailsPage({
                 >
                   Buy Parts
                 </Link>
-                <div className="flex flex-wrap gap-2">
-                  {keySpecs.map((spec) => (
-                    <div
-                      key={spec.label}
-                      className="min-w-[8.5rem] rounded-full border border-slate-200 bg-slate-50 px-3 py-2"
-                    >
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                        {spec.label}
-                      </p>
-                      <p className="mt-0.5 text-sm font-semibold text-slate-900">{spec.value}</p>
-                    </div>
-                  ))}
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="flex flex-wrap divide-y divide-slate-200 sm:divide-x sm:divide-y-0">
+                    {primarySpecs.map((spec, index) => {
+                      const Icon = spec.Icon;
+
+                      return (
+                        <div
+                          key={spec.label}
+                          className={cn(
+                            "flex min-w-[10rem] flex-1 items-center gap-3 px-4 py-3",
+                            index === 1 && "sm:min-w-[9.5rem]"
+                          )}
+                        >
+                          <div className="rounded-full bg-white p-2 text-slate-700 shadow-sm">
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                              {spec.label}
+                            </p>
+                            <p className="text-sm font-semibold text-slate-900">{spec.value}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
                 <p className="max-w-3xl text-slate-600">{bike.summary}</p>
 
