@@ -56,6 +56,32 @@ export type Bike = {
   otaUpdates?: string;
   tractionControl?: string;
   cruiseControl?: string;
+
+  // --- Safety ---
+  cbs?: string;
+  engineKillSwitch?: string;
+  sideStandCutOff?: string;
+  geoFencing?: string;
+  fallSensor?: string;
+
+  // --- Lighting extras ---
+  drl?: string;
+  tailLightType?: string;
+  turnSignalType?: string;
+
+  // --- Brakes & Wheels extras ---
+  wheelType?: string;
+  tyreType?: string;
+  quickShifter?: string;
+
+  // --- Chassis extras (ICE) ---
+  frameType?: string;
+  clutchType?: string;
+  finalDrive?: string;
+
+  // --- Fuel extras (ICE) ---
+  fuelType?: string;
+  reserveFuelCapacity?: string;
 };
 
 export const bikes: Bike[] = [
@@ -63,14 +89,10 @@ export const bikes: Bike[] = [
     slug: "yamaha-r15-v4",
     brand: "Yamaha",
     model: "R15 V4",
-    category: "Sport",
-    powertrain: "ICE",
+    category: "Sport" as const,
+    powertrain: "ICE" as const,
     priceBdt: 650000,
-    displacementCc: 155,
     topSpeedKph: 145,
-    mileageKmpl: 42,
-    fuelTankLiters: 11,
-    gearbox: "6-speed",
     torqueNm: 14.2,
     weightKg: 142,
     seatHeightMm: 815,
@@ -79,6 +101,11 @@ export const bikes: Bike[] = [
     frontTyre: "100/80-17",
     rearTyre: "140/70-17",
     summary: "Track-inspired fairing, quick steering, and sharp cornering manners.",
+    images: ["https://imgd.aeplcdn.com/664x374/n/11u3ehb_1868367.jpg?q=80"],
+    displacementCc: 155,
+    mileageKmpl: 42,
+    fuelTankLiters: 11,
+    gearbox: "6-speed",
   },
   {
     slug: "bajaj-pulsar-n160",
@@ -186,28 +213,7 @@ export const bikes: Bike[] = [
     summary: "Lightweight urban scooter with quick pickup and efficient fuel economy.",
   },
 
-  {
-    slug: "revolt-rv400-brz",
-    brand: "Revolt",
-    model: "RV400 BRZ",
-    category: "Commuter",
-    powertrain: "EV",
-    priceBdt: 360000,
-    motorPowerKw: 5,
-    topSpeedKph: 85,
-    rangeKm: 150,
-    chargingTime0100: "4h 30m",
-    batteryCycleLife: "1,200 cycles",
-    ipRating: "IP65",
-    torqueNm: 45,
-    weightKg: 108,
-    seatHeightMm: 814,
-    wheelbaseMm: 1350,
-    groundClearanceMm: 215,
-    frontTyre: "90/80-17",
-    rearTyre: "120/80-17",
-    summary: "Urban electric motorcycle with removable battery and practical ergonomics.",
-  },
+
 
 
   {
@@ -226,7 +232,7 @@ export const bikes: Bike[] = [
     frontTyre: "90/80-12",
     rearTyre: "100/80-10",
     summary: "The Yadea GT60 is positioned as a high-performance, compact electric commuter, specifically designed with a focus on durability (the \"GT\" line DNA) and modern tech features like keyless entry.",
-    images: ["/bikes/product_image_gt_60693555b22ae5f-1776073320057.webp"],
+    images: ["/bikes/product_image_gt_60693555b22ae5f-1776073320057.webp", "https://webcms.yadea.et/uploads/1_35b21ec136.webp"],
     motorPowerKw: 1.5,
     peakPowerKw: 2.5,
     rangeKm: 120,
@@ -236,27 +242,39 @@ export const bikes: Bike[] = [
     chargingTime0100: "6–8 hours",
     batteryCycleLife: "800 – 1,000",
     ipRating: "IP67",
+    underseatStorage: "32L",
+    gpsTracking: "Yes",
+    keylessStart: "Yes",
+    otaUpdates: "Yes",
+    geoFencing: "No",
+    fallSensor: "No",
     lengthMm: 1952,
     widthMm: 718,
     heightMm: 1123,
-    underseatStorage: "32L",
     frontBrake: "Disk",
     rearBrake: "Disk",
     absType: "None",
+    wheelType: "Alloy",
+    tyreType: "Tubeless",
     frontSuspension: "Hydraulic Fork",
     rearSuspension: "Dual Shock Absorber",
-    ridingModes: "Eco, TTFR, Sports",
-    securityFeatures: "Geo-fencing",
-    appSupport: "Yes",
-    displayType: "TFT",
+    displayType: "LCD",
+    headlightType: "LED",
+    drl: "Yes",
+    tailLightType: "LED",
+    turnSignalType: "LED",
     bluetoothConnectivity: "Yes",
-    gpsTracking: "Yes",
     navigation: "No",
-    keylessStart: "Yes",
-    usbChargingPort: "Yes",
-    otaUpdates: "Yes",
-    tractionControl: "No",
+    ridingModes: "Eco, TTFAR, Sports, Turbo",
+    tractionControl: "Yes",
     cruiseControl: "Yes",
+    quickShifter: "No",
+    usbChargingPort: "Yes",
+    appSupport: "Yes",
+    securityFeatures: "Geo-fencing",
+    cbs: "No",
+    engineKillSwitch: "Yes",
+    sideStandCutOff: "Yes",
   },
 ];
 

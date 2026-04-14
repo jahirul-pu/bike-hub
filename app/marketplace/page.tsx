@@ -252,7 +252,6 @@ function UsedBikeCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-3 text-sm text-slate-700">
-        <p>{bike.summary}</p>
         <p className="font-semibold text-slate-900">{formatBdt(bike.priceBdt)}</p>
         <p className="text-xs uppercase tracking-wide text-slate-500">{headlineMetric(bike)}</p>
         <div className="flex gap-2">

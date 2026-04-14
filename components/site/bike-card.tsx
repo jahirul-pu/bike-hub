@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Gauge, Sparkles } from "lucide-react";
+import { ArrowRight, Bike as BikeIcon, Gauge, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,21 +11,41 @@ type BikeCardProps = {
 };
 
 export function BikeCard({ bike }: BikeCardProps) {
+  const hasImage = bike.images && bike.images.length > 0;
+
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="mb-3 flex items-center justify-between">
-          <Badge className="bg-slate-900 text-white hover:bg-slate-900">{bike.category}</Badge>
-          <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
+    <Card className="overflow-hidden border-slate-200 bg-white/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      {/* ─── Image / Placeholder ─── */}
+      <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50">
+        {hasImage ? (
+          <img
+            src={bike.images![0]}
+            alt={`${bike.brand} ${bike.model}`}
+            className="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-slate-300">
+            <BikeIcon className="h-12 w-12" />
+            <span className="text-xs font-medium uppercase tracking-widest text-slate-400">No Image</span>
+          </div>
+        )}
+        {/* Badges overlay */}
+        <div className="absolute left-3 top-3 flex gap-2">
+          <Badge className="bg-slate-900/80 text-white backdrop-blur-sm hover:bg-slate-900/80">{bike.category}</Badge>
+        </div>
+        <div className="absolute right-3 top-3">
+          <Badge variant="outline" className={cn(powertrainBadgeClass(bike.powertrain), "backdrop-blur-sm")}>
             {bike.powertrain}
           </Badge>
         </div>
+      </div>
+
+      <CardHeader className="pb-3 pt-4">
         <CardTitle className="font-heading text-3xl uppercase leading-none tracking-wide text-slate-900">
           {bike.brand} {bike.model}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-sm text-slate-600">{bike.summary}</p>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="rounded-lg bg-slate-100 p-2">
             <p className="text-xs uppercase tracking-wide text-slate-500">Price</p>

@@ -1,0 +1,35 @@
+
+> bike-hub@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.3 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.106:3000
+- Environments: .env.local
+✓ Ready in 617ms
+
+ GET /admin/inventory/bikes 200 in 918ms (next.js: 60ms, proxy.ts: 427ms, application-code: 430ms)
+ GET /bikes/yadea-gt60 200 in 1345ms (next.js: 877ms, generate-params: 742ms, application-code: 468ms)
+ POST /admin/inventory/bikes 200 in 163ms (next.js: 8ms, proxy.ts: 20ms, application-code: 135ms)
+  └─ ƒ updateBikeCatalogEntry({}) in 7ms app/(admin)/admin/inventory/bikes/actions.ts
+✓ Compiled in 794ms
+ GET /admin/inventory/bikes 200 in 556ms (next.js: 141ms, proxy.ts: 344ms, application-code: 71ms)
+ GET /bikes/yadea-gt60 200 in 491ms (next.js: 158ms, generate-params: 14ms, application-code: 334ms)
+ GET /admin/inventory/bikes 200 in 166ms (next.js: 8ms, proxy.ts: 19ms, application-code: 139ms)
+ GET /bikes/yadea-gt60 200 in 176ms (next.js: 12ms, generate-params: 35µs, application-code: 163ms)
+ GET /admin/inventory/bikes 200 in 206ms (next.js: 8ms, proxy.ts: 18ms, application-code: 179ms)
+ GET /bikes/yadea-gt60 200 in 220ms (next.js: 20ms, generate-params: 13ms, application-code: 200ms)
+ GET /admin/inventory/bikes 200 in 197ms (next.js: 9ms, proxy.ts: 18ms, application-code: 170ms)
+ GET /bikes/yadea-gt60 200 in 187ms (next.js: 7ms, generate-params: 59µs, application-code: 180ms)
+ GET /admin/inventory/bikes 200 in 96ms (next.js: 8ms, proxy.ts: 18ms, application-code: 71ms)
+ GET /admin/inventory/bikes 200 in 158ms (next.js: 6ms, proxy.ts: 100ms, application-code: 52ms)
+ GET /bikes/yadea-gt60 200 in 164ms (next.js: 5ms, generate-params: 40µs, application-code: 159ms)
+ GET /admin/inventory/bikes 200 in 171ms (next.js: 94ms, proxy.ts: 20ms, application-code: 57ms)
+ GET /bikes/yadea-gt60 200 in 170ms (next.js: 5ms, generate-params: 33µs, application-code: 166ms)
+ GET /admin/inventory/bikes 200 in 175ms (next.js: 8ms, proxy.ts: 19ms, application-code: 147ms)
+ GET /bikes/yadea-gt60 200 in 173ms (next.js: 17ms, generate-params: 11ms, application-code: 156ms)
+ GET /admin/inventory/bikes 200 in 158ms (next.js: 6ms, proxy.ts: 14ms, application-code: 138ms)
+ GET /bikes/yadea-gt60 200 in 166ms (next.js: 5ms, generate-params: 61µs, application-code: 161ms)
+ GET /admin/inventory/bikes 200 in 90ms (next.js: 7ms, proxy.ts: 15ms, application-code: 68ms)
+ GET /bikes/yadea-gt60 200 in 88ms (next.js: 6ms, generate-params: 43µs, application-code: 83ms)
+ GET /bikes/yadea-gt60 200 in 87ms (next.js: 5ms, generate-params: 26µs, application-code: 82ms)
