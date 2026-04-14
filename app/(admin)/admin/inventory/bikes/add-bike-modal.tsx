@@ -270,7 +270,7 @@ function BikeForm({
             <Field label="Fuel Type">
               <select name="fuelType" defaultValue={bike?.fuelType ?? 'Petrol'} className={inputClass}>
                 <option value="Petrol">Petrol</option>
-                <option value="Diesel">Diesel</option>
+                <option value="Octane">Octane</option>
               </select>
             </Field>
             <Field label="Mileage (km/l)">
