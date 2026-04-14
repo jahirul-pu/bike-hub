@@ -96,6 +96,15 @@ function parseFormFields(formData: FormData) {
     // Fuel extras (ICE)
     fuelType: str('fuelType'),
     reserveFuelCapacity: str('reserveFuelCapacity'),
+    // Engine extras (ICE)
+    engineType: str('engineType'),
+    maxPower: str('maxPower'),
+    maxTorque: str('maxTorque'),
+    coolingSystem: str('coolingSystem'),
+    fuelSystem: str('fuelSystem'),
+    compressionRatio: str('compressionRatio'),
+    boreStroke: str('boreStroke'),
+    emissionStandard: str('emissionStandard'),
   };
 }
 
@@ -142,6 +151,14 @@ function buildBikeEntryString(slug: string, fields: ReturnType<typeof parseFormF
     if (fields.fuelType) lines.push(`    fuelType: "${fields.fuelType}",`);
     if (fields.reserveFuelCapacity) lines.push(`    reserveFuelCapacity: "${fields.reserveFuelCapacity}",`);
     if (fields.frameType) lines.push(`    frameType: "${fields.frameType}",`);
+    if (fields.engineType) lines.push(`    engineType: "${fields.engineType.replace(/"/g, '\\"')}",`);
+    if (fields.maxPower) lines.push(`    maxPower: "${fields.maxPower.replace(/"/g, '\\"')}",`);
+    if (fields.maxTorque) lines.push(`    maxTorque: "${fields.maxTorque.replace(/"/g, '\\"')}",`);
+    if (fields.coolingSystem) lines.push(`    coolingSystem: "${fields.coolingSystem.replace(/"/g, '\\"')}",`);
+    if (fields.fuelSystem) lines.push(`    fuelSystem: "${fields.fuelSystem.replace(/"/g, '\\"')}",`);
+    if (fields.compressionRatio) lines.push(`    compressionRatio: "${fields.compressionRatio.replace(/"/g, '\\"')}",`);
+    if (fields.boreStroke) lines.push(`    boreStroke: "${fields.boreStroke.replace(/"/g, '\\"')}",`);
+    if (fields.emissionStandard) lines.push(`    emissionStandard: "${fields.emissionStandard.replace(/"/g, '\\"')}",`);
   }
 
   // EV-only fields

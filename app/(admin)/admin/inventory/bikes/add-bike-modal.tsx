@@ -185,6 +185,30 @@ function BikeForm({
             <Field label="Displacement (CC)">
               <input type="number" step="0.1" name="displacementCc" defaultValue={numberValue(bike?.displacementCc)} className={inputClass} />
             </Field>
+            <Field label="Engine Type">
+              <input type="text" name="engineType" defaultValue={textValue(bike?.engineType)} placeholder="e.g. Single-cylinder" className={inputClass} />
+            </Field>
+            <Field label="Max Power (HP / PS @ RPM)">
+              <input type="text" name="maxPower" defaultValue={textValue(bike?.maxPower)} placeholder="e.g. 13.2 HP @ 8,000 RPM" className={inputClass} />
+            </Field>
+            <Field label="Max Torque (Nm @ RPM)">
+              <input type="text" name="maxTorque" defaultValue={textValue(bike?.maxTorque)} placeholder="e.g. 14.2 Nm @ 6,500 RPM" className={inputClass} />
+            </Field>
+            <Field label="Cooling System">
+              <input type="text" name="coolingSystem" defaultValue={textValue(bike?.coolingSystem)} placeholder="e.g. Air-cooled" className={inputClass} />
+            </Field>
+            <Field label="Fuel System">
+              <input type="text" name="fuelSystem" defaultValue={textValue(bike?.fuelSystem)} placeholder="e.g. Fuel Injection" className={inputClass} />
+            </Field>
+            <Field label="Compression Ratio">
+              <input type="text" name="compressionRatio" defaultValue={textValue(bike?.compressionRatio)} placeholder="e.g. 11.6:1" className={inputClass} />
+            </Field>
+            <Field label="Bore x Stroke">
+              <input type="text" name="boreStroke" defaultValue={textValue(bike?.boreStroke)} placeholder="e.g. 57.3 mm x 58.7 mm" className={inputClass} />
+            </Field>
+            <Field label="Emission Standard">
+              <input type="text" name="emissionStandard" defaultValue={textValue(bike?.emissionStandard)} placeholder="e.g. BS6 / Euro 5" className={inputClass} />
+            </Field>
           </>
         ) : (
           <>

@@ -84,6 +84,16 @@ export type Bike = {
   // --- Fuel extras (ICE) ---
   fuelType?: string;
   reserveFuelCapacity?: string;
+
+  // --- Engine extras (ICE) ---
+  engineType?: string;
+  maxPower?: string;
+  maxTorque?: string;
+  coolingSystem?: string;
+  fuelSystem?: string;
+  compressionRatio?: string;
+  boreStroke?: string;
+  emissionStandard?: string;
 };
 
 export const bikes: Bike[] = [

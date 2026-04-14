@@ -411,18 +411,19 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
     {
       title: "2. Engine & Performance",
       items: [
-        { label: "Engine Type", value: engineType(displacement) },
+        { label: "Engine Type", value: bike.engineType ?? engineType(displacement) },
         { label: "Displacement (cc)", value: `${displacement} cc` },
         {
           label: "Max Power (HP / PS @ RPM)",
-          value: `${estimatedPowerFromCc(displacement)} HP @ ${displacement >= 300 ? "6,500" : "8,000"} RPM`,
+          value: bike.maxPower ?? `${estimatedPowerFromCc(displacement)} HP @ ${displacement >= 300 ? "6,500" : "8,000"} RPM`,
         },
-        { label: "Max Torque (Nm @ RPM)", value: `${bike.torqueNm} Nm @ ${displacement >= 300 ? "4,000" : "6,500"} RPM` },
-        { label: "Cooling System", value: coolingSystem(displacement) },
-        { label: "Fuel System", value: fuelSystem(displacement) },
-        { label: "Compression Ratio", value: compressionRatio(displacement) },
-        { label: "Bore x Stroke", value: boreStroke(displacement) },
-        { label: "Emission Standard", value: "BS6 / Euro 5" },
+        { label: "Max Torque (Nm @ RPM)", value: bike.maxTorque ?? `${bike.torqueNm} Nm @ ${displacement >= 300 ? "4,000" : "6,500"} RPM` },
+        { label: "Top Speed (km/h)", value: `${bike.topSpeedKph} km/h` },
+        { label: "Cooling System", value: bike.coolingSystem ?? coolingSystem(displacement) },
+        { label: "Fuel System", value: bike.fuelSystem ?? fuelSystem(displacement) },
+        { label: "Compression Ratio", value: bike.compressionRatio ?? compressionRatio(displacement) },
+        { label: "Bore x Stroke", value: bike.boreStroke ?? boreStroke(displacement) },
+        { label: "Emission Standard", value: bike.emissionStandard ?? "BS6 / Euro 5" },
       ],
     },
     {
