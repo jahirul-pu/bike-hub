@@ -1,2 +1,3 @@
 [browser] Image with src "/bikes/product_image_gt_60693555b22ae5f-1776073320057.webp" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
 [browser] Image with src "https://webcms.yadea.et/uploads/1_35b21ec136.webp" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+^C^C

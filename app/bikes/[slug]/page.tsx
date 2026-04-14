@@ -146,6 +146,30 @@ function colorPalette(bike: Bike): string {
   return "Black, Red, Gray";
 }
 
+function swatchHex(colorName: string): string {
+  const normalized = colorName.toLowerCase();
+
+  if (normalized.includes("white")) return "#f8fafc";
+  if (normalized.includes("black")) return "#0f172a";
+  if (normalized.includes("silver")) return "#cbd5e1";
+  if (normalized.includes("gray") || normalized.includes("grey")) return "#94a3b8";
+  if (normalized.includes("red")) return "#dc2626";
+  if (normalized.includes("blue")) return "#2563eb";
+  if (normalized.includes("green")) return "#166534";
+  if (normalized.includes("cyan")) return "#06b6d4";
+  if (normalized.includes("sand") || normalized.includes("desert")) return "#d6b37a";
+
+  return "#64748b";
+}
+
+function swatchPalette(colors: string): Array<{ name: string; hex: string }> {
+  return colors
+    .split(",")
+    .map((color) => color.trim())
+    .filter(Boolean)
+    .map((name) => ({ name, hex: swatchHex(name) }));
+}
+
 function specialEdition(bike: Bike): string {
   if (bike.category === "Sport") return "Racing Edition";
   if (bike.powertrain === "EV") return "Connected Tech Edition";
@@ -636,6 +660,16 @@ export default async function BikeDetailsPage({
   const specDescription = bike.powertrain === "EV"
     ? "Dedicated EV sheet covering motor, battery, charging, smart tech, and EV market positioning."
     : "Dedicated ICE sheet covering engine, fuel efficiency, transmission, maintenance, and competitor specs.";
+  const colors = swatchPalette(colorPalette(bike));
+  const keySpecs = [
+    { label: "Type", value: bikeTypeLabel(bike) },
+    { label: bike.powertrain === "ICE" ? "Engine" : "Motor", value: headlineMetric(bike) },
+    { label: "Top Speed", value: `${bike.topSpeedKph} km/h` },
+    {
+      label: bike.powertrain === "ICE" ? "Mileage" : "Range",
+      value: bike.powertrain === "ICE" ? `${bike.mileageKmpl} km/l` : `${bike.rangeKm} km`,
+    },
+  ];
 
   // --- PAGE LAYOUT ---
   return (
@@ -644,22 +678,29 @@ export default async function BikeDetailsPage({
         <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm sm:p-6">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Gallery left */}
-            <div className="w-full max-w-lg mx-auto lg:mx-0 lg:w-[420px] flex-shrink-0">
+            <div className="mx-auto w-full max-w-lg flex-shrink-0 lg:mx-0 lg:w-[400px]">
               <BikeGallery images={bike.images && bike.images.length > 0 ? bike.images : ["/placeholder-bike.jpg"]} />
             </div>
             {/* Details right */}
             <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-slate-900 text-white hover:bg-slate-900">{bike.category}</Badge>
-                <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
-                  {bike.powertrain}
-                </Badge>
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+                <h1 className="font-heading text-5xl uppercase tracking-wide text-slate-900 sm:text-6xl">
+                  {bike.brand} {bike.model}
+                </h1>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Badge className="bg-slate-900 text-white hover:bg-slate-900">{bike.category}</Badge>
+                  <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
+                    {bike.powertrain}
+                  </Badge>
+                </div>
               </div>
-              <h1 className="mt-3 font-heading text-5xl uppercase tracking-wide text-slate-900 sm:text-6xl">
-                {bike.brand} {bike.model}
-              </h1>
-              <p className="mt-2 max-w-3xl text-slate-600">{bike.summary}</p>
-              <div className="mt-6 flex flex-col gap-4">
+              <div className="mt-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Price</p>
+                <p className="mt-1 font-heading text-4xl uppercase tracking-wide text-slate-900 sm:text-5xl">
+                  {formatBdt(bike.priceBdt)}
+                </p>
+              </div>
+              <div className="mt-5 flex flex-col gap-4">
                 <Link
                   href={{
                     pathname: "/marketplace",
@@ -669,52 +710,58 @@ export default async function BikeDetailsPage({
                 >
                   Buy Parts
                 </Link>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <div className="rounded-lg bg-slate-100 p-3">
-                    <p className="text-xs uppercase tracking-wide text-slate-500">Price</p>
-                    <p className="text-base font-semibold text-slate-900">{formatBdt(bike.priceBdt)}</p>
-                  </div>
-                  <div className="rounded-lg bg-slate-100 p-3">
-                    <p className="text-xs uppercase tracking-wide text-slate-500">
-                      {bike.powertrain === "ICE" ? "Engine CC" : "Motor Output"}
-                    </p>
-                    <p className="text-base font-semibold text-slate-900">{headlineMetric(bike)}</p>
-                  </div>
-                  <div className="rounded-lg bg-slate-100 p-3">
-                    <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
-                    <p className="text-base font-semibold text-slate-900">{bike.topSpeedKph} km/h</p>
-                  </div>
-                </div>
-
-                {/* Warranty & Service */}
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Warranty & Service</p>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-400">
-                        {bike.powertrain === "EV" ? "Battery Warranty" : "Vehicle Warranty"}
+                <div className="flex flex-wrap gap-2">
+                  {keySpecs.map((spec) => (
+                    <div
+                      key={spec.label}
+                      className="min-w-[8.5rem] rounded-full border border-slate-200 bg-slate-50 px-3 py-2"
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                        {spec.label}
                       </p>
-                      <p className="text-sm font-medium text-slate-900">
-                        {bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km"}
-                      </p>
+                      <p className="mt-0.5 text-sm font-semibold text-slate-900">{spec.value}</p>
                     </div>
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-400">
-                        {bike.powertrain === "EV" ? "Motor Warranty" : "Free Services"}
-                      </p>
-                      <p className="text-sm font-medium text-slate-900">
-                        {bike.powertrain === "EV" ? "3 years" : "500 / 3k / 6k km"}
-                      </p>
+                  ))}
+                </div>
+                <p className="max-w-3xl text-slate-600">{bike.summary}</p>
+
+                <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Colors</p>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      {colors.map((color) => (
+                        <div key={color.name} className="flex items-center gap-2 rounded-full bg-white px-2.5 py-1.5 shadow-sm">
+                          <span
+                            className="h-4 w-4 rounded-full border border-slate-200"
+                            style={{ backgroundColor: color.hex }}
+                            aria-hidden="true"
+                          />
+                          <span className="text-sm font-medium text-slate-700">{color.name}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
 
-                {/* Color & Variants */}
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Color & Variants</p>
-                  <div className="mt-2">
-                    <p className="text-[11px] uppercase tracking-wide text-slate-400">Available Colors</p>
-                    <p className="text-sm font-medium text-slate-900">{colorPalette(bike)}</p>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Warranty</p>
+                    <div className="mt-3 grid gap-2">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wide text-slate-400">
+                          {bike.powertrain === "EV" ? "Battery Warranty" : "Vehicle Warranty"}
+                        </p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wide text-slate-400">
+                          {bike.powertrain === "EV" ? "Motor Warranty" : "Free Services"}
+                        </p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {bike.powertrain === "EV" ? "3 years" : "500 / 3k / 6k km"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
