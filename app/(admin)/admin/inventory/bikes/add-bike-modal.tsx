@@ -167,6 +167,14 @@ function BikeForm({
             className={inputClass}
           />
         </Field>
+        <Field label="Warranty" span={3}>
+          <input
+            name="warranty"
+            defaultValue={textValue(bike?.warranty)}
+            placeholder="e.g. 2 yrs / 20,000 km"
+            className={inputClass}
+          />
+        </Field>
 
         {/* ═══════════════════════════════════════════════════
             2. ENGINE / MOTOR & PERFORMANCE

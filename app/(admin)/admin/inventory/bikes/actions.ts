@@ -29,6 +29,7 @@ function parseFormFields(formData: FormData) {
     powertrain: formData.get('powertrain') as string,
     summary: formData.get('summary') as string,
     colors,
+    warranty: str('warranty'),
     launchYear: num('launchYear'),
     priceBdt: num('priceBdt') ?? 0,
     topSpeedKph: num('topSpeedKph') ?? 0,
@@ -128,6 +129,8 @@ function buildBikeEntryString(slug: string, fields: ReturnType<typeof parseFormF
     `    rearTyre: "${fields.rearTyre}",`,
     `    summary: "${fields.summary.replace(/"/g, '\\"').replace(/\n/g, ' ')}",`,
   ];
+
+  if (fields.warranty) lines.push(`    warranty: "${fields.warranty.replace(/"/g, '\\"')}",`);
 
   if (fields.launchYear) lines.push(`    launchYear: ${fields.launchYear},`);
 

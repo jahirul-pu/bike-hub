@@ -613,13 +613,16 @@ export default async function BikeDetailsPage({
   const warrantyItems = [
     {
       label: bike.powertrain === "EV" ? "Battery" : "Warranty",
-      value: bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km",
-    },
-    {
-      label: bike.powertrain === "EV" ? "Motor" : "Service",
-      value: bike.powertrain === "EV" ? "3 years" : "500 / 3k / 6k km",
+      value: bike.warranty ?? (bike.powertrain === "EV" ? "3 yrs / 30,000 km" : "2 yrs / 20,000 km"),
     },
   ];
+
+  if (bike.powertrain === "EV") {
+    warrantyItems.push({
+      label: "Motor",
+      value: "3 years",
+    });
+  }
 
   // --- PAGE LAYOUT ---
   return (

@@ -28,12 +28,7 @@ export type Bike = {
   frontTyre: string;
   rearTyre: string;
   summary: string;
-
-  // ─── EV-extended fields ───
-  voltageV?: number;
-  ampHours?: number;
-  peakPowerKw?: number;
-  batteryType?: string;
+  warranty?: string;
   ridingModes?: string;
   underseatStorage?: string;
   lengthMm?: number;
@@ -343,6 +338,7 @@ export const bikes: Bike[] = [
     frontTyre: "110/70-17",
     rearTyre: "140/70-17",
     summary: "A very good deal",
+    warranty: "2 Years/20,000 KM",
     launchYear: 2026,
     images: ["https://www.honda2wheelersindia.com/_next/image?url=https%3A%2F%2Fedge.sitecorecloud.io%2Fhondamotorc388f-hmsi8ece-prodb777-e813%2Fmedia%2FProject%2FHONDA2WI%2Fhonda2wheelersindia%2Fmotorcycle%2Fnx200%2Fget-to-know-your-ride.png%3Fh%3D450%26iar%3D0%26w%3D584&w=1200&q=75&dpl=dpl_5PhjtuhDzv67Z32jKx3hVPn4mrRh"],
     colors: ["Red", "Black", "Blue"],
