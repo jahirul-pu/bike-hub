@@ -176,9 +176,6 @@ function BikeForm({
         <Field label="Top Speed (km/h)">
           <input type="number" required name="topSpeedKph" defaultValue={numberValue(bike?.topSpeedKph)} className={inputClass} />
         </Field>
-        <Field label="Torque (Nm)">
-          <input type="number" step="0.1" required name="torqueNm" defaultValue={numberValue(bike?.torqueNm)} className={inputClass} />
-        </Field>
 
         {powertrain === 'ICE' ? (
           <>
@@ -235,6 +232,9 @@ function BikeForm({
             </Field>
             <Field label="Peak Power (kW)">
               <input type="number" step="0.1" name="peakPowerKw" defaultValue={numberValue(bike?.peakPowerKw)} className={inputClass} />
+            </Field>
+            <Field label="Torque (Nm)">
+              <input type="number" step="0.1" name="torqueNm" defaultValue={numberValue(bike?.torqueNm)} className={inputClass} />
             </Field>
           </>
         )}
