@@ -459,7 +459,7 @@ function completeIceSpecCategories(bike: Bike, similarBikes: Bike[]): SpecCatego
         },
         {
           label: "Reserve Fuel Capacity",
-          value: bike.reserveFuelCapacity ?? `${Number(((bike.fuelTankLiters ?? 6) * 0.12).toFixed(1))} L`,
+          value: bike.reserveFuelCapacity ?? "-",
         },
       ],
     },
