@@ -20,6 +20,7 @@ export default function BikesPage() {
   const [brandFilter, setBrandFilter] = useState<string>("All");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [quickUseFilter, setQuickUseFilter] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"Price" | "Popularity" | "Range">("Popularity");
 
   const advancedFilterCount = [metricFilter !== "All", efficiencyFilter !== "All"].filter(Boolean).length;
 
@@ -105,8 +106,16 @@ export default function BikesPage() {
       }
       if (brandFilter !== "All" && bike.brand !== brandFilter) return false;
       return true;
+    }).sort((a, b) => {
+      if (sortBy === "Price") return a.priceBdt - b.priceBdt;
+      if (sortBy === "Range") {
+        const rangeA = a.powertrain === "EV" ? (a.rangeKm || 0) : (a.mileageKmpl || 0);
+        const rangeB = b.powertrain === "EV" ? (b.rangeKm || 0) : (b.mileageKmpl || 0);
+        return rangeB - rangeA;
+      }
+      return b.topSpeedKph - a.topSpeedKph;
     });
-  }, [powertrainFilter, typeFilter, priceRange, metricFilter, efficiencyFilter, brandFilter]);
+  }, [powertrainFilter, typeFilter, priceRange, metricFilter, efficiencyFilter, brandFilter, sortBy]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -317,6 +326,24 @@ export default function BikesPage() {
               )}
               {showAdvancedFilters ? <ChevronUp className="w-3 h-3 opacity-60" /> : <ChevronDown className="w-3 h-3 opacity-60" />}
             </button>
+            <div className="h-7 w-px bg-slate-200 hidden md:block" />
+            
+            {/* Sort Toggle */}
+            <div className="flex bg-white rounded-xl p-1 border border-slate-200 h-9 items-center">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-2 border-r border-slate-100 mr-1 hidden sm:inline">Sort:</span>
+              {["Price", "Popularity", "Range"].map(s => (
+                <button
+                  key={s}
+                  onClick={() => setSortBy(s as any)}
+                  className={cn(
+                    "px-2.5 h-7 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
+                    sortBy === s ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
 
             {/* Reset — right-aligned */}
             {(typeFilter !== "All" || brandFilter !== "All" || metricFilter !== "All" || efficiencyFilter !== "All" || priceRange[0] > 0 || priceRange[1] < 1000000) && (
