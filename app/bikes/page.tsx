@@ -19,8 +19,52 @@ export default function BikesPage() {
   const [efficiencyFilter, setEfficiencyFilter] = useState<string>("All");
   const [brandFilter, setBrandFilter] = useState<string>("All");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [quickUseFilter, setQuickUseFilter] = useState<string | null>(null);
 
   const advancedFilterCount = [metricFilter !== "All", efficiencyFilter !== "All"].filter(Boolean).length;
+
+  const quickUsePresets: { label: string; icon: string; desc: string; apply: () => void }[] = [
+    {
+      label: "Daily Use",
+      icon: "🏙️",
+      desc: "Commuter bikes, good mileage",
+      apply: () => {
+        setPowertrainFilter("ICE"); setTypeFilter("Motorcycle");
+        setPriceRange([0, 350000]); setMetricFilter("100-125");
+        setEfficiencyFilter("40+"); setBrandFilter("All");
+      },
+    },
+    {
+      label: "Long Ride",
+      icon: "🛣️",
+      desc: "Touring & adventure ready",
+      apply: () => {
+        setPowertrainFilter("ICE"); setTypeFilter("Motorcycle");
+        setPriceRange([0, 1000000]); setMetricFilter("151-200");
+        setEfficiencyFilter("All"); setBrandFilter("All");
+      },
+    },
+    {
+      label: "Delivery",
+      icon: "📦",
+      desc: "Fuel-efficient workhorses",
+      apply: () => {
+        setPowertrainFilter("All"); setTypeFilter("All");
+        setPriceRange([0, 250000]); setMetricFilter("All");
+        setEfficiencyFilter("50+"); setBrandFilter("All");
+      },
+    },
+    {
+      label: "Budget",
+      icon: "💰",
+      desc: "Best value under ৳2.5L",
+      apply: () => {
+        setPowertrainFilter("All"); setTypeFilter("All");
+        setPriceRange([0, 250000]); setMetricFilter("All");
+        setEfficiencyFilter("All"); setBrandFilter("All");
+      },
+    },
+  ];
 
   const filteredBikes = useMemo(() => {
     return bikes.filter((bike) => {
@@ -92,6 +136,7 @@ export default function BikesPage() {
                   setEfficiencyFilter("All");
                   setBrandFilter("All");
                   setShowAdvancedFilters(false);
+                  setQuickUseFilter(null);
                 }}
                 className={cn(
                   "min-w-[90px] px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 border-2",
@@ -105,6 +150,37 @@ export default function BikesPage() {
             ))}
           </div>
 
+          {/* Quick Use Filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mr-1">Quick:</span>
+            {quickUsePresets.map((preset) => (
+              <button
+                key={preset.label}
+                onClick={() => {
+                  if (quickUseFilter === preset.label) {
+                    setQuickUseFilter(null);
+                    setPowertrainFilter("All"); setTypeFilter("All");
+                    setPriceRange([0, 1000000]); setMetricFilter("All");
+                    setEfficiencyFilter("All"); setBrandFilter("All");
+                  } else {
+                    setQuickUseFilter(preset.label);
+                    setShowAdvancedFilters(false);
+                    preset.apply();
+                  }
+                }}
+                className={cn(
+                  "h-9 px-4 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 group",
+                  quickUseFilter === preset.label
+                    ? "bg-slate-900 border-slate-900 text-white shadow-lg"
+                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-400 hover:shadow-sm"
+                )}
+              >
+                <span className="text-sm">{preset.icon}</span>
+                <span className="font-black uppercase tracking-wider">{preset.label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Level 2: Compact Inline Filter Bar */}
           <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/50 px-5 py-4">
             {/* Category Toggle */}
@@ -112,7 +188,7 @@ export default function BikesPage() {
               {["All", "Motorcycle", "Scooter"].map(t => (
                 <button
                   key={t}
-                  onClick={() => setTypeFilter(t as any)}
+                  onClick={() => { setTypeFilter(t as any); setQuickUseFilter(null); }}
                   className={cn(
                     "px-3 h-7 rounded-lg text-xs font-black uppercase tracking-wider transition-all",
                     typeFilter === t ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
@@ -156,7 +232,7 @@ export default function BikesPage() {
                     max={1000000}
                     step={10000}
                     value={[priceRange[0], priceRange[1]]}
-                    onValueChange={(val) => setPriceRange([val[0], val[1]])}
+                    onValueChange={(val) => { setPriceRange([val[0], val[1]]); setQuickUseFilter(null); }}
                     className="py-1"
                   />
                   <div className="flex flex-wrap gap-1.5">
@@ -168,7 +244,7 @@ export default function BikesPage() {
                     ].map((preset) => (
                       <button
                         key={preset.label}
-                        onClick={() => setPriceRange(preset.range as [number, number])}
+                        onClick={() => { setPriceRange(preset.range as [number, number]); setQuickUseFilter(null); }}
                         className={cn(
                           "px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-tight transition-all border",
                           JSON.stringify(priceRange) === JSON.stringify(preset.range)
@@ -206,11 +282,11 @@ export default function BikesPage() {
                   <CommandList>
                     <CommandEmpty className="py-2 text-center text-[10px] text-slate-500">No brand found.</CommandEmpty>
                     <CommandGroup>
-                      <CommandItem onSelect={() => setBrandFilter("All")} className="text-xs uppercase font-bold">
+                      <CommandItem onSelect={() => { setBrandFilter("All"); setQuickUseFilter(null); }} className="text-xs uppercase font-bold">
                         All Brands
                       </CommandItem>
                       {Array.from(new Set(bikes.map(b => b.brand))).sort().map(brand => (
-                        <CommandItem key={brand} onSelect={() => setBrandFilter(brand)} className="text-xs">
+                        <CommandItem key={brand} onSelect={() => { setBrandFilter(brand); setQuickUseFilter(null); }} className="text-xs">
                           {brand}
                         </CommandItem>
                       ))}
@@ -252,6 +328,7 @@ export default function BikesPage() {
                   setEfficiencyFilter("All");
                   setBrandFilter("All");
                   setShowAdvancedFilters(false);
+                  setQuickUseFilter(null);
                 }}
                 className="ml-auto flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-red-500 transition-colors"
               >
@@ -291,7 +368,7 @@ export default function BikesPage() {
                         {["All", "100-125", "126-150", "151-200", "201-350", "350+"].map(tier => (
                           <button
                             key={tier}
-                            onClick={() => setMetricFilter(tier)}
+                            onClick={() => { setMetricFilter(tier); setQuickUseFilter(null); }}
                             className={cn(
                               "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
                               metricFilter === tier
@@ -316,7 +393,7 @@ export default function BikesPage() {
                         {["All", "1-2", "2-4", "4+"].map(tier => (
                           <button
                             key={tier}
-                            onClick={() => setMetricFilter(tier)}
+                            onClick={() => { setMetricFilter(tier); setQuickUseFilter(null); }}
                             className={cn(
                               "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
                               metricFilter === tier
@@ -347,7 +424,7 @@ export default function BikesPage() {
                         {["All", "40+", "50+", "60+"].map(tier => (
                           <button
                             key={tier}
-                            onClick={() => setEfficiencyFilter(tier)}
+                            onClick={() => { setEfficiencyFilter(tier); setQuickUseFilter(null); }}
                             className={cn(
                               "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
                               efficiencyFilter === tier
@@ -372,7 +449,7 @@ export default function BikesPage() {
                         {["All", "60", "100", "150+"].map(tier => (
                           <button
                             key={tier}
-                            onClick={() => setEfficiencyFilter(tier)}
+                            onClick={() => { setEfficiencyFilter(tier); setQuickUseFilter(null); }}
                             className={cn(
                               "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
                               efficiencyFilter === tier
@@ -406,42 +483,42 @@ export default function BikesPage() {
             {powertrainFilter !== "All" && (
               <Badge variant="secondary" className="bg-slate-900 text-white pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider">
                 {powertrainFilter}
-                <button onClick={() => setPowertrainFilter("All")} className="hover:bg-white/20 p-0.5 rounded transition-colors"><X className="w-3 h-3" /></button>
+                <button onClick={() => { setPowertrainFilter("All"); setQuickUseFilter(null); }} className="hover:bg-white/20 p-0.5 rounded transition-colors"><X className="w-3 h-3" /></button>
               </Badge>
             )}
 
             {typeFilter !== "All" && (
               <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                 {typeFilter}
-                <button onClick={() => setTypeFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                <button onClick={() => { setTypeFilter("All"); setQuickUseFilter(null); }} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
               </Badge>
             )}
 
             {brandFilter !== "All" && (
               <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                 {brandFilter}
-                <button onClick={() => setBrandFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                <button onClick={() => { setBrandFilter("All"); setQuickUseFilter(null); }} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
               </Badge>
             )}
 
             {metricFilter !== "All" && (
               <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                 {metricFilter.replace("-", "–")} CC/kWh
-                <button onClick={() => setMetricFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                <button onClick={() => { setMetricFilter("All"); setQuickUseFilter(null); }} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
               </Badge>
             )}
 
             {efficiencyFilter !== "All" && (
               <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                 Efficiency: {efficiencyFilter}
-                <button onClick={() => setEfficiencyFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                <button onClick={() => { setEfficiencyFilter("All"); setQuickUseFilter(null); }} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
               </Badge>
             )}
 
             {(priceRange[0] > 0 || priceRange[1] < 1000000) && (
               <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                 ৳{priceRange[0]/1000}K – {priceRange[1]/1000 >= 1000 ? "10L+" : priceRange[1]/1000 + "K"}
-                <button onClick={() => setPriceRange([0, 1000000])} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                <button onClick={() => { setPriceRange([0, 1000000]); setQuickUseFilter(null); }} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
               </Badge>
             )}
           </div>
@@ -462,7 +539,7 @@ export default function BikesPage() {
               No bikes found matching your current selection.
             </p>
             <button
-              onClick={() => { setPowertrainFilter("All"); setTypeFilter("All"); setPriceRange([0, 1000000]); setMetricFilter("All"); setEfficiencyFilter("All"); setBrandFilter("All"); }}
+              onClick={() => { setPowertrainFilter("All"); setTypeFilter("All"); setPriceRange([0, 1000000]); setMetricFilter("All"); setEfficiencyFilter("All"); setBrandFilter("All"); setQuickUseFilter(null); }}
               className="mt-2 text-xs font-bold text-slate-900 underline"
             >
               Reset Filters

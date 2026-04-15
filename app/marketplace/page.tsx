@@ -288,8 +288,52 @@ export default function MarketplacePage() {
   const [efficiencyFilter, setEfficiencyFilter] = useState<string>("All");
   const [brandFilter, setBrandFilter] = useState<string>("All");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [quickUseFilter, setQuickUseFilter] = useState<string | null>(null);
 
   const advancedFilterCount = [metricFilter !== "All", efficiencyFilter !== "All"].filter(Boolean).length;
+
+  const quickUsePresets: { label: string; icon: string; desc: string; apply: () => void }[] = [
+    {
+      label: "Daily Use",
+      icon: "🏙️",
+      desc: "Commuter bikes, good mileage",
+      apply: () => {
+        setPowertrainFilter("ICE"); setTypeFilter("Motorcycle");
+        setPriceRange([0, 350000]); setMetricFilter("100-125");
+        setEfficiencyFilter("40+"); setBrandFilter("All");
+      },
+    },
+    {
+      label: "Long Ride",
+      icon: "🛣️",
+      desc: "Touring & adventure ready",
+      apply: () => {
+        setPowertrainFilter("ICE"); setTypeFilter("Motorcycle");
+        setPriceRange([0, 1000000]); setMetricFilter("151-200");
+        setEfficiencyFilter("All"); setBrandFilter("All");
+      },
+    },
+    {
+      label: "Delivery",
+      icon: "📦",
+      desc: "Fuel-efficient workhorses",
+      apply: () => {
+        setPowertrainFilter("All"); setTypeFilter("All");
+        setPriceRange([0, 250000]); setMetricFilter("All");
+        setEfficiencyFilter("50+"); setBrandFilter("All");
+      },
+    },
+    {
+      label: "Budget",
+      icon: "💰",
+      desc: "Best value under ৳2.5L",
+      apply: () => {
+        setPowertrainFilter("All"); setTypeFilter("All");
+        setPriceRange([0, 250000]); setMetricFilter("All");
+        setEfficiencyFilter("All"); setBrandFilter("All");
+      },
+    },
+  ];
 
   const [selectedCategory, setSelectedCategory] = useState<SparePartCategory | "All">("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
@@ -689,6 +733,7 @@ export default function MarketplacePage() {
                     setEfficiencyFilter("All");
                     setBrandFilter("All");
                     setShowAdvancedFilters(false);
+                    setQuickUseFilter(null);
                   }}
                   className={cn(
                     "min-w-[90px] px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 border-2",
@@ -702,6 +747,38 @@ export default function MarketplacePage() {
               ))}
             </div>
 
+            {/* Quick Use Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mr-1">Quick:</span>
+              {quickUsePresets.map((preset) => (
+                <button
+                  key={preset.label}
+                  onClick={() => {
+                    if (quickUseFilter === preset.label) {
+                      // Deselect — reset all
+                      setQuickUseFilter(null);
+                      setPowertrainFilter("All"); setTypeFilter("All");
+                      setPriceRange([0, 1000000]); setMetricFilter("All");
+                      setEfficiencyFilter("All"); setBrandFilter("All");
+                    } else {
+                      setQuickUseFilter(preset.label);
+                      setShowAdvancedFilters(false);
+                      preset.apply();
+                    }
+                  }}
+                  className={cn(
+                    "h-9 px-4 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 group",
+                    quickUseFilter === preset.label
+                      ? "bg-slate-900 border-slate-900 text-white shadow-lg"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-400 hover:shadow-sm"
+                  )}
+                >
+                  <span className="text-sm">{preset.icon}</span>
+                  <span className="font-black uppercase tracking-wider">{preset.label}</span>
+                </button>
+              ))}
+            </div>
+
             {/* Level 2: Compact Inline Filter Bar */}
             <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/50 px-5 py-4">
               {/* Category Toggle */}
@@ -709,7 +786,7 @@ export default function MarketplacePage() {
                 {["All", "Motorcycle", "Scooter"].map(t => (
                   <button
                     key={t}
-                    onClick={() => setTypeFilter(t as any)}
+                    onClick={() => { setTypeFilter(t as any); setQuickUseFilter(null); }}
                     className={cn(
                       "px-3 h-7 rounded-lg text-xs font-black uppercase tracking-wider transition-all",
                       typeFilter === t ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
