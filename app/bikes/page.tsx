@@ -211,12 +211,18 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setMetricFilter(tier)}
                           className={cn(
-                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-2",
                             metricFilter === tier 
-                              ? "bg-emerald-600 border-emerald-600 text-white shadow-md" 
+                              ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
                           )}
                         >
+                          {tier !== "All" && (
+                            <span className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              metricFilter === tier ? "bg-emerald-400" : "bg-emerald-500/30"
+                            )} />
+                          )}
                           {tier === "All" ? "Any Power" : tier.replace("-", "–") + " kWh"}
                         </button>
                       ))}
@@ -258,12 +264,18 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setEfficiencyFilter(tier)}
                           className={cn(
-                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-2",
                             efficiencyFilter === tier 
-                              ? "bg-emerald-600 border-emerald-600 text-white shadow-md" 
+                              ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
                           )}
                         >
+                          {tier !== "All" && (
+                            <span className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              efficiencyFilter === tier ? "bg-emerald-400" : "bg-emerald-500/30"
+                            )} />
+                          )}
                           {tier === "All" ? "Any" : tier + (tier.includes("+") ? "" : " km+")}
                         </button>
                       ))}
