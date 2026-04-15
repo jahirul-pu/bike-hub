@@ -132,7 +132,7 @@ export default function BikesPage() {
                       key={t}
                       onClick={() => setTypeFilter(t as any)}
                       className={cn(
-                        "px-4 h-7 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
+                        "px-4 h-7 rounded-lg text-xs font-black uppercase tracking-wider transition-all",
                         typeFilter === t ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -142,18 +142,22 @@ export default function BikesPage() {
                 </div>
               </div>
 
-              {/* Row 1, Col 2: Price Range Filter */}
+              {/* Row 1, Col 2: Price Range Filter (Unified Module) */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between border-l-2 border-slate-900 pl-3 h-4 mb-1">
                   <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">
                     02. Price Range
                   </span>
-                  <span className="text-[10px] font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded leading-none">
-                    ৳ {priceRange[0]/1000}K - {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1]/100000}L`}
-                  </span>
                 </div>
                 
-                <div className="flex flex-col gap-3 py-1">
+                <div className="flex flex-col gap-4 p-4 rounded-2xl bg-white border border-slate-200/60 shadow-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px] font-bold uppercase text-slate-400">Manual Adjust</span>
+                    <span className="text-[10px] font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded leading-none">
+                      ৳ {priceRange[0]/1000}K - {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1]/100000}L`}
+                    </span>
+                  </div>
+
                   <Slider
                     defaultValue={[0, 1000000]}
                     max={1000000}
@@ -163,21 +167,29 @@ export default function BikesPage() {
                     className="py-1"
                   />
 
-                  <div className="flex gap-2">
-                    {[
-                      { label: "All", range: [0, 1000000] },
-                      { label: "Under 1L", range: [0, 100000] },
-                      { label: "1L–2L", range: [100000, 200000] },
-                      { label: "2L+", range: [200000, 1000000] }
-                    ].map((preset) => (
-                      <button
-                        key={preset.label}
-                        onClick={() => setPriceRange(preset.range as [number, number])}
-                        className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[8px] font-bold uppercase tracking-tighter text-slate-500 hover:border-slate-900 hover:text-slate-900 transition-all"
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-50 mt-1">
+                    <span className="text-[8px] font-black uppercase text-slate-300 mr-1">Quick Picks:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { label: "All", range: [0, 1000000] },
+                        { label: "< 1L", range: [0, 100000] },
+                        { label: "1L–2L", range: [100000, 200000] },
+                        { label: "2L+", range: [200000, 1000000] }
+                      ].map((preset) => (
+                        <button
+                          key={preset.label}
+                          onClick={() => setPriceRange(preset.range as [number, number])}
+                          className={cn(
+                            "px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-tight transition-all border",
+                            JSON.stringify(priceRange) === JSON.stringify(preset.range) 
+                              ? "bg-slate-900 border-slate-900 text-white shadow-sm" 
+                              : "bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                          )}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -195,7 +207,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setMetricFilter(tier)}
                           className={cn(
-                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
                             metricFilter === tier 
                               ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -219,7 +231,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setMetricFilter(tier)}
                           className={cn(
-                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-2",
+                            "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
                             metricFilter === tier 
                               ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -252,7 +264,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setEfficiencyFilter(tier)}
                           className={cn(
-                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
                             efficiencyFilter === tier 
                               ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -276,7 +288,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setEfficiencyFilter(tier)}
                           className={cn(
-                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-2",
+                            "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
                             efficiencyFilter === tier 
                               ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -376,7 +388,7 @@ export default function BikesPage() {
                       setEfficiencyFilter("All");
                       setBrandFilter("All");
                     }}
-                    className="ml-auto flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-red-500 transition-colors"
+                    className="ml-auto flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-red-500 transition-colors"
                   >
                     Reset Grid
                     <X className="w-3.5 h-3.5" />
