@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BikeCard } from "@/components/site/bike-card";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -23,6 +23,17 @@ export default function BikesPage() {
   const [sortBy, setSortBy] = useState<"Price" | "Popularity" | "Range">("Popularity");
 
   const advancedFilterCount = [metricFilter !== "All", efficiencyFilter !== "All"].filter(Boolean).length;
+
+  const [isScrolledPast, setIsScrolledPast] = useState(false);
+  const filterSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolledPast(window.scrollY > 200);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const quickUsePresets: { label: string; icon: React.ReactNode; desc: string; apply: () => void }[] = [
     {
@@ -129,11 +140,10 @@ export default function BikesPage() {
         </p>
       </section>
 
-      <section className="mt-10">
-        {/* Progressive Disclosure Navigation */}
-        <div className="mb-12 space-y-6">
-          {/* Level 1: Energy Source Tabs */}
-          <div className="flex items-center gap-3">
+      <section ref={filterSectionRef} className="mt-10">
+        {/* Level 1: Energy Source Tabs (Compact Sticky Pill) */}
+        <div className="sticky top-[102px] z-[60] flex justify-center py-4 transition-all duration-300 sm:top-[124px]">
+          <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/70 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-slate-900/5">
             {(["All", "ICE", "EV"] as const).map((p) => (
               <button
                 key={p}
@@ -148,16 +158,19 @@ export default function BikesPage() {
                   setQuickUseFilter(null);
                 }}
                 className={cn(
-                  "min-w-[90px] px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 border-2",
+                  "min-w-[80px] px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300",
                   powertrainFilter === p
-                    ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-[1.03]"
-                    : "bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                    ? "bg-slate-900 text-white shadow-lg scale-[1.05]"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
                 )}
               >
                 {p}
               </button>
             ))}
+            </div>
           </div>
+          
+          <div className="space-y-6">
 
           {/* Quick Use Filters */}
           <div className="flex flex-wrap items-center gap-2">
@@ -212,7 +225,7 @@ export default function BikesPage() {
 
             {/* Price Popover */}
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger>
                 <div
                   role="button"
                   className={cn(
@@ -271,7 +284,7 @@ export default function BikesPage() {
 
             {/* Brand Popover */}
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger>
                 <div
                   role="button"
                   className={cn(
@@ -549,7 +562,7 @@ export default function BikesPage() {
               </Badge>
             )}
           </div>
-        </div>
+
 
         <div className="mb-6 flex items-center gap-3">
           <h2 className="font-heading text-4xl uppercase tracking-wide text-slate-900">
@@ -579,7 +592,22 @@ export default function BikesPage() {
             ))}
           </div>
         )}
+      </div>
       </section>
+
+      {isScrolledPast && (
+        <button
+          onClick={() => {
+            filterSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            setTimeout(() => {
+              window.scrollBy({ top: -140, behavior: "smooth" });
+            }, 300);
+          }}
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-2xl ring-4 ring-white/20 transition-all duration-300 hover:scale-110 active:scale-95 sm:bottom-10 sm:right-10"
+        >
+          <SlidersHorizontal className="h-6 w-6" />
+        </button>
+      )}
     </div>
   );
 }

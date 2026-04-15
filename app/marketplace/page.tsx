@@ -342,6 +342,19 @@ export default function MarketplacePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoverCategory, setHoverCategory] = useState<SparePartCategory | "All">("All");
   const [hoverSubcategory, setHoverSubcategory] = useState<string>("All");
+  
+  const [isScrolledPast, setIsScrolledPast] = useState(false);
+  const filterSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Very low threshold to ensure it works
+      setIsScrolledPast(window.scrollY > 200);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const closeMenuTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const categoryOptions: Array<SparePartCategory | "All"> = [
@@ -717,8 +730,8 @@ export default function MarketplacePage() {
       ) : null}
 
       {activeSection === "used" ? (
-        <section className="mt-8">
-          <div className="mb-4 flex items-center justify-between gap-3">
+        <section ref={filterSectionRef} className="mt-8">
+          <div className="mb-4 flex items-center justify-between gap-3 px-4 sm:px-0">
             <h2 className="flex items-center gap-2 font-heading text-4xl uppercase tracking-wide text-slate-900">
               <BikeIcon className="h-7 w-7" />
               Used Vehicles
@@ -729,9 +742,10 @@ export default function MarketplacePage() {
           </div>
 
           {/* Progressive Disclosure Navigation */}
-          <div className="mb-12 space-y-6">
-            {/* Level 1: Energy Source Tabs */}
-            <div className="flex items-center gap-3">
+          <div className="space-y-6">
+            {/* Level 1: Energy Source Tabs (Compact Sticky Pill) */}
+            <div className="sticky top-[102px] z-[60] flex justify-center py-4 transition-all duration-300 sm:top-[124px]">
+              <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/70 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-slate-900/5">
               {(["All", "ICE", "EV"] as const).map((p) => (
                 <button
                   key={p}
@@ -746,15 +760,16 @@ export default function MarketplacePage() {
                     setQuickUseFilter(null);
                   }}
                   className={cn(
-                    "min-w-[90px] px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 border-2",
+                    "min-w-[80px] px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300",
                     powertrainFilter === p
-                      ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-[1.03]"
-                      : "bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                      ? "bg-slate-900 text-white shadow-lg scale-[1.05]"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
                   )}
                 >
                   {p}
                 </button>
               ))}
+              </div>
             </div>
 
             {/* Quick Use Filters */}
@@ -811,7 +826,7 @@ export default function MarketplacePage() {
 
               {/* Price Popover */}
               <Popover>
-                <PopoverTrigger asChild>
+                <PopoverTrigger>
                   <div
                     role="button"
                     className={cn(
@@ -870,7 +885,7 @@ export default function MarketplacePage() {
 
               {/* Brand Popover */}
               <Popover>
-                <PopoverTrigger asChild>
+                <PopoverTrigger>
                   <div
                     role="button"
                     className={cn(
@@ -1148,7 +1163,6 @@ export default function MarketplacePage() {
                 </Badge>
               )}
             </div>
-          </div>
 
           <div className="space-y-8">
             <section className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 p-4">
@@ -1202,8 +1216,23 @@ export default function MarketplacePage() {
               </div>
             </section>
           </div>
+          </div>
         </section>
       ) : null}
+      {isScrolledPast && (
+        <button
+          onClick={() => {
+            filterSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            // Small delay to ensure scroll target adjustment
+            setTimeout(() => {
+              window.scrollBy({ top: -140, behavior: "smooth" });
+            }, 300);
+          }}
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-2xl ring-4 ring-white/20 transition-all duration-300 hover:scale-110 active:scale-95 sm:bottom-10 sm:right-10"
+        >
+          <SlidersHorizontal className="h-6 w-6" />
+        </button>
+      )}
     </div>
   );
 }
