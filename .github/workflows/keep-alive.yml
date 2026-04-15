@@ -1,0 +1,31 @@
+name: Database Keep Alive (Direct)
+
+on:
+  schedule:
+    # Runs every Tuesday and Friday at 00:00 UTC
+    - cron: '0 0 * * 2,5'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  ping-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Ping Database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx tsx scripts/keep-alive.ts
