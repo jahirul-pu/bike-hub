@@ -124,13 +124,13 @@ export default function BikesPage() {
               {/* Row 1, Col 1: Category Selection */}
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">01. Vehicle Category</span>
-                <div className="flex bg-white rounded-lg p-1 border border-slate-200 w-fit">
+                <div className="flex bg-white rounded-xl p-1 border border-slate-200 w-fit h-9 items-center">
                   {["All", "Motorcycle", "Scooter"].map(t => (
                     <button
                       key={t}
                       onClick={() => setTypeFilter(t as any)}
                       className={cn(
-                        "px-6 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                        "px-4 h-7 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
                         typeFilter === t ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -189,7 +189,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setMetricFilter(tier)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
                             metricFilter === tier 
                               ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -211,7 +211,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setMetricFilter(tier)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
                             metricFilter === tier 
                               ? "bg-emerald-600 border-emerald-600 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -236,7 +236,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setEfficiencyFilter(tier)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
                             efficiencyFilter === tier 
                               ? "bg-slate-900 border-slate-900 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -258,7 +258,7 @@ export default function BikesPage() {
                           key={tier}
                           onClick={() => setEfficiencyFilter(tier)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
                             efficiencyFilter === tier 
                               ? "bg-emerald-600 border-emerald-600 text-white shadow-md" 
                               : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
@@ -284,7 +284,7 @@ export default function BikesPage() {
                         key={brand}
                         onClick={() => setBrandFilter(brandFilter === brand ? "All" : brand)}
                         className={cn(
-                          "px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2",
+                          "h-9 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2",
                           brandFilter === brand 
                             ? "bg-slate-900 border-slate-900 text-white shadow-lg" 
                             : "bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:text-slate-700"
@@ -303,7 +303,7 @@ export default function BikesPage() {
                       <div 
                         role="button"
                         className={cn(
-                          "px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2 flex items-center gap-2 cursor-pointer",
+                          "h-9 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2 flex items-center gap-2 cursor-pointer",
                           brandFilter !== "All" && !["Honda", "Yamaha", "Suzuki", "TVS"].includes(brandFilter)
                             ? "bg-slate-900 border-slate-900 text-white shadow-lg"
                             : "bg-white border-dashed border-slate-300 text-slate-400 hover:border-slate-400"
