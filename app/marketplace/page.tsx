@@ -705,10 +705,12 @@ export default function MarketplacePage() {
           <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-slate-50/50 p-6">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">02. Refined Search</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
               {/* Row 1, Col 1: Type Selection */}
-              <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">01. Vehicle Category</span>
+              <div className="flex flex-col gap-3">
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
+                  01. Vehicle Category
+                </span>
                 <div className="flex bg-white rounded-xl p-1 border border-slate-200 w-fit h-9 items-center">
                   {["All", "Motorcycle", "Scooter"].map(t => (
                     <button
@@ -726,9 +728,11 @@ export default function MarketplacePage() {
               </div>
 
               {/* Row 1, Col 2: Price Range Filter */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-end justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">02. Price Range</span>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between border-l-2 border-slate-900 pl-3 h-4 mb-1">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">
+                    02. Price Range
+                  </span>
                   <span className="text-[10px] font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded leading-none">
                     ৳ {priceRange[0]/1000}K - {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1]/100000}L`}
                   </span>
@@ -764,10 +768,12 @@ export default function MarketplacePage() {
               </div>
 
               {/* Row 2, Col 1: Dynamic Metrics */}
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-6 md:pt-6 border-t border-slate-100/60 lg:md:border-t-0">
                 {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">03. Engine Displacement (ICE)</span>
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
+                      03. Engine Displacement
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {["All", "100-125", "126-150", "151-200", "201-350", "350+"].map(tier => (
                         <button
@@ -788,8 +794,10 @@ export default function MarketplacePage() {
                 )}
 
                 {(powertrainFilter === "All" || powertrainFilter === "EV") && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">03. Battery Capacity (EV)</span>
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
+                      03. Battery Capacity (EV)
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {["All", "1-2", "2-4", "4+"].map(tier => (
                         <button
@@ -817,10 +825,12 @@ export default function MarketplacePage() {
               </div>
 
               {/* Row 2, Col 2: Efficiency / Range */}
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-6 md:pt-6 border-t border-slate-100/60 lg:md:border-t-0">
                 {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">04. Efficiency (Fuel)</span>
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
+                      04. Efficiency (km/l)
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {["All", "40+", "50+", "60+"].map(tier => (
                         <button
@@ -841,8 +851,10 @@ export default function MarketplacePage() {
                 )}
 
                 {(powertrainFilter === "All" || powertrainFilter === "EV") && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">04. Drive Range (Electric)</span>
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
+                      04. Drive Range (km)
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {["All", "60", "100", "150+"].map(tier => (
                         <button
@@ -870,8 +882,10 @@ export default function MarketplacePage() {
               </div>
 
               {/* Row 3: Brand Selection Area (Full Width) */}
-              <div className="flex flex-col gap-3 md:col-span-2 pt-6 border-t border-slate-200/60">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">05. Primary Manufacturer</span>
+              <div className="flex flex-col gap-4 md:col-span-2 pt-8 border-t border-slate-200">
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
+                  05. Preferred Manufacturer
+                </span>
                 
                 <div className="flex flex-wrap items-center gap-3">
                   {/* Quick Taps */}
