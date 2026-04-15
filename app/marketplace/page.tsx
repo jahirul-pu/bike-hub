@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X } from "lucide-react";
+import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -292,10 +292,10 @@ export default function MarketplacePage() {
 
   const advancedFilterCount = [metricFilter !== "All", efficiencyFilter !== "All"].filter(Boolean).length;
 
-  const quickUsePresets: { label: string; icon: string; desc: string; apply: () => void }[] = [
+  const quickUsePresets: { label: string; icon: React.ReactNode; desc: string; apply: () => void }[] = [
     {
       label: "Daily Use",
-      icon: "🏙️",
+      icon: <Building2 className="w-3.5 h-3.5" />,
       desc: "Commuter bikes, good mileage",
       apply: () => {
         setPowertrainFilter("ICE"); setTypeFilter("Motorcycle");
@@ -305,7 +305,7 @@ export default function MarketplacePage() {
     },
     {
       label: "Long Ride",
-      icon: "🛣️",
+      icon: <Map className="w-3.5 h-3.5" />,
       desc: "Touring & adventure ready",
       apply: () => {
         setPowertrainFilter("ICE"); setTypeFilter("Motorcycle");
@@ -315,7 +315,7 @@ export default function MarketplacePage() {
     },
     {
       label: "Delivery",
-      icon: "📦",
+      icon: <Package className="w-3.5 h-3.5" />,
       desc: "Fuel-efficient workhorses",
       apply: () => {
         setPowertrainFilter("All"); setTypeFilter("All");
@@ -325,7 +325,7 @@ export default function MarketplacePage() {
     },
     {
       label: "Budget",
-      icon: "💰",
+      icon: <Wallet className="w-3.5 h-3.5" />,
       desc: "Best value under ৳2.5L",
       apply: () => {
         setPowertrainFilter("All"); setTypeFilter("All");
@@ -773,7 +773,7 @@ export default function MarketplacePage() {
                       : "bg-white border-slate-200 text-slate-600 hover:border-slate-400 hover:shadow-sm"
                   )}
                 >
-                  <span className="text-sm">{preset.icon}</span>
+                  <span className="text-slate-400 group-hover:text-inherit transition-colors">{preset.icon}</span>
                   <span className="font-black uppercase tracking-wider">{preset.label}</span>
                 </button>
               ))}
