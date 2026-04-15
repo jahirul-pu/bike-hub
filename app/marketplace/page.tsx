@@ -277,6 +277,10 @@ export default function MarketplacePage() {
   const [activeSection, setActiveSection] = useState<"spare" | "used">("spare");
   const addItem = useCartStore((state) => state.addItem);
 
+  // Used Vehicles Filters
+  const [powertrainFilter, setPowertrainFilter] = useState<"All" | "ICE" | "EV">("All");
+  const [typeFilter, setTypeFilter] = useState<"All" | "Motorcycle" | "Scooter">("All");
+
   const [selectedCategory, setSelectedCategory] = useState<SparePartCategory | "All">("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
   const [selectedNestedSubcategory, setSelectedNestedSubcategory] = useState<string>("All");
@@ -395,9 +399,25 @@ export default function MarketplacePage() {
     });
   }, [selectedCategory, selectedSubcategory, selectedNestedSubcategory]);
 
-  const bikeHubCertified = bikes.filter((bike) => certifiedSlugs.has(bike.slug));
-  const promoted = bikes.filter((bike) => promotedSlugs.has(bike.slug) && !certifiedSlugs.has(bike.slug));
-  const userListed = bikes.filter(
+  const filteredBikes = useMemo(() => {
+    return bikes.filter((bike) => {
+      // Powertrain filter
+      if (powertrainFilter !== "All" && bike.powertrain !== powertrainFilter) return false;
+
+      // Type filter
+      if (typeFilter !== "All") {
+        const isScooter = bike.category === "Scooter";
+        if (typeFilter === "Motorcycle" && isScooter) return false;
+        if (typeFilter === "Scooter" && !isScooter) return false;
+      }
+
+      return true;
+    });
+  }, [powertrainFilter, typeFilter]);
+
+  const bikeHubCertified = filteredBikes.filter((bike) => certifiedSlugs.has(bike.slug));
+  const promoted = filteredBikes.filter((bike) => promotedSlugs.has(bike.slug) && !certifiedSlugs.has(bike.slug));
+  const userListed = filteredBikes.filter(
     (bike) => !certifiedSlugs.has(bike.slug) && !promotedSlugs.has(bike.slug)
   );
 
@@ -602,6 +622,81 @@ export default function MarketplacePage() {
           <Badge variant="outline" className="border-slate-300 text-slate-700">
             {bikes.length} listings
           </Badge>
+        </div>
+
+        {/* Two-Level Navigation */}
+        <div className="mb-10 space-y-6">
+          {/* Level 1: Powertrain Category */}
+          <div className="flex flex-col gap-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Section</p>
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {(["All", "ICE", "EV"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPowertrainFilter(p)}
+                  className={cn(
+                    "relative px-6 py-2 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 border-2",
+                    powertrainFilter === p
+                      ? "bg-slate-900 border-slate-900 text-white shadow-[0_8px_20px_-6px_rgba(15,23,42,0.3)] scale-[1.02]"
+                      : "bg-white border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-700"
+                  )}
+                >
+                  {p}
+                  {powertrainFilter === p && (
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-slate-500"></span>
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Level 2: Dynamic Vehicle Type */}
+          <div className={cn(
+            "flex flex-col gap-3 transition-all duration-500",
+            powertrainFilter === "All" ? "opacity-100" : "opacity-100"
+          )}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Form Factor</p>
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {(() => {
+                const types = ["All", "Motorcycle", "Scooter"] as const;
+                return types.map((t) => {
+                  // Count matches for this type under current powertrain
+                  const count = bikes.filter(b => {
+                    const matchesPowertrain = powertrainFilter === "All" || b.powertrain === powertrainFilter;
+                    const isScooter = b.category === "Scooter";
+                    const matchesType = t === "All" || (t === "Motorcycle" && !isScooter) || (t === "Scooter" && isScooter);
+                    return matchesPowertrain && matchesType;
+                  }).length;
+
+                  if (count === 0 && t !== "All") return null;
+
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => setTypeFilter(t)}
+                      className={cn(
+                        "group relative flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all border-b-2",
+                        typeFilter === t
+                          ? "bg-slate-50 border-slate-900 text-slate-900"
+                          : "bg-white border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-200"
+                      )}
+                    >
+                      {t}
+                      <span className={cn(
+                        "px-1.5 py-0.5 rounded-full text-[9px] transition-colors",
+                        typeFilter === t ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+                      )}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                });
+              })()}
+            </div>
+          </div>
         </div>
 
         <div className="space-y-8">
