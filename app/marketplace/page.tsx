@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bike as BikeIcon, ChevronDown, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, User, Wrench, X } from "lucide-react";
+import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -287,6 +287,9 @@ export default function MarketplacePage() {
   const [metricFilter, setMetricFilter] = useState<string>("All");
   const [efficiencyFilter, setEfficiencyFilter] = useState<string>("All");
   const [brandFilter, setBrandFilter] = useState<string>("All");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  const advancedFilterCount = [metricFilter !== "All", efficiencyFilter !== "All"].filter(Boolean).length;
 
   const [selectedCategory, setSelectedCategory] = useState<SparePartCategory | "All">("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
@@ -671,74 +674,80 @@ export default function MarketplacePage() {
             </Badge>
           </div>
 
-          {/* Final UX Structure Navigation */}
-          <div className="mb-12 space-y-8">
-            {/* Level 1: Primary energy navigation */}
-            <div className="flex flex-col gap-4">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">01. Energy Source</p>
-              <div className="flex items-center gap-4">
-                {(["All", "ICE", "EV"] as const).map((p) => (
+          {/* Progressive Disclosure Navigation */}
+          <div className="mb-12 space-y-6">
+            {/* Level 1: Energy Source Tabs */}
+            <div className="flex items-center gap-3">
+              {(["All", "ICE", "EV"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => {
+                    setPowertrainFilter(p);
+                    setTypeFilter("All");
+                    setPriceRange([0, 1000000]);
+                    setMetricFilter("All");
+                    setEfficiencyFilter("All");
+                    setBrandFilter("All");
+                    setShowAdvancedFilters(false);
+                  }}
+                  className={cn(
+                    "min-w-[90px] px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 border-2",
+                    powertrainFilter === p
+                      ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-[1.03]"
+                      : "bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            {/* Level 2: Compact Inline Filter Bar */}
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/50 px-5 py-4">
+              {/* Category Toggle */}
+              <div className="flex bg-white rounded-xl p-1 border border-slate-200 h-9 items-center">
+                {["All", "Motorcycle", "Scooter"].map(t => (
                   <button
-                    key={p}
-                    onClick={() => {
-                      setPowertrainFilter(p);
-                      setTypeFilter("All");
-                      setPriceRange([0, 1000000]);
-                      setMetricFilter("All");
-                      setEfficiencyFilter("All");
-                      setBrandFilter("All");
-                    }}
+                    key={t}
+                    onClick={() => setTypeFilter(t as any)}
                     className={cn(
-                      "min-w-[100px] px-8 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all duration-300 border-2",
-                      powertrainFilter === p
-                        ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-[1.05]"
-                        : "bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                      "px-3 h-7 rounded-lg text-xs font-black uppercase tracking-wider transition-all",
+                      typeFilter === t ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
                     )}
                   >
-                    {p}
+                    {t}
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* Level 2: Secondary Filter Bar (Dynamic) */}
-            <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-slate-50/50 p-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">02. Refined Search</p>
+              <div className="h-7 w-px bg-slate-200 hidden md:block" />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                {/* Row 1, Col 1: Type Selection */}
-                <div className="flex flex-col gap-3">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
-                    01. Vehicle Category
-                  </span>
-                  <div className="flex bg-white rounded-xl p-1 border border-slate-200 w-fit h-9 items-center">
-                    {["All", "Motorcycle", "Scooter"].map(t => (
-                      <button
-                        key={t}
-                        onClick={() => setTypeFilter(t as any)}
-                        className={cn(
-                          "px-4 h-7 rounded-lg text-xs font-black uppercase tracking-wider transition-all",
-                          typeFilter === t ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
-                        )}
-                      >
-                        {t}
-                      </button>
-                    ))}
+              {/* Price Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div
+                    role="button"
+                    className={cn(
+                      "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2 cursor-pointer",
+                      priceRange[0] > 0 || priceRange[1] < 1000000
+                        ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                        : "bg-white border-slate-200 text-slate-500 hover:border-slate-400"
+                    )}
+                  >
+                    {priceRange[0] > 0 || priceRange[1] < 1000000
+                      ? `৳${priceRange[0]/1000}K – ${priceRange[1] >= 1000000 ? "10L+" : priceRange[1]/100000 + "L"}`
+                      : "Price"}
+                    <ChevronDown className="w-3.5 h-3.5 opacity-50" />
                   </div>
-                </div>
-
-                {/* Row 1, Col 2: Price Range Filter */}
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between border-l-2 border-slate-900 pl-3 h-4 mb-1">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">
-                      02. Price Range
-                    </span>
-                    <span className="text-[10px] font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded leading-none">
-                      ৳ {priceRange[0] / 1000}K - {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1] / 100000}L`}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-3 py-1">
+                </PopoverTrigger>
+                <PopoverContent className="w-[320px] p-4" align="start">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">Price Range</span>
+                      <span className="text-[10px] font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+                        ৳ {priceRange[0]/1000}K – {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1]/100000}L`}
+                      </span>
+                    </div>
                     <Slider
                       defaultValue={[0, 1000000]}
                       max={1000000}
@@ -747,278 +756,292 @@ export default function MarketplacePage() {
                       onValueChange={(val) => setPriceRange([val[0], val[1]])}
                       className="py-1"
                     />
-
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {[
                         { label: "All", range: [0, 1000000] },
-                        { label: "Under 1L", range: [0, 100000] },
+                        { label: "< 1L", range: [0, 100000] },
                         { label: "1L–2L", range: [100000, 200000] },
                         { label: "2L+", range: [200000, 1000000] }
                       ].map((preset) => (
                         <button
                           key={preset.label}
                           onClick={() => setPriceRange(preset.range as [number, number])}
-                          className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[8px] font-bold uppercase tracking-tighter text-slate-500 hover:border-slate-900 hover:text-slate-900 transition-all"
+                          className={cn(
+                            "px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-tight transition-all border",
+                            JSON.stringify(priceRange) === JSON.stringify(preset.range)
+                              ? "bg-slate-900 border-slate-900 text-white shadow-sm"
+                              : "bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                          )}
                         >
                           {preset.label}
                         </button>
                       ))}
                     </div>
                   </div>
-                </div>
+                </PopoverContent>
+              </Popover>
 
-                {/* Row 2, Col 1: Dynamic Metrics */}
-                <div className="flex flex-col gap-6 md:pt-6 border-t border-slate-100/60 lg:md:border-t-0">
-                  {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
-                    <div className="flex flex-col gap-3">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
-                        03. Engine Displacement
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {["All", "100-125", "126-150", "151-200", "201-350", "350+"].map(tier => (
-                          <button
-                            key={tier}
-                            onClick={() => setMetricFilter(tier)}
-                            className={cn(
-                              "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
-                              metricFilter === tier
-                                ? "bg-slate-900 border-slate-900 text-white shadow-md"
-                                : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                            )}
-                          >
-                            {tier === "All" ? "Any CC" : tier.replace("-", "–") + (tier.includes("+") ? "" : " cc")}
-                          </button>
+              {/* Brand Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div
+                    role="button"
+                    className={cn(
+                      "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2 cursor-pointer",
+                      brandFilter !== "All"
+                        ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                        : "bg-white border-slate-200 text-slate-500 hover:border-slate-400"
+                    )}
+                  >
+                    {brandFilter !== "All" ? brandFilter : "Brand"}
+                    <ChevronDown className="w-3.5 h-3.5 opacity-50" />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-[260px] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search brands..." className="text-xs" />
+                    <CommandList>
+                      <CommandEmpty className="py-2 text-center text-[10px] text-slate-500">No brand found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem onSelect={() => setBrandFilter("All")} className="text-xs uppercase font-bold">
+                          All Brands
+                        </CommandItem>
+                        {Array.from(new Set(bikes.map(b => b.brand))).sort().map(brand => (
+                          <CommandItem key={brand} onSelect={() => setBrandFilter(brand)} className="text-xs">
+                            {brand}
+                          </CommandItem>
                         ))}
-                      </div>
-                    </div>
-                  )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
 
-                  {(powertrainFilter === "All" || powertrainFilter === "EV") && (
-                    <div className="flex flex-col gap-3">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
-                        03. Battery Capacity (EV)
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {["All", "1-2", "2-4", "4+"].map(tier => (
-                          <button
-                            key={tier}
-                            onClick={() => setMetricFilter(tier)}
-                            className={cn(
-                              "h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-2",
-                              metricFilter === tier
-                                ? "bg-slate-900 border-slate-900 text-white shadow-md"
-                                : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                            )}
-                          >
-                            {tier !== "All" && (
-                              <span className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                metricFilter === tier ? "bg-emerald-400" : "bg-emerald-500/30"
-                              )} />
-                            )}
-                            {tier === "All" ? "Any Power" : tier.replace("-", "–") + " kWh"}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div className="h-7 w-px bg-slate-200 hidden md:block" />
 
-                {/* Row 2, Col 2: Efficiency / Range */}
-                <div className="flex flex-col gap-6 md:pt-6 border-t border-slate-100/60 lg:md:border-t-0">
-                  {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
-                    <div className="flex flex-col gap-3">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
-                        04. Efficiency (km/l)
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {["All", "40+", "50+", "60+"].map(tier => (
-                          <button
-                            key={tier}
-                            onClick={() => setEfficiencyFilter(tier)}
-                            className={cn(
-                              "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
-                              efficiencyFilter === tier
-                                ? "bg-slate-900 border-slate-900 text-white shadow-md"
-                                : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                            )}
-                          >
-                            {tier === "All" ? "Any" : tier}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {(powertrainFilter === "All" || powertrainFilter === "EV") && (
-                    <div className="flex flex-col gap-3">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
-                        04. Drive Range (km)
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {["All", "60", "100", "150+"].map(tier => (
-                          <button
-                            key={tier}
-                            onClick={() => setEfficiencyFilter(tier)}
-                            className={cn(
-                              "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
-                              efficiencyFilter === tier
-                                ? "bg-slate-900 border-slate-900 text-white shadow-md"
-                                : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                            )}
-                          >
-                            {tier !== "All" && (
-                              <span className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                efficiencyFilter === tier ? "bg-emerald-400" : "bg-emerald-500/30"
-                              )} />
-                            )}
-                            {tier === "All" ? "Any" : tier + (tier.includes("+") ? "" : " km+")}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Row 3: Brand Selection Area (Full Width) */}
-                <div className="flex flex-col gap-4 md:col-span-2 pt-8 border-t border-slate-200">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3 h-4 flex items-center mb-1">
-                    05. Preferred Manufacturer
+              {/* More Filters Toggle */}
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className={cn(
+                  "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
+                  showAdvancedFilters || advancedFilterCount > 0
+                    ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                    : "bg-white border-slate-200 text-slate-500 hover:border-slate-400"
+                )}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                Specs
+                {advancedFilterCount > 0 && (
+                  <span className="ml-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-white/20 text-[9px] font-black">
+                    {advancedFilterCount}
                   </span>
+                )}
+                {showAdvancedFilters ? <ChevronUp className="w-3 h-3 opacity-60" /> : <ChevronDown className="w-3 h-3 opacity-60" />}
+              </button>
 
-                  <div className="flex flex-wrap items-center gap-3">
-                    {/* Quick Taps */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {["Honda", "Yamaha", "Suzuki", "TVS"].map(brand => (
-                        <button
-                          key={brand}
-                          onClick={() => setBrandFilter(brandFilter === brand ? "All" : brand)}
-                          className={cn(
-                            "h-9 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2",
-                            brandFilter === brand
-                              ? "bg-slate-900 border-slate-900 text-white shadow-lg"
-                              : "bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:text-slate-700"
-                          )}
-                        >
-                          {brand}
-                        </button>
-                      ))}
-                    </div>
+              {/* Reset — right-aligned */}
+              {(typeFilter !== "All" || brandFilter !== "All" || metricFilter !== "All" || efficiencyFilter !== "All" || priceRange[0] > 0 || priceRange[1] < 1000000) && (
+                <button
+                  onClick={() => {
+                    setTypeFilter("All");
+                    setPriceRange([0, 1000000]);
+                    setMetricFilter("All");
+                    setEfficiencyFilter("All");
+                    setBrandFilter("All");
+                    setShowAdvancedFilters(false);
+                  }}
+                  className="ml-auto flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  Reset
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
-                    <div className="h-8 w-px bg-slate-200 mx-2 hidden md:block" />
+            {/* Level 3: Advanced Filters Panel (Progressive Disclosure) */}
+            <div
+              className={cn(
+                "overflow-hidden transition-all duration-300 ease-in-out",
+                showAdvancedFilters ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+              )}
+            >
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <p className="text-[11px] font-black uppercase tracking-widest text-slate-900 border-l-2 border-slate-900 pl-3">
+                    Technical Specifications
+                  </p>
+                  <button
+                    onClick={() => setShowAdvancedFilters(false)}
+                    className="text-[10px] font-bold uppercase text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    Collapse ↑
+                  </button>
+                </div>
 
-                    {/* Searchable More Dropdown */}
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <div
-                          role="button"
-                          className={cn(
-                            "h-9 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2 flex items-center gap-2 cursor-pointer",
-                            brandFilter !== "All" && !["Honda", "Yamaha", "Suzuki", "TVS"].includes(brandFilter)
-                              ? "bg-slate-900 border-slate-900 text-white shadow-lg"
-                              : "bg-white border-dashed border-slate-300 text-slate-400 hover:border-slate-400"
-                          )}
-                        >
-                          {brandFilter !== "All" && !["Honda", "Yamaha", "Suzuki", "TVS"].includes(brandFilter)
-                            ? brandFilter
-                            : "Explore Brands +"}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                  {/* Engine / Battery */}
+                  <div className="flex flex-col gap-5">
+                    {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
+                      <div className="flex flex-col gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Engine Displacement</span>
+                        <div className="flex flex-wrap gap-2">
+                          {["All", "100-125", "126-150", "151-200", "201-350", "350+"].map(tier => (
+                            <button
+                              key={tier}
+                              onClick={() => setMetricFilter(tier)}
+                              className={cn(
+                                "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
+                                metricFilter === tier
+                                  ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                                  : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                              )}
+                            >
+                              {tier === "All" ? "Any CC" : tier.replace("-", "–") + (tier.includes("+") ? "" : " cc")}
+                            </button>
+                          ))}
                         </div>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[240px] p-0" align="start">
-                        <Command>
-                          <CommandInput placeholder="Search catalog..." className="text-xs" />
-                          <CommandList>
-                            <CommandEmpty className="py-2 text-center text-[10px] text-slate-500">No results found.</CommandEmpty>
-                            <CommandGroup>
-                              <CommandItem
-                                onSelect={() => setBrandFilter("All")}
-                                className="text-xs uppercase font-bold"
-                              >
-                                Show All Brands
-                              </CommandItem>
-                              {Array.from(new Set(bikes.map(b => b.brand))).sort().map(brand => (
-                                <CommandItem
-                                  key={brand}
-                                  onSelect={() => setBrandFilter(brand)}
-                                  className="text-xs"
-                                >
-                                  {brand}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                      </div>
+                    )}
 
-                    {/* Reset Filter Action */}
-                    <button
-                      onClick={() => {
-                        setTypeFilter("All");
-                        setPriceRange([0, 1000000]);
-                        setMetricFilter("All");
-                        setEfficiencyFilter("All");
-                        setBrandFilter("All");
-                      }}
-                      className="ml-auto flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-red-500 transition-colors"
-                    >
-                      Reset Grid
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                    {(powertrainFilter === "All" || powertrainFilter === "EV") && (
+                      <div className="flex flex-col gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                          Battery Capacity
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {["All", "1-2", "2-4", "4+"].map(tier => (
+                            <button
+                              key={tier}
+                              onClick={() => setMetricFilter(tier)}
+                              className={cn(
+                                "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
+                                metricFilter === tier
+                                  ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                                  : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                              )}
+                            >
+                              {tier !== "All" && (
+                                <span className={cn(
+                                  "w-1.5 h-1.5 rounded-full",
+                                  metricFilter === tier ? "bg-emerald-400" : "bg-emerald-500/30"
+                                )} />
+                              )}
+                              {tier === "All" ? "Any Power" : tier.replace("-", "–") + " kWh"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Efficiency / Range */}
+                  <div className="flex flex-col gap-5">
+                    {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
+                      <div className="flex flex-col gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Fuel Efficiency</span>
+                        <div className="flex flex-wrap gap-2">
+                          {["All", "40+", "50+", "60+"].map(tier => (
+                            <button
+                              key={tier}
+                              onClick={() => setEfficiencyFilter(tier)}
+                              className={cn(
+                                "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border",
+                                efficiencyFilter === tier
+                                  ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                                  : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                              )}
+                            >
+                              {tier === "All" ? "Any" : tier + " km/l"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {(powertrainFilter === "All" || powertrainFilter === "EV") && (
+                      <div className="flex flex-col gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                          Drive Range
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {["All", "60", "100", "150+"].map(tier => (
+                            <button
+                              key={tier}
+                              onClick={() => setEfficiencyFilter(tier)}
+                              className={cn(
+                                "h-9 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border flex items-center gap-2",
+                                efficiencyFilter === tier
+                                  ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                                  : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                              )}
+                            >
+                              {tier !== "All" && (
+                                <span className={cn(
+                                  "w-1.5 h-1.5 rounded-full",
+                                  efficiencyFilter === tier ? "bg-emerald-400" : "bg-emerald-500/30"
+                                )} />
+                              )}
+                              {tier === "All" ? "Any" : tier + (tier.includes("+") ? "" : " km+") }
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Active Filters Row */}
-          <div className="flex flex-wrap items-center gap-2 mb-6 min-h-[32px]">
-            {(brandFilter !== "All" || typeFilter !== "All" || metricFilter !== "All" || efficiencyFilter !== "All" || powertrainFilter !== "All" || priceRange[0] > 0 || priceRange[1] < 1000000) && (
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-2 border-r border-slate-200 pr-4">Active Filters:</span>
-            )}
+            {/* Active Filters Row */}
+            <div className="flex flex-wrap items-center gap-2 min-h-[28px]">
+              {(brandFilter !== "All" || typeFilter !== "All" || metricFilter !== "All" || efficiencyFilter !== "All" || powertrainFilter !== "All" || priceRange[0] > 0 || priceRange[1] < 1000000) && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-2 border-r border-slate-200 pr-4">Filters:</span>
+              )}
 
-            {powertrainFilter !== "All" && (
-              <Badge variant="secondary" className="bg-slate-900 text-white pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                {powertrainFilter}
-                <button onClick={() => setPowertrainFilter("All")} className="hover:bg-white/20 p-0.5 rounded transition-colors"><X className="w-3 h-3" /></button>
-              </Badge>
-            )}
+              {powertrainFilter !== "All" && (
+                <Badge variant="secondary" className="bg-slate-900 text-white pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                  {powertrainFilter}
+                  <button onClick={() => setPowertrainFilter("All")} className="hover:bg-white/20 p-0.5 rounded transition-colors"><X className="w-3 h-3" /></button>
+                </Badge>
+              )}
 
-            {typeFilter !== "All" && (
-              <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
-                {typeFilter}
-                <button onClick={() => setTypeFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
-              </Badge>
-            )}
+              {typeFilter !== "All" && (
+                <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                  {typeFilter}
+                  <button onClick={() => setTypeFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                </Badge>
+              )}
 
-            {brandFilter !== "All" && (
-              <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
-                {brandFilter}
-                <button onClick={() => setBrandFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
-              </Badge>
-            )}
+              {brandFilter !== "All" && (
+                <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                  {brandFilter}
+                  <button onClick={() => setBrandFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                </Badge>
+              )}
 
-            {metricFilter !== "All" && (
-              <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
-                {metricFilter.replace("-", "–")} CC/kWh
-                <button onClick={() => setMetricFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
-              </Badge>
-            )}
+              {metricFilter !== "All" && (
+                <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                  {metricFilter.replace("-", "–")} CC/kWh
+                  <button onClick={() => setMetricFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                </Badge>
+              )}
 
-            {efficiencyFilter !== "All" && (
-              <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
-                Efficiency: {efficiencyFilter}
-                <button onClick={() => setEfficiencyFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
-              </Badge>
-            )}
+              {efficiencyFilter !== "All" && (
+                <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                  Efficiency: {efficiencyFilter}
+                  <button onClick={() => setEfficiencyFilter("All")} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                </Badge>
+              )}
 
-            {(priceRange[0] > 0 || priceRange[1] < 1000000) && (
-              <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
-                ৳{priceRange[0] / 1000}K - {priceRange[1] / 1000 >= 1000 ? "10L+" : priceRange[1] / 1000 + "K"}
-                <button onClick={() => setPriceRange([0, 1000000])} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
-              </Badge>
-            )}
+              {(priceRange[0] > 0 || priceRange[1] < 1000000) && (
+                <Badge variant="secondary" className="bg-slate-100 text-slate-900 pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                  ৳{priceRange[0] / 1000}K – {priceRange[1] / 1000 >= 1000 ? "10L+" : priceRange[1] / 1000 + "K"}
+                  <button onClick={() => setPriceRange([0, 1000000])} className="hover:bg-slate-200 p-0.5 rounded transition-colors text-slate-400"><X className="w-3 h-3" /></button>
+                </Badge>
+              )}
+            </div>
           </div>
 
           <div className="space-y-8">
