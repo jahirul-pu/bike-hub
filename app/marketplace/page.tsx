@@ -705,17 +705,17 @@ export default function MarketplacePage() {
           <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-slate-50/50 p-6">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">02. Refined Search</p>
             
-            <div className="flex flex-wrap items-center gap-y-6 gap-x-8">
-              {/* Type Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+              {/* Row 1, Col 1: Type Selection */}
               <div className="flex flex-col gap-2">
-                <span className="text-[9px] font-bold uppercase text-slate-400">Category</span>
-                <div className="flex bg-white rounded-lg p-1 border border-slate-200">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">01. Vehicle Category</span>
+                <div className="flex bg-white rounded-lg p-1 border border-slate-200 w-fit">
                   {["All", "Motorcycle", "Scooter"].map(t => (
                     <button
                       key={t}
                       onClick={() => setTypeFilter(t as any)}
                       className={cn(
-                        "px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                        "px-6 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
                         typeFilter === t ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -725,152 +725,162 @@ export default function MarketplacePage() {
                 </div>
               </div>
 
-              {/* Price Range Filter */}
-              <div className="flex flex-col gap-4 min-w-[280px]">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-bold uppercase text-slate-400">Price Range</span>
-                  <span className="text-[10px] font-black font-mono text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+              {/* Row 1, Col 2: Price Range Filter */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-end justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">02. Price Range</span>
+                  <span className="text-[10px] font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded leading-none">
                     ৳ {priceRange[0]/1000}K - {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1]/100000}L`}
                   </span>
                 </div>
                 
-                <Slider
-                  defaultValue={[0, 1000000]}
-                  max={1000000}
-                  step={10000}
-                  value={[priceRange[0], priceRange[1]]}
-                  onValueChange={(val) => setPriceRange([val[0], val[1]])}
-                  className="py-1"
-                />
+                <div className="flex flex-col gap-3 py-1">
+                  <Slider
+                    defaultValue={[0, 1000000]}
+                    max={1000000}
+                    step={10000}
+                    value={[priceRange[0], priceRange[1]]}
+                    onValueChange={(val) => setPriceRange([val[0], val[1]])}
+                    className="py-1"
+                  />
 
-                <div className="flex gap-2">
-                  {[
-                    { label: "All", range: [0, 1000000] },
-                    { label: "Under 1L", range: [0, 100000] },
-                    { label: "1L–2L", range: [100000, 200000] },
-                    { label: "2L+", range: [200000, 1000000] }
-                  ].map((preset) => (
-                    <button
-                      key={preset.label}
-                      onClick={() => setPriceRange(preset.range as [number, number])}
-                      className="px-2 py-1 rounded bg-white border border-slate-200 text-[8px] font-bold uppercase tracking-tighter text-slate-500 hover:border-slate-900 hover:text-slate-900 transition-all"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+                  <div className="flex gap-2">
+                    {[
+                      { label: "All", range: [0, 1000000] },
+                      { label: "Under 1L", range: [0, 100000] },
+                      { label: "1L–2L", range: [100000, 200000] },
+                      { label: "2L+", range: [200000, 1000000] }
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        onClick={() => setPriceRange(preset.range as [number, number])}
+                        className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[8px] font-bold uppercase tracking-tighter text-slate-500 hover:border-slate-900 hover:text-slate-900 transition-all"
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Dynamic Metrics: Engine CC and/or Battery Capacity */}
-              {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
-                <div className="flex flex-col gap-2">
-                  <span className="text-[9px] font-bold uppercase text-slate-400">Engine CC</span>
-                  <div className="flex flex-wrap gap-2">
-                    {["All", "100-125", "126-150", "151-200", "201-350", "350+"].map(tier => (
-                      <button
-                        key={tier}
-                        onClick={() => setMetricFilter(tier)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
-                          metricFilter === tier 
-                            ? "bg-slate-900 border-slate-900 text-white shadow-md scale-105" 
-                            : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                        )}
-                      >
-                        {tier === "All" ? "Any CC" : tier.replace("-", "–") + (tier.includes("+") ? "" : " cc")}
-                      </button>
-                    ))}
+              {/* Row 2, Col 1: Dynamic Metrics */}
+              <div className="flex flex-col gap-5">
+                {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">03. Engine Displacement (ICE)</span>
+                    <div className="flex flex-wrap gap-2">
+                      {["All", "100-125", "126-150", "151-200", "201-350", "350+"].map(tier => (
+                        <button
+                          key={tier}
+                          onClick={() => setMetricFilter(tier)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            metricFilter === tier 
+                              ? "bg-slate-900 border-slate-900 text-white shadow-md" 
+                              : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                          )}
+                        >
+                          {tier === "All" ? "Any CC" : tier.replace("-", "–") + (tier.includes("+") ? "" : " cc")}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {(powertrainFilter === "All" || powertrainFilter === "EV") && (
-                <div className="flex flex-col gap-2">
-                  <span className="text-[9px] font-bold uppercase text-slate-400">Battery Capacity</span>
-                  <div className="flex flex-wrap gap-2">
-                    {["All", "1-2", "2-4", "4+"].map(tier => (
-                      <button
-                        key={tier}
-                        onClick={() => setMetricFilter(tier)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
-                          metricFilter === tier 
-                            ? "bg-emerald-600 border-emerald-600 text-white shadow-md scale-105" 
-                            : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                        )}
-                      >
-                        {tier === "All" ? "Any Power" : tier.replace("-", "–") + " kWh"}
-                      </button>
-                    ))}
+                {(powertrainFilter === "All" || powertrainFilter === "EV") && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">03. Battery Capacity (EV)</span>
+                    <div className="flex flex-wrap gap-2">
+                      {["All", "1-2", "2-4", "4+"].map(tier => (
+                        <button
+                          key={tier}
+                          onClick={() => setMetricFilter(tier)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            metricFilter === tier 
+                              ? "bg-emerald-600 border-emerald-600 text-white shadow-md" 
+                              : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                          )}
+                        >
+                          {tier === "All" ? "Any Power" : tier.replace("-", "–") + " kWh"}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Range / Mileage Row */}
-              {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
-                <div className="flex flex-col gap-2">
-                  <span className="text-[9px] font-bold uppercase text-slate-400">Mileage (km/l)</span>
-                  <div className="flex flex-wrap gap-2">
-                    {["All", "40+", "50+", "60+"].map(tier => (
-                      <button
-                        key={tier}
-                        onClick={() => setEfficiencyFilter(tier)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
-                          efficiencyFilter === tier 
-                            ? "bg-slate-900 border-slate-900 text-white shadow-md scale-105" 
-                            : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                        )}
-                      >
-                        {tier === "All" ? "Any" : tier}
-                      </button>
-                    ))}
+              {/* Row 2, Col 2: Efficiency / Range */}
+              <div className="flex flex-col gap-5">
+                {(powertrainFilter === "All" || powertrainFilter === "ICE") && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">04. Efficiency (Fuel)</span>
+                    <div className="flex flex-wrap gap-2">
+                      {["All", "40+", "50+", "60+"].map(tier => (
+                        <button
+                          key={tier}
+                          onClick={() => setEfficiencyFilter(tier)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            efficiencyFilter === tier 
+                              ? "bg-slate-900 border-slate-900 text-white shadow-md" 
+                              : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                          )}
+                        >
+                          {tier === "All" ? "Any" : tier}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {(powertrainFilter === "All" || powertrainFilter === "EV") && (
-                <div className="flex flex-col gap-2">
-                  <span className="text-[9px] font-bold uppercase text-slate-400">Range (km)</span>
-                  <div className="flex flex-wrap gap-2">
-                    {["All", "60", "100", "150+"].map(tier => (
-                      <button
-                        key={tier}
-                        onClick={() => setEfficiencyFilter(tier)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
-                          efficiencyFilter === tier 
-                            ? "bg-emerald-600 border-emerald-600 text-white shadow-md scale-105" 
-                            : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                        )}
-                      >
-                        {tier === "All" ? "Any" : tier + (tier.includes("+") ? "" : " km+")}
-                      </button>
-                    ))}
+                {(powertrainFilter === "All" || powertrainFilter === "EV") && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">04. Drive Range (Electric)</span>
+                    <div className="flex flex-wrap gap-2">
+                      {["All", "60", "100", "150+"].map(tier => (
+                        <button
+                          key={tier}
+                          onClick={() => setEfficiencyFilter(tier)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            efficiencyFilter === tier 
+                              ? "bg-emerald-600 border-emerald-600 text-white shadow-md" 
+                              : "bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                          )}
+                        >
+                          {tier === "All" ? "Any" : tier + (tier.includes("+") ? "" : " km+")}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Brand Selection Area */}
-              <div className="flex flex-col gap-2 min-w-[240px]">
-                <span className="text-[9px] font-bold uppercase text-slate-400">Brand</span>
+              {/* Row 3: Brand Selection Area (Full Width) */}
+              <div className="flex flex-col gap-3 md:col-span-2 pt-6 border-t border-slate-200/60">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">05. Primary Manufacturer</span>
                 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3">
                   {/* Quick Taps */}
-                  {["Honda", "Yamaha", "Suzuki", "TVS"].map(brand => (
-                    <button
-                      key={brand}
-                      onClick={() => setBrandFilter(brandFilter === brand ? "All" : brand)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border",
-                        brandFilter === brand 
-                          ? "bg-slate-900 border-slate-900 text-white shadow-md" 
-                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-400"
-                      )}
-                    >
-                      {brand}
-                    </button>
-                  ))}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {["Honda", "Yamaha", "Suzuki", "TVS"].map(brand => (
+                      <button
+                        key={brand}
+                        onClick={() => setBrandFilter(brandFilter === brand ? "All" : brand)}
+                        className={cn(
+                          "px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2",
+                          brandFilter === brand 
+                            ? "bg-slate-900 border-slate-900 text-white shadow-lg" 
+                            : "bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                        )}
+                      >
+                        {brand}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="h-8 w-px bg-slate-200 mx-2 hidden md:block" />
 
                   {/* Searchable More Dropdown */}
                   <Popover>
@@ -878,37 +888,33 @@ export default function MarketplacePage() {
                       <div 
                         role="button"
                         className={cn(
-                          "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border flex items-center gap-1 cursor-pointer",
+                          "px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border-2 flex items-center gap-2 cursor-pointer",
                           brandFilter !== "All" && !["Honda", "Yamaha", "Suzuki", "TVS"].includes(brandFilter)
-                            ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                            ? "bg-slate-900 border-slate-900 text-white shadow-lg"
                             : "bg-white border-dashed border-slate-300 text-slate-400 hover:border-slate-400"
                         )}
                       >
                         {brandFilter !== "All" && !["Honda", "Yamaha", "Suzuki", "TVS"].includes(brandFilter) 
                           ? brandFilter 
-                          : "Explore +"}
+                          : "Explore Brands +"}
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0" align="start">
+                    <PopoverContent className="w-[240px] p-0" align="start">
                       <Command>
-                        <CommandInput placeholder="Search brands..." className="text-xs" />
+                        <CommandInput placeholder="Search catalog..." className="text-xs" />
                         <CommandList>
-                          <CommandEmpty className="py-2 text-center text-[10px] text-slate-500">No brand found.</CommandEmpty>
+                          <CommandEmpty className="py-2 text-center text-[10px] text-slate-500">No results found.</CommandEmpty>
                           <CommandGroup>
                             <CommandItem
-                              onSelect={() => {
-                                setBrandFilter("All");
-                              }}
+                              onSelect={() => setBrandFilter("All")}
                               className="text-xs uppercase font-bold"
                             >
-                              All Brands
+                              Show All Brands
                             </CommandItem>
                             {Array.from(new Set(bikes.map(b => b.brand))).sort().map(brand => (
                               <CommandItem
                                 key={brand}
-                                onSelect={() => {
-                                  setBrandFilter(brand);
-                                }}
+                                onSelect={() => setBrandFilter(brand)}
                                 className="text-xs"
                               >
                                 {brand}
@@ -919,22 +925,23 @@ export default function MarketplacePage() {
                       </Command>
                     </PopoverContent>
                   </Popover>
+
+                  {/* Reset Filter Action */}
+                  <button 
+                    onClick={() => {
+                      setTypeFilter("All");
+                      setPriceRange([0, 1000000]);
+                      setMetricFilter("All");
+                      setEfficiencyFilter("All");
+                      setBrandFilter("All");
+                    }}
+                    className="ml-auto flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    Reset Grid
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
-
-              {/* Reset Filter Action */}
-              <button 
-                onClick={() => {
-                  setTypeFilter("All");
-                  setPriceRange([0, 1000000]);
-                  setMetricFilter("All");
-                  setEfficiencyFilter("All");
-                  setBrandFilter("All");
-                }}
-                className="ml-auto text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors"
-              >
-                Clear All
-              </button>
             </div>
           </div>
         </div>
