@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRightLeft,
+  Bike as BikeIcon,
   ChevronDown,
   Flame,
   ListChecks,
@@ -234,6 +235,45 @@ const popularComparisons: PopularComparison[] = [
   { slug1: "yamaha-r15-v4", slug2: "honda-nx-200", label: "R15 V4 vs NX 200" },
 ];
 
+/* ─────────────────── Bike Thumbnail ─────────────────── */
+
+function BikeThumb({ bike, size = "md" }: { bike: Bike; size?: "sm" | "md" | "lg" }) {
+  const hasImage = bike.images && bike.images.length > 0;
+  const sizeClasses = {
+    sm: "h-8 w-8 rounded-lg",
+    md: "h-10 w-10 rounded-xl",
+    lg: "h-full w-full rounded-xl",
+  };
+  const iconClasses = {
+    sm: "h-3.5 w-3.5",
+    md: "h-4 w-4",
+    lg: "h-8 w-8",
+  };
+
+  if (hasImage) {
+    return (
+      <div className={cn("shrink-0 overflow-hidden bg-slate-100", sizeClasses[size])}>
+        <img
+          src={bike.images![0]}
+          alt={`${bike.brand} ${bike.model}`}
+          className="h-full w-full object-cover object-center"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex shrink-0 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-50",
+        sizeClasses[size]
+      )}
+    >
+      <BikeIcon className={cn("text-slate-300", iconClasses[size])} />
+    </div>
+  );
+}
+
 /* ─────────────────── Bike Selector Dropdown ─────────────────── */
 
 function BikeSelector({
@@ -277,58 +317,73 @@ function BikeSelector({
   }, [search, disabledSlugs]);
 
   if (selectedBike) {
+    const hasImage = selectedBike.images && selectedBike.images.length > 0;
     return (
       <div className="group relative">
-        <div className="relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-amber-300 hover:shadow-md">
+        <div className="relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-sm transition-all duration-300 hover:border-amber-300 hover:shadow-md">
           {/* Powertrain strip */}
           <div
             className={cn(
-              "absolute left-0 top-0 h-1 w-full",
+              "absolute left-0 top-0 z-10 h-1 w-full",
               selectedBike.powertrain === "ICE"
                 ? "bg-gradient-to-r from-red-400 to-orange-400"
                 : "bg-gradient-to-r from-emerald-400 to-teal-400"
             )}
           />
 
-          <div className="mt-1 flex items-start justify-between gap-2">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                {slotLabel}
-              </p>
-              <p className="mt-1 font-heading text-2xl uppercase tracking-wide text-slate-900 sm:text-3xl">
-                {selectedBike.brand}
-              </p>
-              <p className="font-heading text-lg uppercase tracking-wide text-slate-600">
-                {selectedBike.model}
-              </p>
+          {/* Bike Image */}
+          <div className="relative h-36 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50">
+            {hasImage ? (
+              <img
+                src={selectedBike.images![0]}
+                alt={`${selectedBike.brand} ${selectedBike.model}`}
+                className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-slate-300">
+                <BikeIcon className="h-10 w-10" />
+                <span className="text-[9px] font-medium uppercase tracking-widest text-slate-400">No Image</span>
+              </div>
+            )}
+            {/* Badges overlay on image */}
+            <div className="absolute left-2.5 top-3 flex gap-1.5">
+              <Badge className="bg-slate-900/75 text-[10px] text-white backdrop-blur-sm hover:bg-slate-900/75">
+                {selectedBike.category}
+              </Badge>
             </div>
+            <div className="absolute right-2.5 top-3">
+              <Badge variant="outline" className={cn(powertrainBadgeClass(selectedBike.powertrain), "backdrop-blur-sm text-[10px]")}>
+                {selectedBike.powertrain}
+              </Badge>
+            </div>
+            {/* Remove button overlaid on image */}
             <button
               type="button"
               onClick={onRemove}
-              className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+              className="absolute right-2.5 bottom-2.5 rounded-full bg-white/90 p-1.5 text-slate-400 shadow-sm backdrop-blur-sm transition-colors hover:bg-red-50 hover:text-red-500"
               aria-label="Remove bike"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Badge variant="outline" className={powertrainBadgeClass(selectedBike.powertrain)}>
-              {selectedBike.powertrain}
-            </Badge>
-            <Badge variant="outline" className="border-slate-200 text-slate-600">
-              {selectedBike.category}
-            </Badge>
-          </div>
+          <div className="p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+              {slotLabel}
+            </p>
+            <p className="mt-0.5 font-heading text-2xl uppercase tracking-wide text-slate-900 sm:text-3xl">
+              {selectedBike.brand} {selectedBike.model}
+            </p>
 
-          <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
-            <div>
-              <span className="text-slate-400">Price</span>
-              <p className="font-semibold text-slate-800">{formatBdt(selectedBike.priceBdt)}</p>
-            </div>
-            <div>
-              <span className="text-slate-400">Top Speed</span>
-              <p className="font-semibold text-slate-800">{selectedBike.topSpeedKph} km/h</p>
+            <div className="mt-2.5 grid grid-cols-2 gap-2 text-xs text-slate-600">
+              <div className="rounded-lg bg-slate-50 p-2">
+                <span className="text-slate-400">Price</span>
+                <p className="font-semibold text-slate-800">{formatBdt(selectedBike.priceBdt)}</p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-2">
+                <span className="text-slate-400">Top Speed</span>
+                <p className="font-semibold text-slate-800">{selectedBike.topSpeedKph} km/h</p>
+              </div>
             </div>
           </div>
         </div>
@@ -397,10 +452,11 @@ function BikeSelector({
                   onSelect(bike);
                   setOpen(false);
                 }}
-                className="flex w-full items-center justify-between gap-3 border-b border-slate-50 px-4 py-3 text-left transition-colors hover:bg-amber-50/60"
+                className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-3 text-left transition-colors hover:bg-amber-50/60"
               >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">
+                <BikeThumb bike={bike} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-slate-800">
                     {bike.brand} {bike.model}
                   </p>
                   <p className="text-xs text-slate-500">
@@ -654,6 +710,7 @@ export default function ComparePage() {
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber-300 via-orange-400 to-amber-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
                   <div className="flex items-center gap-3">
+                    <BikeThumb bike={bike1} size="md" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-slate-800">
                         {bike1.brand} {bike1.model}
@@ -675,6 +732,7 @@ export default function ComparePage() {
                         {bike2.category} · {bike2.powertrain}
                       </p>
                     </div>
+                    <BikeThumb bike={bike2} size="md" />
                   </div>
 
                   {/* Price comparison */}
