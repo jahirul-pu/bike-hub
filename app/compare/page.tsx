@@ -510,7 +510,12 @@ export default function ComparePage() {
   const [selectedBikes, setSelectedBikes] = useState<(Bike | null)[]>([null, null]);
   const [showComparison, setShowComparison] = useState(false);
   const [activeProfile, setActiveProfile] = useState<ScoringProfile>("balanced");
+  const [mounted, setMounted] = useState(false);
   const comparisonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const disabledSlugs = useMemo(() => {
     return new Set(selectedBikes.filter(Boolean).map((b) => b!.slug));
@@ -675,7 +680,7 @@ export default function ComparePage() {
             <button
               type="button"
               onClick={handleCompare}
-              disabled={!canCompare || hasMixedPowertrains}
+              disabled={!mounted || !canCompare || hasMixedPowertrains}
               className={cn(
                 "group relative inline-flex items-center gap-3 rounded-2xl px-10 py-4 text-lg font-bold tracking-wide transition-all duration-300",
                 canCompare && !hasMixedPowertrains
