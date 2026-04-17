@@ -1012,6 +1012,52 @@ export default function ComparePage() {
                       </TableRow>
                     );
                   })}
+
+                  {/* ═══════ CRITICAL ACTION LAYER ═══════ */}
+                  <TableRow className="bg-amber-50/40">
+                    <TableCell className="align-top py-6">
+                      <div className="font-heading text-xl uppercase tracking-wide text-slate-900">
+                        Take Action
+                      </div>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        Your next steps
+                      </p>
+                    </TableCell>
+                    {validBikes.map((bike) => (
+                      <TableCell key={`${bike.slug}-actions`} className="align-top py-6">
+                        <div className="flex flex-col gap-2">
+                          <Link
+                            href={`/marketplace?query=${bike.model}`}
+                            className={cn(
+                              buttonVariants({ size: "sm" }),
+                              "w-full bg-slate-900 text-white shadow hover:bg-slate-800"
+                            )}
+                          >
+                            <Search className="mr-1.5 h-3.5 w-3.5" />
+                            View Used Listings
+                          </Link>
+                          <Link
+                            href={`/showrooms?brands=${bike.brand}`}
+                            className={cn(
+                              buttonVariants({ size: "sm", variant: "outline" }),
+                              "w-full border-slate-300 bg-white"
+                            )}
+                          >
+                            Find Showrooms
+                          </Link>
+                          <Link
+                            href={`/accessories?bike=${bike.slug}`}
+                            className={cn(
+                              buttonVariants({ size: "sm", variant: "outline" }),
+                              "w-full border-slate-300 bg-white"
+                            )}
+                          >
+                            Buy Parts
+                          </Link>
+                        </div>
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 </TableBody>
               </Table>
             </div>
