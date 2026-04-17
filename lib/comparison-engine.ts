@@ -331,17 +331,22 @@ export function detectStrengths(bikeScores: BikeScore[]): StrengthComparison[] {
     const bestScore = best.normalizedMetrics[key];
     const worstScore = worst.normalizedMetrics[key];
 
-    if (bestScore === worstScore) continue;
+    const bestRaw = best.rawMetrics[key];
+    const worstRaw = worst.rawMetrics[key];
 
-    // Use raw values for display
-    const percentDiff = worstScore > 0
-      ? ((bestScore - worstScore) / worstScore) * 100
-      : bestScore > 0 ? 100 : 0;
+    if (bestRaw === worstRaw) continue;
+
+    // Use raw values for difference calculation to prevent artificial inflation from 0-10 normalization
+    const diff = Math.abs(bestRaw - worstRaw);
+    const denominator = Math.max(bestRaw, worstRaw);
+    
+    const percentDiff = denominator > 0 ? (diff / denominator) * 100 : 0;
 
     let tier: StrengthTier = "similar";
-    if (percentDiff > 15) {
+    // Adjust thresholds for raw metrics
+    if (percentDiff > 18) {
       tier = "significantly_better";
-    } else if (percentDiff > 5) {
+    } else if (percentDiff > 8) {
       tier = "better";
     }
 
