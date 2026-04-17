@@ -700,69 +700,6 @@ export default function ComparePage() {
         </div>
       </section>
 
-      {/* ═══════ POPULAR COMPARISONS ═══════ */}
-      <section className="mt-10">
-        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-6 backdrop-blur-sm">
-          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.15em] text-slate-400">
-            <Flame className="h-4 w-4 text-orange-400" />
-            Popular Comparisons
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {popularComparisons.map((comp) => {
-              const bike1 = bikes.find((b) => b.slug === comp.slug1);
-              const bike2 = bikes.find((b) => b.slug === comp.slug2);
-              if (!bike1 || !bike2) return null;
-
-              return (
-                <button
-                  key={`${comp.slug1}-${comp.slug2}`}
-                  type="button"
-                  onClick={() => loadPopularComparison(comp)}
-                  className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 text-left transition-all duration-300 hover:border-amber-300 hover:shadow-md hover:shadow-amber-100/40"
-                >
-                  {/* Gradient accent */}
-                  <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber-300 via-orange-400 to-amber-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                  <div className="flex items-center gap-3">
-                    <BikeThumb bike={bike1} size="md" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        {bike1.brand} {bike1.model}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-wider text-slate-400">
-                        {bike1.category} · {bike1.powertrain}
-                      </p>
-                    </div>
-
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[10px] font-black text-amber-700">
-                      VS
-                    </div>
-
-                    <div className="min-w-0 flex-1 text-right">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        {bike2.brand} {bike2.model}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-wider text-slate-400">
-                        {bike2.category} · {bike2.powertrain}
-                      </p>
-                    </div>
-                    <BikeThumb bike={bike2} size="md" />
-                  </div>
-
-                  {/* Price comparison */}
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] text-slate-500">
-                    <span>{formatBdt(bike1.priceBdt)}</span>
-                    <ArrowRightLeft className="h-3 w-3 text-slate-300 transition-colors group-hover:text-amber-400" />
-                    <span>{formatBdt(bike2.priceBdt)}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* ═══════ COMPARISON TABLE (shows after clicking Compare Now) ═══════ */}
       {showComparison && validBikes.length >= 2 && !hasMixedPowertrains && (
         <section ref={comparisonRef} className="mt-10 scroll-mt-24">
@@ -1089,6 +1026,68 @@ export default function ComparePage() {
           </div>
         </section>
       )}
+      {/* ═══════ POPULAR COMPARISONS ═══════ */}
+      <section className="mt-14">
+        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-6 backdrop-blur-sm">
+          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.15em] text-slate-400">
+            <Flame className="h-4 w-4 text-orange-400" />
+            Popular Comparisons
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {popularComparisons.map((comp) => {
+              const bike1 = bikes.find((b) => b.slug === comp.slug1);
+              const bike2 = bikes.find((b) => b.slug === comp.slug2);
+              if (!bike1 || !bike2) return null;
+
+              return (
+                <button
+                  key={`${comp.slug1}-${comp.slug2}`}
+                  type="button"
+                  onClick={() => loadPopularComparison(comp)}
+                  className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 text-left transition-all duration-300 hover:border-amber-300 hover:shadow-md hover:shadow-amber-100/40"
+                >
+                  {/* Gradient accent */}
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber-300 via-orange-400 to-amber-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                  <div className="flex items-center gap-3">
+                    <BikeThumb bike={bike1} size="md" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-800">
+                        {bike1.brand} {bike1.model}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wider text-slate-400">
+                        {bike1.category} · {bike1.powertrain}
+                      </p>
+                    </div>
+
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[10px] font-black text-amber-700">
+                      VS
+                    </div>
+
+                    <div className="min-w-0 flex-1 text-right">
+                      <p className="truncate text-sm font-semibold text-slate-800">
+                        {bike2.brand} {bike2.model}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wider text-slate-400">
+                        {bike2.category} · {bike2.powertrain}
+                      </p>
+                    </div>
+                    <BikeThumb bike={bike2} size="md" />
+                  </div>
+
+                  {/* Price comparison */}
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] text-slate-500">
+                    <span>{formatBdt(bike1.priceBdt)}</span>
+                    <ArrowRightLeft className="h-3 w-3 text-slate-300 transition-colors group-hover:text-amber-400" />
+                    <span>{formatBdt(bike2.priceBdt)}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
