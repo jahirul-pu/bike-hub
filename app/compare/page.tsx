@@ -6,6 +6,8 @@ import {
   AlertTriangle,
   ArrowRightLeft,
   Bike as BikeIcon,
+  Brain,
+  Check,
   ChevronDown,
   Flame,
   ListChecks,
@@ -13,6 +15,7 @@ import {
   Search,
   Sparkles,
   Trash2,
+  Trophy,
   X,
   Zap,
 } from "lucide-react";
@@ -490,6 +493,148 @@ function VsDivider() {
   );
 }
 
+/* ─────────────────── Smart Summary Generator ─────────────────── */
+
+type BikeAdvantage = {
+  text: string;
+  metric?: string;
+};
+
+function generateSmartSummary(bikesToCompare: Bike[]): Map<string, BikeAdvantage[]> {
+  const result = new Map<string, BikeAdvantage[]>();
+
+  for (const bike of bikesToCompare) {
+    result.set(bike.slug, []);
+  }
+
+  const allPowertrain = bikesToCompare[0]?.powertrain ?? "ICE";
+
+  // --- Price (lower is better) ---
+  const cheapest = bikesToCompare.reduce((a, b) => (a.priceBdt < b.priceBdt ? a : b));
+  const mostExpensive = bikesToCompare.reduce((a, b) => (a.priceBdt > b.priceBdt ? a : b));
+  if (mostExpensive.priceBdt - cheapest.priceBdt > 15000) {
+    result.get(cheapest.slug)!.push({
+      text: "More affordable price",
+      metric: `${formatBdt(cheapest.priceBdt)} vs ${formatBdt(mostExpensive.priceBdt)}`,
+    });
+  }
+
+  // --- Mileage / Range (higher is better) ---
+  if (allPowertrain === "ICE") {
+    const best = bikesToCompare.reduce((a, b) => ((a.mileageKmpl ?? 0) > (b.mileageKmpl ?? 0) ? a : b));
+    const worst = bikesToCompare.reduce((a, b) => ((a.mileageKmpl ?? 0) < (b.mileageKmpl ?? 0) ? a : b));
+    if ((best.mileageKmpl ?? 0) - (worst.mileageKmpl ?? 0) >= 3) {
+      result.get(best.slug)!.push({
+        text: "Better fuel efficiency",
+        metric: `${best.mileageKmpl} km/l vs ${worst.mileageKmpl} km/l`,
+      });
+    }
+  } else {
+    const best = bikesToCompare.reduce((a, b) => ((a.rangeKm ?? 0) > (b.rangeKm ?? 0) ? a : b));
+    const worst = bikesToCompare.reduce((a, b) => ((a.rangeKm ?? 0) < (b.rangeKm ?? 0) ? a : b));
+    if ((best.rangeKm ?? 0) - (worst.rangeKm ?? 0) >= 10) {
+      result.get(best.slug)!.push({
+        text: "Longer range per charge",
+        metric: `${best.rangeKm} km vs ${worst.rangeKm} km`,
+      });
+    }
+  }
+
+  // --- Top Speed (higher is better) ---
+  const fastest = bikesToCompare.reduce((a, b) => (a.topSpeedKph > b.topSpeedKph ? a : b));
+  const slowest = bikesToCompare.reduce((a, b) => (a.topSpeedKph < b.topSpeedKph ? a : b));
+  if (fastest.topSpeedKph - slowest.topSpeedKph >= 5) {
+    result.get(fastest.slug)!.push({
+      text: "Higher top speed",
+      metric: `${fastest.topSpeedKph} km/h vs ${slowest.topSpeedKph} km/h`,
+    });
+  }
+
+  // --- Torque (higher is better) ---
+  const mostTorque = bikesToCompare.reduce((a, b) => (a.torqueNm > b.torqueNm ? a : b));
+  const leastTorque = bikesToCompare.reduce((a, b) => (a.torqueNm < b.torqueNm ? a : b));
+  if (mostTorque.torqueNm - leastTorque.torqueNm >= 1.5) {
+    result.get(mostTorque.slug)!.push({
+      text: "More pulling power (torque)",
+      metric: `${mostTorque.torqueNm} Nm vs ${leastTorque.torqueNm} Nm`,
+    });
+  }
+
+  // --- Power (higher is better) ---
+  if (allPowertrain === "ICE") {
+    const withPower = bikesToCompare.filter((b) => b.displacementCc);
+    if (withPower.length >= 2) {
+      const mostPower = withPower.reduce((a, b) => ((a.displacementCc ?? 0) > (b.displacementCc ?? 0) ? a : b));
+      const leastPower = withPower.reduce((a, b) => ((a.displacementCc ?? 0) < (b.displacementCc ?? 0) ? a : b));
+      if ((mostPower.displacementCc ?? 0) - (leastPower.displacementCc ?? 0) >= 10) {
+        result.get(mostPower.slug)!.push({
+          text: "Larger engine displacement",
+          metric: `${mostPower.displacementCc} cc vs ${leastPower.displacementCc} cc`,
+        });
+      }
+    }
+  } else {
+    const withPower = bikesToCompare.filter((b) => b.motorPowerKw);
+    if (withPower.length >= 2) {
+      const mostPower = withPower.reduce((a, b) => ((a.motorPowerKw ?? 0) > (b.motorPowerKw ?? 0) ? a : b));
+      const leastPower = withPower.reduce((a, b) => ((a.motorPowerKw ?? 0) < (b.motorPowerKw ?? 0) ? a : b));
+      if ((mostPower.motorPowerKw ?? 0) - (leastPower.motorPowerKw ?? 0) >= 0.5) {
+        result.get(mostPower.slug)!.push({
+          text: "More powerful motor",
+          metric: `${mostPower.motorPowerKw} kW vs ${leastPower.motorPowerKw} kW`,
+        });
+      }
+    }
+  }
+
+  // --- Weight (lower is better) ---
+  const lightest = bikesToCompare.reduce((a, b) => (a.weightKg < b.weightKg ? a : b));
+  const heaviest = bikesToCompare.reduce((a, b) => (a.weightKg > b.weightKg ? a : b));
+  if (heaviest.weightKg - lightest.weightKg >= 5) {
+    result.get(lightest.slug)!.push({
+      text: "Lighter weight",
+      metric: `${lightest.weightKg} kg vs ${heaviest.weightKg} kg`,
+    });
+  }
+
+  // --- Seat Height (lower can be better for comfort) ---
+  const lowestSeat = bikesToCompare.reduce((a, b) => (a.seatHeightMm < b.seatHeightMm ? a : b));
+  const highestSeat = bikesToCompare.reduce((a, b) => (a.seatHeightMm > b.seatHeightMm ? a : b));
+  if (highestSeat.seatHeightMm - lowestSeat.seatHeightMm >= 15) {
+    result.get(lowestSeat.slug)!.push({
+      text: "Lower seat (easier for shorter riders)",
+      metric: `${lowestSeat.seatHeightMm} mm vs ${highestSeat.seatHeightMm} mm`,
+    });
+  }
+
+  // --- Ground Clearance (higher is better for rough roads) ---
+  const highestGC = bikesToCompare.reduce((a, b) => (a.groundClearanceMm > b.groundClearanceMm ? a : b));
+  const lowestGC = bikesToCompare.reduce((a, b) => (a.groundClearanceMm < b.groundClearanceMm ? a : b));
+  if (highestGC.groundClearanceMm - lowestGC.groundClearanceMm >= 10) {
+    result.get(highestGC.slug)!.push({
+      text: "Better ground clearance",
+      metric: `${highestGC.groundClearanceMm} mm vs ${lowestGC.groundClearanceMm} mm`,
+    });
+  }
+
+  // --- Fuel Tank (larger is better for distance) ---
+  if (allPowertrain === "ICE") {
+    const withTank = bikesToCompare.filter((b) => b.fuelTankLiters);
+    if (withTank.length >= 2) {
+      const biggestTank = withTank.reduce((a, b) => ((a.fuelTankLiters ?? 0) > (b.fuelTankLiters ?? 0) ? a : b));
+      const smallestTank = withTank.reduce((a, b) => ((a.fuelTankLiters ?? 0) < (b.fuelTankLiters ?? 0) ? a : b));
+      if ((biggestTank.fuelTankLiters ?? 0) - (smallestTank.fuelTankLiters ?? 0) >= 1.5) {
+        result.get(biggestTank.slug)!.push({
+          text: "Larger fuel tank",
+          metric: `${biggestTank.fuelTankLiters} L vs ${smallestTank.fuelTankLiters} L`,
+        });
+      }
+    }
+  }
+
+  return result;
+}
+
 /* ─────────────────── Main Compare Page ─────────────────── */
 
 export default function ComparePage() {
@@ -762,6 +907,87 @@ export default function ComparePage() {
               {validBikes.length} bikes compared
             </Badge>
           </div>
+
+          {/* ═══════ SMART SUMMARY ═══════ */}
+          {(() => {
+            const summaryMap = generateSmartSummary(validBikes);
+            const hasAnyAdvantage = Array.from(summaryMap.values()).some((v) => v.length > 0);
+            if (!hasAnyAdvantage) return null;
+
+            return (
+              <div className="mb-6 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/60 p-6 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-200/50">
+                    <Brain className="h-4.5 w-4.5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-2xl uppercase tracking-wide text-slate-900 sm:text-3xl">
+                      Which one should you buy?
+                    </h3>
+                    <p className="text-xs text-slate-500">Based on spec analysis</p>
+                  </div>
+                </div>
+
+                <div className={cn(
+                  "mt-5 grid gap-4",
+                  validBikes.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"
+                )}>
+                  {validBikes.map((bike, bikeIdx) => {
+                    const advantages = summaryMap.get(bike.slug) ?? [];
+                    if (advantages.length === 0) return null;
+
+                    // Assign distinct colors per slot
+                    const colorSets = [
+                      { border: "border-blue-200", bg: "bg-blue-50/60", icon: "text-blue-600", badge: "bg-blue-100 text-blue-700", check: "text-blue-500" },
+                      { border: "border-emerald-200", bg: "bg-emerald-50/60", icon: "text-emerald-600", badge: "bg-emerald-100 text-emerald-700", check: "text-emerald-500" },
+                      { border: "border-violet-200", bg: "bg-violet-50/60", icon: "text-violet-600", badge: "bg-violet-100 text-violet-700", check: "text-violet-500" },
+                    ];
+                    const colors = colorSets[bikeIdx % colorSets.length];
+
+                    return (
+                      <div
+                        key={bike.slug}
+                        className={cn(
+                          "rounded-xl border p-4 transition-all duration-300 hover:shadow-md",
+                          colors.border,
+                          colors.bg
+                        )}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <BikeThumb bike={bike} size="sm" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                              Choose
+                            </p>
+                            <p className="truncate font-heading text-xl uppercase tracking-wide text-slate-900">
+                              {bike.brand} {bike.model}
+                            </p>
+                          </div>
+                          {advantages.length >= 3 && (
+                            <Trophy className={cn("h-4.5 w-4.5 shrink-0", colors.icon)} />
+                          )}
+                        </div>
+
+                        <div className="mt-3 space-y-2">
+                          {advantages.map((adv) => (
+                            <div key={adv.text} className="flex items-start gap-2">
+                              <Check className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", colors.check)} />
+                              <div>
+                                <p className="text-sm font-medium text-slate-700">{adv.text}</p>
+                                {adv.metric && (
+                                  <p className="text-[11px] text-slate-400">{adv.metric}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="overflow-x-auto">
