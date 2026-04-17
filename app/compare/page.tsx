@@ -512,6 +512,24 @@ export default function ComparePage() {
   const [activeProfile, setActiveProfile] = useState<ScoringProfile>("balanced");
   const comparisonRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    // Only run on the initial load if running in the browser
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const bikeSlug = params.get("bikes");
+      if (bikeSlug) {
+        const bike = bikes.find(b => b.slug === bikeSlug);
+        if (bike) {
+          // Pre-fill the first slot with the bike from the URL
+          setSelectedBikes([bike, null]);
+          
+          // Clear query param without a page reload so refresh doesn't trigger it again
+          window.history.replaceState({}, "", "/compare");
+        }
+      }
+    }
+  }, []);
+
   const disabledSlugs = useMemo(() => {
     return new Set(selectedBikes.filter(Boolean).map((b) => b!.slug));
   }, [selectedBikes]);
