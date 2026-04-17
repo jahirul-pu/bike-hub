@@ -95,7 +95,7 @@ function getIceSpecRows(): SpecRow[] {
       label: "Power Output",
       valueFor: (bike) => bike.maxPower ?? `${Number((((bike.displacementCc ?? 125) * 0.085)).toFixed(1))} hp`,
     },
-    { label: "Torque", valueFor: (bike) => `${bike.torqueNm} Nm` },
+    { label: "Torque", valueFor: (bike) => bike.maxTorque ?? `${bike.torqueNm} Nm` },
     { label: "Top Speed", valueFor: (bike) => `${bike.topSpeedKph} km/h` },
     { label: "Fuel Type", valueFor: () => "Petrol" },
     { label: "Fuel Tank", valueFor: (bike) => `${bike.fuelTankLiters ?? "-"} L` },
@@ -150,7 +150,7 @@ function getEvSpecRows(): SpecRow[] {
       label: "Peak Power",
       valueFor: (bike) => `${Number(((bike.motorPowerKw ?? 4) * 1.25).toFixed(1))} kW`,
     },
-    { label: "Torque", valueFor: (bike) => `${bike.torqueNm} Nm` },
+    { label: "Torque", valueFor: (bike) => bike.maxTorque ?? `${bike.torqueNm} Nm` },
     { label: "Top Speed", valueFor: (bike) => `${bike.topSpeedKph} km/h` },
     {
       label: "Acceleration",

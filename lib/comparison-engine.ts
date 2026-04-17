@@ -212,12 +212,25 @@ function computeCostPerKm(bike: Bike): number {
 }
 
 /**
+ * Extract torque metric (unified for ICE and EV).
+ */
+function extractTorque(bike: Bike): number {
+  if (bike.torqueNm) return bike.torqueNm;
+  
+  if (bike.maxTorque) {
+    const match = bike.maxTorque.match(/([\d.]+)\s*Nm/i);
+    if (match?.[1]) return Number(match[1]);
+  }
+  return 0;
+}
+
+/**
  * Extract all raw metric values from a bike.
  */
 export function extractRawMetrics(bike: Bike): Record<MetricKey, number> {
   return {
     power: extractPower(bike),
-    torque: bike.torqueNm,
+    torque: extractTorque(bike),
     mileage: bike.powertrain === "ICE" ? (bike.mileageKmpl ?? 0) : (bike.rangeKm ?? 0),
     costPerKm: computeCostPerKm(bike),
     weight: bike.weightKg,
