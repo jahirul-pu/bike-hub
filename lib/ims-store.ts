@@ -8,58 +8,7 @@ export type ImsInventoryPart = {
   stockQty: number;
 };
 
-const inventoryByPartId = new Map<string, ImsInventoryPart>([
-  [
-    "part-001",
-    {
-      id: "part-001",
-      name: "Chain & Sprocket Kit",
-      category: "Parts",
-      unitPriceBdt: 6500,
-      stockQty: 14,
-    },
-  ],
-  [
-    "part-002",
-    {
-      id: "part-002",
-      name: "Front Brake Pads",
-      category: "Parts",
-      unitPriceBdt: 1800,
-      stockQty: 28,
-    },
-  ],
-  [
-    "part-003",
-    {
-      id: "part-003",
-      name: "Touring Windshield",
-      category: "Accessories",
-      unitPriceBdt: 4200,
-      stockQty: 10,
-    },
-  ],
-  [
-    "part-004",
-    {
-      id: "part-004",
-      name: "Phone Mount with USB",
-      category: "Accessories",
-      unitPriceBdt: 2100,
-      stockQty: 45,
-    },
-  ],
-  [
-    "part-010",
-    {
-      id: "part-010",
-      name: "Tubeless Tyre Pair",
-      category: "Parts",
-      unitPriceBdt: 7600,
-      stockQty: 9,
-    },
-  ],
-]);
+const inventoryByPartId = new Map<string, ImsInventoryPart>([]);
 
 export function getImsPartById(partId: string): ImsInventoryPart | undefined {
   return inventoryByPartId.get(partId);

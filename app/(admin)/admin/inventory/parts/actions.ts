@@ -40,8 +40,17 @@ export async function createPart(data: z.infer<typeof PartSchema>) {
 
     revalidatePath("/admin/inventory/parts");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Database Error:", error);
-    return { success: false, error: "Failed to create part" };
+    
+    // Safely extract error string for diagnostic UI display
+    let errorMessage = "Failed to create part";
+    if (error instanceof z.ZodError) {
+      errorMessage = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+    
+    return { success: false, error: errorMessage };
   }
 }
