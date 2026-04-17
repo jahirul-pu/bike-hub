@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default async function CalculatorPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const searchParams = await props.searchParams;
-  const currentTab = searchParams.tab === "loan" ? "loan" : "ev";
+  const currentTab = searchParams.tab === "bike-loan-calculator" ? "bike-loan-calculator" : "ev-savings-calculator";
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
@@ -23,10 +23,10 @@ export default async function CalculatorPage(props: { searchParams: Promise<{ [k
         </p>
         <h1 className="mt-2 flex items-center gap-2 font-heading text-5xl uppercase tracking-wide text-slate-900 sm:text-6xl">
           <Calculator className="h-10 w-10" />
-          {currentTab === "ev" ? "EV Savings" : "Loan EMIs"}
+          {currentTab === "ev-savings-calculator" ? "EV Savings" : "Loan EMIs"}
         </h1>
         <p className="mt-3 max-w-2xl text-slate-600">
-          {currentTab === "ev" 
+          {currentTab === "ev-savings-calculator" 
             ? "Estimate how much you could save each month and year by going electric — and how long it takes to break even."
             : "Estimate your monthly loan installments based on down payment, interest rate, and duration."}
         </p>
@@ -35,33 +35,33 @@ export default async function CalculatorPage(props: { searchParams: Promise<{ [k
       {/* TABS MENU */}
       <div className="flex border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
         <Link 
-          href="?tab=ev" 
+          href="?tab=ev-savings-calculator" 
           className={cn(
             "flex items-center gap-2 border-b-2 px-6 py-4 text-sm font-bold uppercase tracking-wider transition-colors",
-            currentTab === "ev" 
+            currentTab === "ev-savings-calculator" 
               ? "border-amber-500 text-slate-900" 
               : "border-transparent text-slate-400 hover:text-slate-700"
           )}
         >
-          <Zap className={cn("h-4 w-4", currentTab === "ev" ? "text-amber-500" : "")} />
+          <Zap className={cn("h-4 w-4", currentTab === "ev-savings-calculator" ? "text-amber-500" : "")} />
           EV Savings Calculator
         </Link>
         <Link 
-          href="?tab=loan" 
+          href="?tab=bike-loan-calculator" 
           className={cn(
             "flex items-center gap-2 border-b-2 px-6 py-4 text-sm font-bold uppercase tracking-wider transition-colors",
-            currentTab === "loan" 
+            currentTab === "bike-loan-calculator" 
               ? "border-amber-500 text-slate-900" 
               : "border-transparent text-slate-400 hover:text-slate-700"
           )}
         >
-          <FileText className={cn("h-4 w-4", currentTab === "loan" ? "text-amber-500" : "")} />
+          <FileText className={cn("h-4 w-4", currentTab === "bike-loan-calculator" ? "text-amber-500" : "")} />
           Bike Loan Calculator
         </Link>
       </div>
 
       <div className="tab-content transition-all duration-300">
-        {currentTab === "ev" ? (
+        {currentTab === "ev-savings-calculator" ? (
           <EvSavingsCalculator />
         ) : (
           <BikeLoanCalculator />
