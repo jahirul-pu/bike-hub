@@ -110,3 +110,28 @@ model Brand {
   createdAt   DateTime @default(now())
   vehicles    Vehicle[]
 }
+
+// ─── Comparison Scoring Cache ───
+// Stores pre-computed comparison results for fast retrieval at scale.
+// The `slugHash` is a deterministic, sorted hash of the bike slugs + profile
+// so the same comparison is never computed twice.
+model ComparisonScore {
+  id            String   @id @default(cuid())
+  slugHash      String   @unique  // sorted slugs + profile → deterministic key
+  slugs         String             // comma-separated sorted slugs
+  profile       String             // "balanced" | "commuter" | "performance" | "budget"
+  winnerSlug    String?            // null if balanced verdict
+  verdict       String             // "clear_winner" | "balanced"
+  scoreDiff     Float              // score gap between top 2
+  scores        String             // JSON: BikeScore[]
+  strengths     String             // JSON: StrengthComparison[]
+  recommendations String           // JSON: SmartRecommendation[]
+  summary       String             // human-readable summary text
+  computedAt    DateTime @default(now())
+  expiresAt     DateTime           // cache TTL for re-computation
+
+  @@index([slugs])
+  @@index([profile])
+  @@index([winnerSlug])
+  @@index([expiresAt])
+}

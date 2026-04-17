@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRightLeft,
+  BarChart3,
   Bike as BikeIcon,
   Brain,
   Check,
   ChevronDown,
+  Crown,
   Flame,
   ListChecks,
   Plus,
@@ -19,6 +21,13 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import {
+  runComparison,
+  PROFILE_LABELS,
+  METRIC_LABELS,
+  type ScoringProfile,
+  type ComparisonResult,
+} from "@/lib/comparison-engine";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -493,153 +502,14 @@ function VsDivider() {
   );
 }
 
-/* ─────────────────── Smart Summary Generator ─────────────────── */
-
-type BikeAdvantage = {
-  text: string;
-  metric?: string;
-};
-
-function generateSmartSummary(bikesToCompare: Bike[]): Map<string, BikeAdvantage[]> {
-  const result = new Map<string, BikeAdvantage[]>();
-
-  for (const bike of bikesToCompare) {
-    result.set(bike.slug, []);
-  }
-
-  const allPowertrain = bikesToCompare[0]?.powertrain ?? "ICE";
-
-  // --- Price (lower is better) ---
-  const cheapest = bikesToCompare.reduce((a, b) => (a.priceBdt < b.priceBdt ? a : b));
-  const mostExpensive = bikesToCompare.reduce((a, b) => (a.priceBdt > b.priceBdt ? a : b));
-  if (mostExpensive.priceBdt - cheapest.priceBdt > 15000) {
-    result.get(cheapest.slug)!.push({
-      text: "More affordable price",
-      metric: `${formatBdt(cheapest.priceBdt)} vs ${formatBdt(mostExpensive.priceBdt)}`,
-    });
-  }
-
-  // --- Mileage / Range (higher is better) ---
-  if (allPowertrain === "ICE") {
-    const best = bikesToCompare.reduce((a, b) => ((a.mileageKmpl ?? 0) > (b.mileageKmpl ?? 0) ? a : b));
-    const worst = bikesToCompare.reduce((a, b) => ((a.mileageKmpl ?? 0) < (b.mileageKmpl ?? 0) ? a : b));
-    if ((best.mileageKmpl ?? 0) - (worst.mileageKmpl ?? 0) >= 3) {
-      result.get(best.slug)!.push({
-        text: "Better fuel efficiency",
-        metric: `${best.mileageKmpl} km/l vs ${worst.mileageKmpl} km/l`,
-      });
-    }
-  } else {
-    const best = bikesToCompare.reduce((a, b) => ((a.rangeKm ?? 0) > (b.rangeKm ?? 0) ? a : b));
-    const worst = bikesToCompare.reduce((a, b) => ((a.rangeKm ?? 0) < (b.rangeKm ?? 0) ? a : b));
-    if ((best.rangeKm ?? 0) - (worst.rangeKm ?? 0) >= 10) {
-      result.get(best.slug)!.push({
-        text: "Longer range per charge",
-        metric: `${best.rangeKm} km vs ${worst.rangeKm} km`,
-      });
-    }
-  }
-
-  // --- Top Speed (higher is better) ---
-  const fastest = bikesToCompare.reduce((a, b) => (a.topSpeedKph > b.topSpeedKph ? a : b));
-  const slowest = bikesToCompare.reduce((a, b) => (a.topSpeedKph < b.topSpeedKph ? a : b));
-  if (fastest.topSpeedKph - slowest.topSpeedKph >= 5) {
-    result.get(fastest.slug)!.push({
-      text: "Higher top speed",
-      metric: `${fastest.topSpeedKph} km/h vs ${slowest.topSpeedKph} km/h`,
-    });
-  }
-
-  // --- Torque (higher is better) ---
-  const mostTorque = bikesToCompare.reduce((a, b) => (a.torqueNm > b.torqueNm ? a : b));
-  const leastTorque = bikesToCompare.reduce((a, b) => (a.torqueNm < b.torqueNm ? a : b));
-  if (mostTorque.torqueNm - leastTorque.torqueNm >= 1.5) {
-    result.get(mostTorque.slug)!.push({
-      text: "More pulling power (torque)",
-      metric: `${mostTorque.torqueNm} Nm vs ${leastTorque.torqueNm} Nm`,
-    });
-  }
-
-  // --- Power (higher is better) ---
-  if (allPowertrain === "ICE") {
-    const withPower = bikesToCompare.filter((b) => b.displacementCc);
-    if (withPower.length >= 2) {
-      const mostPower = withPower.reduce((a, b) => ((a.displacementCc ?? 0) > (b.displacementCc ?? 0) ? a : b));
-      const leastPower = withPower.reduce((a, b) => ((a.displacementCc ?? 0) < (b.displacementCc ?? 0) ? a : b));
-      if ((mostPower.displacementCc ?? 0) - (leastPower.displacementCc ?? 0) >= 10) {
-        result.get(mostPower.slug)!.push({
-          text: "Larger engine displacement",
-          metric: `${mostPower.displacementCc} cc vs ${leastPower.displacementCc} cc`,
-        });
-      }
-    }
-  } else {
-    const withPower = bikesToCompare.filter((b) => b.motorPowerKw);
-    if (withPower.length >= 2) {
-      const mostPower = withPower.reduce((a, b) => ((a.motorPowerKw ?? 0) > (b.motorPowerKw ?? 0) ? a : b));
-      const leastPower = withPower.reduce((a, b) => ((a.motorPowerKw ?? 0) < (b.motorPowerKw ?? 0) ? a : b));
-      if ((mostPower.motorPowerKw ?? 0) - (leastPower.motorPowerKw ?? 0) >= 0.5) {
-        result.get(mostPower.slug)!.push({
-          text: "More powerful motor",
-          metric: `${mostPower.motorPowerKw} kW vs ${leastPower.motorPowerKw} kW`,
-        });
-      }
-    }
-  }
-
-  // --- Weight (lower is better) ---
-  const lightest = bikesToCompare.reduce((a, b) => (a.weightKg < b.weightKg ? a : b));
-  const heaviest = bikesToCompare.reduce((a, b) => (a.weightKg > b.weightKg ? a : b));
-  if (heaviest.weightKg - lightest.weightKg >= 5) {
-    result.get(lightest.slug)!.push({
-      text: "Lighter weight",
-      metric: `${lightest.weightKg} kg vs ${heaviest.weightKg} kg`,
-    });
-  }
-
-  // --- Seat Height (lower can be better for comfort) ---
-  const lowestSeat = bikesToCompare.reduce((a, b) => (a.seatHeightMm < b.seatHeightMm ? a : b));
-  const highestSeat = bikesToCompare.reduce((a, b) => (a.seatHeightMm > b.seatHeightMm ? a : b));
-  if (highestSeat.seatHeightMm - lowestSeat.seatHeightMm >= 15) {
-    result.get(lowestSeat.slug)!.push({
-      text: "Lower seat (easier for shorter riders)",
-      metric: `${lowestSeat.seatHeightMm} mm vs ${highestSeat.seatHeightMm} mm`,
-    });
-  }
-
-  // --- Ground Clearance (higher is better for rough roads) ---
-  const highestGC = bikesToCompare.reduce((a, b) => (a.groundClearanceMm > b.groundClearanceMm ? a : b));
-  const lowestGC = bikesToCompare.reduce((a, b) => (a.groundClearanceMm < b.groundClearanceMm ? a : b));
-  if (highestGC.groundClearanceMm - lowestGC.groundClearanceMm >= 10) {
-    result.get(highestGC.slug)!.push({
-      text: "Better ground clearance",
-      metric: `${highestGC.groundClearanceMm} mm vs ${lowestGC.groundClearanceMm} mm`,
-    });
-  }
-
-  // --- Fuel Tank (larger is better for distance) ---
-  if (allPowertrain === "ICE") {
-    const withTank = bikesToCompare.filter((b) => b.fuelTankLiters);
-    if (withTank.length >= 2) {
-      const biggestTank = withTank.reduce((a, b) => ((a.fuelTankLiters ?? 0) > (b.fuelTankLiters ?? 0) ? a : b));
-      const smallestTank = withTank.reduce((a, b) => ((a.fuelTankLiters ?? 0) < (b.fuelTankLiters ?? 0) ? a : b));
-      if ((biggestTank.fuelTankLiters ?? 0) - (smallestTank.fuelTankLiters ?? 0) >= 1.5) {
-        result.get(biggestTank.slug)!.push({
-          text: "Larger fuel tank",
-          metric: `${biggestTank.fuelTankLiters} L vs ${smallestTank.fuelTankLiters} L`,
-        });
-      }
-    }
-  }
-
-  return result;
-}
+/* Old generateSmartSummary replaced by lib/comparison-engine.ts */
 
 /* ─────────────────── Main Compare Page ─────────────────── */
 
 export default function ComparePage() {
   const [selectedBikes, setSelectedBikes] = useState<(Bike | null)[]>([null, null]);
   const [showComparison, setShowComparison] = useState(false);
+  const [activeProfile, setActiveProfile] = useState<ScoringProfile>("balanced");
   const comparisonRef = useRef<HTMLDivElement>(null);
 
   const disabledSlugs = useMemo(() => {
@@ -908,83 +778,236 @@ export default function ComparePage() {
             </Badge>
           </div>
 
-          {/* ═══════ SMART SUMMARY ═══════ */}
+          {/* ═══════ SCORING ENGINE DASHBOARD ═══════ */}
           {(() => {
-            const summaryMap = generateSmartSummary(validBikes);
-            const hasAnyAdvantage = Array.from(summaryMap.values()).some((v) => v.length > 0);
-            if (!hasAnyAdvantage) return null;
+            const result: ComparisonResult = runComparison(validBikes, activeProfile);
+            const { bikes: scoredBikes, winner, scoreDifference, strengths, recommendations, summary } = result;
+            const sortedBikes = [...scoredBikes].sort((a, b) => b.weightedScore - a.weightedScore);
+            const maxScore = Math.max(...scoredBikes.map((b) => b.weightedScore));
+
+            const bikeColors = [
+              { bar: "bg-blue-500", ring: "ring-blue-200", text: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200", check: "text-blue-500" },
+              { bar: "bg-emerald-500", ring: "ring-emerald-200", text: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", check: "text-emerald-500" },
+              { bar: "bg-violet-500", ring: "ring-violet-200", text: "text-violet-600", bg: "bg-violet-50", border: "border-violet-200", check: "text-violet-500" },
+            ];
+
+            const metricKeys: (keyof typeof METRIC_LABELS)[] = ["power", "torque", "mileage", "costPerKm", "weight", "features", "price"];
 
             return (
-              <div className="mb-6 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/60 p-6 shadow-sm">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-200/50">
-                    <Brain className="h-4.5 w-4.5 text-white" />
+              <div className="mb-6 space-y-4">
+                {/* ── Profile Selector Tabs ── */}
+                <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    Scoring Profile
                   </div>
-                  <div>
-                    <h3 className="font-heading text-2xl uppercase tracking-wide text-slate-900 sm:text-3xl">
-                      Which one should you buy?
-                    </h3>
-                    <p className="text-xs text-slate-500">Based on spec analysis</p>
-                  </div>
-                </div>
-
-                <div className={cn(
-                  "mt-5 grid gap-4",
-                  validBikes.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"
-                )}>
-                  {validBikes.map((bike, bikeIdx) => {
-                    const advantages = summaryMap.get(bike.slug) ?? [];
-                    if (advantages.length === 0) return null;
-
-                    // Assign distinct colors per slot
-                    const colorSets = [
-                      { border: "border-blue-200", bg: "bg-blue-50/60", icon: "text-blue-600", badge: "bg-blue-100 text-blue-700", check: "text-blue-500" },
-                      { border: "border-emerald-200", bg: "bg-emerald-50/60", icon: "text-emerald-600", badge: "bg-emerald-100 text-emerald-700", check: "text-emerald-500" },
-                      { border: "border-violet-200", bg: "bg-violet-50/60", icon: "text-violet-600", badge: "bg-violet-100 text-violet-700", check: "text-violet-500" },
-                    ];
-                    const colors = colorSets[bikeIdx % colorSets.length];
-
-                    return (
-                      <div
-                        key={bike.slug}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(["balanced", "commuter", "performance", "budget"] as ScoringProfile[]).map((profile) => (
+                      <button
+                        key={profile}
+                        type="button"
+                        onClick={() => setActiveProfile(profile)}
                         className={cn(
-                          "rounded-xl border p-4 transition-all duration-300 hover:shadow-md",
-                          colors.border,
-                          colors.bg
+                          "rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300",
+                          activeProfile === profile
+                            ? "bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-md"
+                            : "border border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:bg-amber-50/50"
                         )}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <BikeThumb bike={bike} size="sm" />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
-                              Choose
-                            </p>
-                            <p className="truncate font-heading text-xl uppercase tracking-wide text-slate-900">
-                              {bike.brand} {bike.model}
-                            </p>
-                          </div>
-                          {advantages.length >= 3 && (
-                            <Trophy className={cn("h-4.5 w-4.5 shrink-0", colors.icon)} />
-                          )}
-                        </div>
+                        {PROFILE_LABELS[profile]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                        <div className="mt-3 space-y-2">
-                          {advantages.map((adv) => (
-                            <div key={adv.text} className="flex items-start gap-2">
-                              <Check className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", colors.check)} />
-                              <div>
-                                <p className="text-sm font-medium text-slate-700">{adv.text}</p>
-                                {adv.metric && (
-                                  <p className="text-[11px] text-slate-400">{adv.metric}</p>
-                                )}
+                {/* ── Smart Summary Card ── */}
+                <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/60 p-6 shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-200/50">
+                      <Brain className="h-4.5 w-4.5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-2xl uppercase tracking-wide text-slate-900 sm:text-3xl">
+                        Which one should you buy?
+                      </h3>
+                      <p className="text-xs text-slate-500">Scored for {PROFILE_LABELS[activeProfile].toLowerCase()} riders</p>
+                    </div>
+                  </div>
+
+                  {/* Overall Summary Text */}
+                  <p className="mt-4 rounded-xl bg-white/70 p-3.5 text-sm leading-relaxed text-slate-700 shadow-inner">
+                    {summary}
+                  </p>
+
+                  {/* Score Cards */}
+                  <div className={cn(
+                    "mt-5 grid gap-4",
+                    validBikes.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"
+                  )}>
+                    {sortedBikes.map((scored, idx) => {
+                      const colors = bikeColors[scoredBikes.findIndex((b) => b.slug === scored.slug) % bikeColors.length];
+                      const isWinner = winner?.slug === scored.slug && winner?.verdict === "clear_winner";
+                      const rec = recommendations.find((r) => r.slug === scored.slug);
+                      const matchedBike = validBikes.find((b) => b.slug === scored.slug);
+
+                      return (
+                        <div
+                          key={scored.slug}
+                          className={cn(
+                            "relative rounded-xl border p-4 transition-all duration-300 hover:shadow-md",
+                            isWinner ? "border-amber-300 bg-amber-50/40 ring-1 ring-amber-200" : `${colors.border} ${colors.bg}`
+                          )}
+                        >
+                          {/* Winner Badge */}
+                          {isWinner && (
+                            <div className="absolute -right-1 -top-1 flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-md">
+                              <Crown className="h-3 w-3" />
+                              Winner
+                            </div>
+                          )}
+
+                          {/* Bike Header */}
+                          <div className="flex items-center gap-2.5">
+                            {matchedBike && <BikeThumb bike={matchedBike} size="sm" />}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                                {isWinner ? "Choose" : idx === 0 ? "Choose" : "Consider"}
+                              </p>
+                              <p className="truncate font-heading text-xl uppercase tracking-wide text-slate-900">
+                                {scored.brand} {scored.model}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Score Display */}
+                          <div className="mt-3 flex items-center gap-3">
+                            <div className="relative h-16 w-16 shrink-0">
+                              <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
+                                <circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
+                                <circle
+                                  cx="18" cy="18" r="15" fill="none"
+                                  strokeWidth="2.5" strokeLinecap="round"
+                                  className={isWinner ? "stroke-amber-500" : colors.bar.replace("bg-", "stroke-")}
+                                  strokeDasharray={`${(scored.weightedScore / 10) * 94.2} 94.2`}
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-lg font-black text-slate-900">
+                                  {scored.weightedScore.toFixed(1)}
+                                </span>
                               </div>
                             </div>
-                          ))}
+                            <div className="min-w-0 flex-1 text-xs text-slate-500">
+                              out of 10
+                              <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-200">
+                                <div
+                                  className={cn(
+                                    "h-full rounded-full transition-all duration-700",
+                                    isWinner ? "bg-gradient-to-r from-amber-400 to-orange-500" : colors.bar
+                                  )}
+                                  style={{ width: `${(scored.weightedScore / maxScore) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Top Strengths */}
+                          {rec && rec.topStrengths.length > 0 && (
+                            <div className="mt-3 space-y-1.5">
+                              {rec.topStrengths.slice(0, 4).map((str) => (
+                                <div key={str} className="flex items-start gap-1.5">
+                                  <Check className={cn("mt-0.5 h-3 w-3 shrink-0", isWinner ? "text-amber-500" : colors.check)} />
+                                  <p className="text-xs text-slate-600">{str}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ── Metric Breakdown Bars ── */}
+                <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-sm">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
+                    <ListChecks className="h-3.5 w-3.5" />
+                    Metric Breakdown
+                  </div>
+
+                  <div className="mt-4 space-y-4">
+                    {metricKeys.map((key) => (
+                      <div key={key}>
+                        <div className="mb-1.5 flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-600">{METRIC_LABELS[key]}</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {scoredBikes.map((scored, idx) => {
+                            const colors = bikeColors[idx % bikeColors.length];
+                            const normalized = scored.normalizedMetrics[key];
+                            return (
+                              <div key={scored.slug} className="flex items-center gap-2">
+                                <span className="w-20 truncate text-[10px] font-semibold text-slate-500 sm:w-28">
+                                  {scored.brand} {scored.model}
+                                </span>
+                                <div className="h-3 flex-1 overflow-hidden rounded-full bg-slate-100">
+                                  <div
+                                    className={cn("h-full rounded-full transition-all duration-700", colors.bar)}
+                                    style={{ width: `${(normalized / 10) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-8 text-right text-[10px] font-bold text-slate-700">
+                                  {normalized.toFixed(1)}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
+
+                {/* ── Strength Comparisons ── */}
+                {strengths.length > 0 && (
+                  <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
+                      <Zap className="h-3.5 w-3.5 text-amber-400" />
+                      Key Differences
+                    </div>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {strengths.map((s) => {
+                        const winnerBike = scoredBikes.find((b) => b.slug === s.winnerSlug);
+                        return (
+                          <div
+                            key={s.metric}
+                            className="flex items-start gap-2.5 rounded-xl border border-slate-100 bg-slate-50/60 p-3"
+                          >
+                            <div className={cn(
+                              "mt-0.5 rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase",
+                              s.tier === "significantly_better"
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-slate-200 text-slate-600"
+                            )}>
+                              {s.tier === "significantly_better" ? "↑↑" : "↑"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-semibold text-slate-800">
+                                {winnerBike?.brand} {winnerBike?.model}
+                              </p>
+                              <p className="text-[11px] text-slate-500">
+                                {s.tier === "significantly_better" ? "Significantly" : "Noticeably"} better {s.metricLabel.toLowerCase()}
+                              </p>
+                              <p className="text-[10px] text-slate-400">
+                                {s.percentDiff.toFixed(0)}% advantage
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })()}
