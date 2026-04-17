@@ -9,7 +9,7 @@ export type ScoringProfile = "balanced" | "commuter" | "performance" | "budget";
 export type MetricKey =
   | "power"
   | "torque"
-  | "mileage"
+  | "range"
   | "costPerKm"
   | "weight"
   | "features"
@@ -70,8 +70,8 @@ export const PROFILE_WEIGHTS: Record<ScoringProfile, ProfileWeights> = {
   balanced: {
     power: 0.20,
     torque: 0.10,
-    mileage: 0.20,
-    costPerKm: 0.15,
+    range: 0.15,
+    costPerKm: 0.20,
     weight: 0.10,
     features: 0.10,
     price: 0.15,
@@ -79,8 +79,8 @@ export const PROFILE_WEIGHTS: Record<ScoringProfile, ProfileWeights> = {
   commuter: {
     power: 0.025,
     torque: 0.025,
-    mileage: 0.30,
-    costPerKm: 0.25,
+    range: 0.15,
+    costPerKm: 0.40,
     weight: 0.10,
     features: 0.10,
     price: 0.20,
@@ -88,7 +88,7 @@ export const PROFILE_WEIGHTS: Record<ScoringProfile, ProfileWeights> = {
   performance: {
     power: 0.35,
     torque: 0.20,
-    mileage: 0.10,
+    range: 0.10,
     costPerKm: 0.05,
     weight: 0.15,
     features: 0.10,
@@ -97,8 +97,8 @@ export const PROFILE_WEIGHTS: Record<ScoringProfile, ProfileWeights> = {
   budget: {
     power: 0.025,
     torque: 0.025,
-    mileage: 0.20,
-    costPerKm: 0.30,
+    range: 0.15,
+    costPerKm: 0.35,
     weight: 0.05,
     features: 0.10,
     price: 0.35,
@@ -115,7 +115,7 @@ export const PROFILE_LABELS: Record<ScoringProfile, string> = {
 export const METRIC_LABELS: Record<MetricKey, string> = {
   power: "Power Output",
   torque: "Torque",
-  mileage: "Fuel Efficiency",
+  range: "Estimated Range",
   costPerKm: "Running Cost",
   weight: "Weight",
   features: "Features & Tech",
@@ -227,10 +227,13 @@ function extractTorque(bike: Bike): number {
  * Extract all raw metric values from a bike.
  */
 export function extractRawMetrics(bike: Bike): Record<MetricKey, number> {
+  // Common sense fallback for ICE range calculation if data is missing
+  const iceRange = (bike.mileageKmpl ?? 40) * (bike.fuelTankLiters ?? 10);
+  
   return {
     power: extractPower(bike),
     torque: extractTorque(bike),
-    mileage: bike.powertrain === "ICE" ? (bike.mileageKmpl ?? 0) : (bike.rangeKm ?? 0),
+    range: bike.powertrain === "ICE" ? iceRange : (bike.rangeKm ?? 0),
     costPerKm: computeCostPerKm(bike),
     weight: bike.weightKg,
     features: computeFeatureScore(bike),
@@ -250,7 +253,7 @@ export function normalizeMetrics(
   bikesRawMetrics: Record<MetricKey, number>[],
   referenceRawMetrics: Record<MetricKey, number>[]
 ): NormalizedMetrics[] {
-  const metricKeys: MetricKey[] = ["power", "torque", "mileage", "costPerKm", "weight", "features", "price"];
+  const metricKeys: MetricKey[] = ["power", "torque", "range", "costPerKm", "weight", "features", "price"];
 
   // Compute min/max for each metric using the global reference
   const mins: Record<string, number> = {};
@@ -296,7 +299,7 @@ export function computeWeightedScore(
   normalized: NormalizedMetrics,
   weights: ProfileWeights
 ): { total: number; breakdown: Record<MetricKey, number> } {
-  const metricKeys: MetricKey[] = ["power", "torque", "mileage", "costPerKm", "weight", "features", "price"];
+  const metricKeys: MetricKey[] = ["power", "torque", "range", "costPerKm", "weight", "features", "price"];
   let total = 0;
   const breakdown: Partial<Record<MetricKey, number>> = {};
 
@@ -319,7 +322,7 @@ export function computeWeightedScore(
 export function detectStrengths(bikeScores: BikeScore[]): StrengthComparison[] {
   if (bikeScores.length < 2) return [];
 
-  const metricKeys: MetricKey[] = ["power", "torque", "mileage", "costPerKm", "weight", "features", "price"];
+  const metricKeys: MetricKey[] = ["power", "torque", "range", "costPerKm", "weight", "features", "price"];
   const strengths: StrengthComparison[] = [];
 
   for (const key of metricKeys) {

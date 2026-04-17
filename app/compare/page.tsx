@@ -936,7 +936,7 @@ export default function ComparePage() {
                   </div>
 
                   <div className="mt-4 space-y-4">
-                    {metricKeys.map((key) => (
+                    {(["power", "torque", "range", "costPerKm", "weight", "features", "price"] as const).map((key) => (
                       <div key={key}>
                         <div className="mb-1.5 flex items-center justify-between">
                           <span className="text-xs font-semibold text-slate-600">{METRIC_LABELS[key]}</span>
