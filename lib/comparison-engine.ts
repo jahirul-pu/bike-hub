@@ -1,5 +1,4 @@
-import type { Bike } from "@/lib/bikes-data";
-import { formatBdt } from "@/lib/bikes-data";
+import { type Bike, bikes, formatBdt } from "@/lib/bikes-data";
 
 /* ═══════════════════════════════════════════════════════════════════
  *  TYPES
@@ -248,21 +247,22 @@ export function extractRawMetrics(bike: Bike): Record<MetricKey, number> {
  * For inverted metrics (lower is better), the scale is reversed.
  */
 export function normalizeMetrics(
-  allRawMetrics: Record<MetricKey, number>[]
+  bikesRawMetrics: Record<MetricKey, number>[],
+  referenceRawMetrics: Record<MetricKey, number>[]
 ): NormalizedMetrics[] {
   const metricKeys: MetricKey[] = ["power", "torque", "mileage", "costPerKm", "weight", "features", "price"];
 
-  // Compute min/max for each metric
+  // Compute min/max for each metric using the global reference
   const mins: Record<string, number> = {};
   const maxs: Record<string, number> = {};
 
   for (const key of metricKeys) {
-    const values = allRawMetrics.map((m) => m[key]);
-    mins[key] = Math.min(...values);
-    maxs[key] = Math.max(...values);
+    const refValues = referenceRawMetrics.map((m) => m[key]);
+    mins[key] = Math.min(...refValues);
+    maxs[key] = Math.max(...refValues);
   }
 
-  return allRawMetrics.map((raw) => {
+  return bikesRawMetrics.map((raw) => {
     const normalized: Partial<NormalizedMetrics> = {};
 
     for (const key of metricKeys) {
@@ -425,9 +425,12 @@ export function runComparison(
 
   // 1. Extract raw metrics
   const allRaw = bikesToCompare.map((bike) => extractRawMetrics(bike));
+  
+  // Create global reference by extracting raw metrics for all valid bikes
+  const globalRaw = bikes.map((bike) => extractRawMetrics(bike));
 
-  // 2. Normalize to 0–10
-  const allNormalized = normalizeMetrics(allRaw);
+  // 2. Normalize to 0-10 relative to the global dataset
+  const allNormalized = normalizeMetrics(allRaw, globalRaw);
 
   // 3. Compute weighted scores
   const bikeScores: BikeScore[] = bikesToCompare.map((bike, i) => {
