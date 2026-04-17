@@ -1046,7 +1046,7 @@ export default function ComparePage() {
                             Find Showrooms
                           </Link>
                           <Link
-                            href={`/accessories?bike=${bike.slug}`}
+                            href={`/marketplace?bike=${bike.slug}`}
                             className={cn(
                               buttonVariants({ size: "sm", variant: "outline" }),
                               "w-full border-slate-300 bg-white"

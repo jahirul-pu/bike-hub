@@ -24,6 +24,7 @@ type SparePartListing = {
   category: SparePartCategory;
   subcategory: string;
   nestedSubcategory?: string;
+  compatibleBikes: string[];
 };
 
 const spareParts = [
@@ -36,6 +37,7 @@ const spareParts = [
     category: "Parts",
     subcategory: "Drivetrain",
     nestedSubcategory: "Chain & Sprocket",
+    compatibleBikes: ["yamaha-r15-v4", "mt-15-v2", "pulsar-n160"],
   },
   {
     id: "part-002",
@@ -46,6 +48,7 @@ const spareParts = [
     category: "Parts",
     subcategory: "Braking",
     nestedSubcategory: "Brake Pads",
+    compatibleBikes: ["yamaha-r15-v4", "gixxer-sf-fi", "cbr-150r"],
   },
   {
     id: "part-003",
@@ -56,6 +59,7 @@ const spareParts = [
     category: "Accessories",
     subcategory: "Touring",
     nestedSubcategory: "Wind Protection",
+    compatibleBikes: ["Universal"],
   },
   {
     id: "part-004",
@@ -66,6 +70,7 @@ const spareParts = [
     category: "Accessories",
     subcategory: "Electronics",
     nestedSubcategory: "Mobile Holder",
+    compatibleBikes: ["Universal"],
   },
   {
     id: "part-005",
@@ -76,6 +81,7 @@ const spareParts = [
     category: "Additives",
     subcategory: "Engine Oil",
     nestedSubcategory: "Semi Synthetic",
+    compatibleBikes: ["Universal"],
   },
   {
     id: "part-006",
@@ -86,6 +92,7 @@ const spareParts = [
     category: "Additives",
     subcategory: "Engine Flush Oil",
     nestedSubcategory: "Pre-Service Flush",
+    compatibleBikes: ["Universal"],
   },
   {
     id: "part-007",
@@ -96,6 +103,7 @@ const spareParts = [
     category: "Additives",
     subcategory: "Octane Booster",
     nestedSubcategory: "Performance Boost",
+    compatibleBikes: ["Universal"],
   },
   {
     id: "part-008",
@@ -106,6 +114,7 @@ const spareParts = [
     category: "Additives",
     subcategory: "Fuel Cleaner",
     nestedSubcategory: "Injector Cleaner",
+    compatibleBikes: ["Universal"],
   },
   {
     id: "part-009",
@@ -116,6 +125,7 @@ const spareParts = [
     category: "Additives",
     subcategory: "Brake Fluid",
     nestedSubcategory: "DOT 4",
+    compatibleBikes: ["Universal"],
   },
   {
     id: "part-010",
@@ -126,6 +136,7 @@ const spareParts = [
     category: "Parts",
     subcategory: "Tyres",
     nestedSubcategory: "Tubeless Tyres",
+    compatibleBikes: ["mt-15-v2", "pulsar-n160", "gixxer-sf-fi"],
   },
 ] satisfies SparePartListing[];
 
@@ -278,7 +289,19 @@ function UsedBikeCard({
 
 export default function MarketplacePage() {
   const [activeSection, setActiveSection] = useState<"spare" | "used">("spare");
+  const [selectedBikeSlug, setSelectedBikeSlug] = useState<string>("all");
   const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const bikeSlug = params.get("bike");
+      if (bikeSlug && bikes.find(b => b.slug === bikeSlug)) {
+        setSelectedBikeSlug(bikeSlug);
+        setActiveSection("spare");
+      }
+    }
+  }, []);
 
   // Used Vehicles Filters
   const [powertrainFilter, setPowertrainFilter] = useState<"All" | "ICE" | "EV">("All");
@@ -454,6 +477,14 @@ export default function MarketplacePage() {
 
   const filteredSpareParts = useMemo(() => {
     return spareParts.filter((item) => {
+      // Bike-Based Entry Filter
+      if (selectedBikeSlug !== "all") {
+        if (!item.compatibleBikes.includes("Universal") && !item.compatibleBikes.includes(selectedBikeSlug)) {
+          return false;
+        }
+      }
+
+      // Mega Menu Category Filters
       if (selectedCategory !== "All" && item.category !== selectedCategory) return false;
       if (selectedSubcategory !== "All" && item.subcategory !== selectedSubcategory) return false;
       if (
@@ -465,7 +496,7 @@ export default function MarketplacePage() {
 
       return true;
     });
-  }, [selectedCategory, selectedSubcategory, selectedNestedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, selectedNestedSubcategory, selectedBikeSlug]);
 
   const filteredBikes = useMemo(() => {
     return bikes.filter((bike) => {
@@ -591,6 +622,45 @@ export default function MarketplacePage() {
 
       {activeSection === "spare" ? (
         <section className="mt-8">
+          {/* ── BIKE-BASED ENTRY UI ── */}
+          <div className="mb-12 relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
+            <div className="absolute -right-20 -top-20 opacity-[0.03]">
+              <Wrench strokeWidth={1} size={250} />
+            </div>
+            
+            <div className="relative mx-auto max-w-2xl text-center">
+              <h2 className="flex items-center justify-center gap-2 text-2xl font-bold tracking-tight text-slate-900">
+                <SlidersHorizontal className="h-6 w-6 text-amber-500" />
+                Find parts for your bike
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Pick your exact model to see modifications and spare parts that fit perfectly.
+              </p>
+              
+              <div className="mx-auto mt-6 flex max-w-sm items-center justify-center">
+                <div className="relative w-full">
+                  <Wrench className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <select
+                    value={selectedBikeSlug}
+                    onChange={(e) => setSelectedBikeSlug(e.target.value)}
+                    className="w-full appearance-none rounded-xl border-2 border-slate-200 bg-slate-50 py-4 pl-12 pr-10 text-sm font-bold text-slate-700 outline-none transition-all hover:border-amber-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 cursor-pointer"
+                  >
+                    <option value="all">Browse All Parts & Universal Gear</option>
+                    <optgroup label="Select Your Motorcycle">
+                      {bikes.map((bike) => (
+                        <option key={bike.slug} value={bike.slug}>
+                          {bike.brand} {bike.model}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    ▼
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 font-heading text-4xl uppercase tracking-wide text-slate-900">
               <Wrench className="h-7 w-7" />
