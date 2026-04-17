@@ -27,118 +27,7 @@ type SparePartListing = {
   compatibleBikes: string[];
 };
 
-const spareParts = [
-  {
-    id: "part-001",
-    name: "Chain & Sprocket Kit",
-    fitment: "150cc - 200cc street bikes",
-    condition: "New",
-    priceBdt: 6500,
-    category: "Parts",
-    subcategory: "Drivetrain",
-    nestedSubcategory: "Chain & Sprocket",
-    compatibleBikes: ["yamaha-r15-v4", "mt-15-v2", "pulsar-n160"],
-  },
-  {
-    id: "part-002",
-    name: "Front Brake Pads",
-    fitment: "Dual-piston caliper setup",
-    condition: "New",
-    priceBdt: 1800,
-    category: "Parts",
-    subcategory: "Braking",
-    nestedSubcategory: "Brake Pads",
-    compatibleBikes: ["yamaha-r15-v4", "gixxer-sf-fi", "cbr-150r"],
-  },
-  {
-    id: "part-003",
-    name: "Touring Windshield",
-    fitment: "Universal street and adventure bikes",
-    condition: "New",
-    priceBdt: 4200,
-    category: "Accessories",
-    subcategory: "Touring",
-    nestedSubcategory: "Wind Protection",
-    compatibleBikes: ["Universal"],
-  },
-  {
-    id: "part-004",
-    name: "Phone Mount with USB",
-    fitment: "Handlebar 22mm - 32mm",
-    condition: "New",
-    priceBdt: 2100,
-    category: "Accessories",
-    subcategory: "Electronics",
-    nestedSubcategory: "Mobile Holder",
-    compatibleBikes: ["Universal"],
-  },
-  {
-    id: "part-005",
-    name: "10W40 Semi-Synthetic Engine Oil",
-    fitment: "125cc - 250cc motorcycles",
-    condition: "New",
-    priceBdt: 950,
-    category: "Additives",
-    subcategory: "Engine Oil",
-    nestedSubcategory: "Semi Synthetic",
-    compatibleBikes: ["Universal"],
-  },
-  {
-    id: "part-006",
-    name: "Engine Flush Oil Treatment",
-    fitment: "All ICE engines before oil change",
-    condition: "New",
-    priceBdt: 780,
-    category: "Additives",
-    subcategory: "Engine Flush Oil",
-    nestedSubcategory: "Pre-Service Flush",
-    compatibleBikes: ["Universal"],
-  },
-  {
-    id: "part-007",
-    name: "Octane Booster Concentrate",
-    fitment: "Petrol bikes and scooters",
-    condition: "New",
-    priceBdt: 620,
-    category: "Additives",
-    subcategory: "Octane Booster",
-    nestedSubcategory: "Performance Boost",
-    compatibleBikes: ["Universal"],
-  },
-  {
-    id: "part-008",
-    name: "Fuel System Cleaner",
-    fitment: "Injector and fuel line cleaning",
-    condition: "New",
-    priceBdt: 690,
-    category: "Additives",
-    subcategory: "Fuel Cleaner",
-    nestedSubcategory: "Injector Cleaner",
-    compatibleBikes: ["Universal"],
-  },
-  {
-    id: "part-009",
-    name: "DOT 4 Brake Fluid",
-    fitment: "Disc brake hydraulic systems",
-    condition: "New",
-    priceBdt: 540,
-    category: "Additives",
-    subcategory: "Brake Fluid",
-    nestedSubcategory: "DOT 4",
-    compatibleBikes: ["Universal"],
-  },
-  {
-    id: "part-010",
-    name: "Tubeless Tyre Pair",
-    fitment: "Front 90/90-17 | Rear 120/80-17",
-    condition: "New",
-    priceBdt: 7600,
-    category: "Parts",
-    subcategory: "Tyres",
-    nestedSubcategory: "Tubeless Tyres",
-    compatibleBikes: ["mt-15-v2", "pulsar-n160", "gixxer-sf-fi"],
-  },
-] satisfies SparePartListing[];
+// Removed hardcoded spare parts array; fetching from PostgreSQL DB instead.
 
 const certifiedSlugs = new Set(["yamaha-r15-v4", "suzuki-vstrom-250", "ultraviolette-f77"]);
 const promotedSlugs = new Set(["honda-cb350rs", "ather-450x-gen3", "revolt-rv400-brz"]);
@@ -290,7 +179,28 @@ function UsedBikeCard({
 export default function MarketplacePage() {
   const [activeSection, setActiveSection] = useState<"spare" | "used">("spare");
   const [selectedBikeSlug, setSelectedBikeSlug] = useState<string>("all");
+  const [spareParts, setSpareParts] = useState<SparePartListing[]>([]);
   const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    fetch("/api/parts")
+      .then((res) => res.json())
+      .then((data: any[]) => {
+        const payload: SparePartListing[] = data.map((d) => ({
+          id: d.id,
+          name: d.name,
+          fitment: d.fitment,
+          condition: d.condition,
+          priceBdt: d.retailPrice ?? d.price ?? 0,
+          category: d.category as SparePartCategory,
+          subcategory: d.subcategory,
+          nestedSubcategory: d.nestedSubcategory,
+          compatibleBikes: d.compatibleBikes ? JSON.parse(d.compatibleBikes) : ["Universal"],
+        }));
+        setSpareParts(payload);
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

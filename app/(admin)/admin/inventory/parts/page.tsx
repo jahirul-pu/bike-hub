@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { Plus } from 'lucide-react';
 import * as React from 'react';
+import Link from 'next/link';
 
 export default async function PartsPage() {
   const parts = await db.part.findMany({
@@ -14,9 +15,9 @@ export default async function PartsPage() {
           <h2 className="text-2xl font-bold">Parts Inventory</h2>
           <p className="text-slate-500">Manage Motowolf gear and EV components</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <Link href="/admin/inventory/parts/new" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
           <Plus size={18} /> Add New Part
-        </button>
+        </Link>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -25,6 +26,7 @@ export default async function PartsPage() {
             <tr>
               <th className="px-6 py-4 font-semibold text-slate-700">Part Name</th>
               <th className="px-6 py-4 font-semibold text-slate-700">SKU</th>
+              <th className="px-6 py-4 font-semibold text-slate-700">Category</th>
               <th className="px-6 py-4 font-semibold text-slate-700">Stock</th>
               <th className="px-6 py-4 font-semibold text-slate-700">Price (BDT)</th>
               <th className="px-6 py-4 font-semibold text-slate-700">Status</th>
@@ -35,6 +37,7 @@ export default async function PartsPage() {
               <tr key={part.id} className="hover:bg-slate-50">
                 <td className="px-6 py-4 font-medium">{part.name}</td>
                 <td className="px-6 py-4 text-slate-500">{part.sku}</td>
+                <td className="px-6 py-4 text-slate-500">{part.category} <span className="text-xs text-slate-400">/ {part.subcategory}</span></td>
                 <td className={`px-6 py-4 ${part.stock < 10 ? 'text-red-500 font-bold' : ''}`}>
                   {part.stock}
                 </td>

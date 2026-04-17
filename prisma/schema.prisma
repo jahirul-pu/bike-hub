@@ -95,9 +95,18 @@ model Part {
   name        String
   sku         String   @unique
   stock       Int      @default(0)
-  retailPrice Float?
-  price       Float?
-  createdAt   DateTime @default(now())
+  retailPrice       Float?
+  price             Float?
+
+  // ─── Marketplace Integration ───
+  category          String   @default("Parts") // "Parts" | "Accessories" | "Additives"
+  subcategory       String   @default("General")
+  nestedSubcategory String?
+  condition         String   @default("New")
+  fitment           String   @default("Universal")
+  compatibleBikes   String?  // Stored as JSON string array: '["yamaha-r15-v4", "Universal"]'
+
+  createdAt         DateTime @default(now())
 }
 
 model Brand {

@@ -10,7 +10,12 @@ const PartSchema = z.object({
   purchasePrice: z.number().min(0),
   retailPrice: z.number().min(0),
   stock: z.number().int().min(0),
-  fitment: z.array(z.string()).optional(),
+  category: z.string().default("Parts"),
+  subcategory: z.string().default("General"),
+  nestedSubcategory: z.string().optional(),
+  condition: z.string().default("New"),
+  fitment: z.string().default("Universal"),
+  compatibleBikes: z.array(z.string()).default(["Universal"]),
 });
 
 export async function createPart(data: z.infer<typeof PartSchema>) {
@@ -21,10 +26,15 @@ export async function createPart(data: z.infer<typeof PartSchema>) {
       data: {
         name: parsed.name,
         sku: parsed.sku,
-        // Persist purchase cost in the existing fallback price column.
         price: parsed.purchasePrice,
         retailPrice: parsed.retailPrice,
         stock: parsed.stock,
+        category: parsed.category,
+        subcategory: parsed.subcategory,
+        nestedSubcategory: parsed.nestedSubcategory,
+        condition: parsed.condition,
+        fitment: parsed.fitment,
+        compatibleBikes: JSON.stringify(parsed.compatibleBikes),
       },
     });
 
