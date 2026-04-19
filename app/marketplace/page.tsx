@@ -453,7 +453,7 @@ export default function MarketplacePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoverCategory, setHoverCategory] = useState<SparePartCategory | "All">("All");
   const [hoverSubcategory, setHoverSubcategory] = useState<string>("All");
-  
+
   const [isScrolledPast, setIsScrolledPast] = useState(false);
   const filterSectionRef = useRef<HTMLDivElement>(null);
   const [bikeSearchQuery, setBikeSearchQuery] = useState("");
@@ -1292,29 +1292,29 @@ export default function MarketplacePage() {
             {/* Level 1: Energy Source Tabs (Compact Sticky Pill) */}
             <div className="sticky top-[102px] z-[60] flex justify-center py-4 transition-all duration-300 sm:top-[124px]">
               <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/70 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-slate-900/5">
-              {(["All", "ICE", "EV"] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => {
-                    setPowertrainFilter(p);
-                    setTypeFilter("All");
-                    setPriceRange([0, 1000000]);
-                    setMetricFilter("All");
-                    setEfficiencyFilter("All");
-                    setBrandFilter("All");
-                    setShowAdvancedFilters(false);
-                    setQuickUseFilter(null);
-                  }}
-                  className={cn(
-                    "min-w-[80px] px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300",
-                    powertrainFilter === p
-                      ? "bg-slate-900 text-white shadow-lg scale-[1.05]"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
-                  )}
-                >
-                  {p}
-                </button>
-              ))}
+                {(["All", "ICE", "EV"] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => {
+                      setPowertrainFilter(p);
+                      setTypeFilter("All");
+                      setPriceRange([0, 1000000]);
+                      setMetricFilter("All");
+                      setEfficiencyFilter("All");
+                      setBrandFilter("All");
+                      setShowAdvancedFilters(false);
+                      setQuickUseFilter(null);
+                    }}
+                    className={cn(
+                      "min-w-[80px] px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                      powertrainFilter === p
+                        ? "bg-slate-900 text-white shadow-lg scale-[1.05]"
+                        : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1382,7 +1382,7 @@ export default function MarketplacePage() {
                     )}
                   >
                     {priceRange[0] > 0 || priceRange[1] < 1000000
-                      ? `৳${priceRange[0]/1000}K – ${priceRange[1] >= 1000000 ? "10L+" : priceRange[1]/100000 + "L"}`
+                      ? `৳${priceRange[0] / 1000}K – ${priceRange[1] >= 1000000 ? "10L+" : priceRange[1] / 100000 + "L"}`
                       : "Price"}
                     <ChevronDown className="w-3.5 h-3.5 opacity-50" />
                   </div>
@@ -1392,7 +1392,7 @@ export default function MarketplacePage() {
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">Price Range</span>
                       <span className="text-[10px] font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
-                        ৳ {priceRange[0]/1000}K – {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1]/100000}L`}
+                        ৳ {priceRange[0] / 1000}K – {priceRange[1] >= 1000000 ? "10L+" : `${priceRange[1] / 100000}L`}
                       </span>
                     </div>
                     <Slider
@@ -1649,7 +1649,7 @@ export default function MarketplacePage() {
                                   efficiencyFilter === tier ? "bg-emerald-400" : "bg-emerald-500/30"
                                 )} />
                               )}
-                              {tier === "All" ? "Any" : tier + (tier.includes("+") ? "" : " km+") }
+                              {tier === "All" ? "Any" : tier + (tier.includes("+") ? "" : " km+")}
                             </button>
                           ))}
                         </div>
@@ -1709,58 +1709,58 @@ export default function MarketplacePage() {
               )}
             </div>
 
-          <div className="space-y-8">
-            <section className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
-                  <ShieldCheck className="h-6 w-6" />
-                  BikeHub Certified
-                </h3>
-                <Badge variant="outline" className="border-slate-300 text-slate-700">
-                  {bikeHubCertified.length} listings
-                </Badge>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {bikeHubCertified.map((bike) => (
-                  <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Certified" priority="certified" />
-                ))}
-              </div>
-            </section>
+            <div className="space-y-8">
+              <section className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
+                    <ShieldCheck className="h-6 w-6" />
+                    BikeHub Certified
+                  </h3>
+                  <Badge variant="outline" className="border-slate-300 text-slate-700">
+                    {bikeHubCertified.length} listings
+                  </Badge>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {bikeHubCertified.map((bike) => (
+                    <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Certified" priority="certified" />
+                  ))}
+                </div>
+              </section>
 
-            <section className="rounded-2xl border border-amber-300 bg-amber-50/40 p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
-                  <Megaphone className="h-6 w-6" />
-                  Promoted
-                </h3>
-                <Badge variant="outline" className="border-slate-300 text-slate-700">
-                  {promoted.length} listings
-                </Badge>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {promoted.map((bike) => (
-                  <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Promoted" priority="promoted" />
-                ))}
-              </div>
-            </section>
+              <section className="rounded-2xl border border-amber-300 bg-amber-50/40 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
+                    <Megaphone className="h-6 w-6" />
+                    Promoted
+                  </h3>
+                  <Badge variant="outline" className="border-slate-300 text-slate-700">
+                    {promoted.length} listings
+                  </Badge>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {promoted.map((bike) => (
+                    <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Promoted" priority="promoted" />
+                  ))}
+                </div>
+              </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white/70 p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
-                  <User className="h-6 w-6" />
-                  User Listed
-                </h3>
-                <Badge variant="outline" className="border-slate-300 text-slate-700">
-                  {userListed.length} listings
-                </Badge>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {userListed.map((bike) => (
-                  <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="User Listed" priority="user-listed" />
-                ))}
-              </div>
-            </section>
-          </div>
+              <section className="rounded-2xl border border-slate-200 bg-white/70 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="flex items-center gap-2 font-heading text-3xl uppercase tracking-wide text-slate-900">
+                    <User className="h-6 w-6" />
+                    User Listed
+                  </h3>
+                  <Badge variant="outline" className="border-slate-300 text-slate-700">
+                    {userListed.length} listings
+                  </Badge>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {userListed.map((bike) => (
+                    <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="User Listed" priority="user-listed" />
+                  ))}
+                </div>
+              </section>
+            </div>
           </div>
         </section>
       ) : null}

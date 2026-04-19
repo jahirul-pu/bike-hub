@@ -1,14 +1,27 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useFormStatus } from "react-dom";
-import { createPart } from "../actions";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Bike as BikeIcon, CheckCircle2, Search, X, Wrench, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, Bike as BikeIcon, CheckCircle2, Search, X, Wrench, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { bikes } from "@/lib/bikes-data";
+import { updatePart } from "../../actions";
 
-// ─── Subcategory Presets per Category ──────────────────────────────────────
+type PartData = {
+  id: string;
+  name: string;
+  sku: string;
+  purchasePrice: number;
+  retailPrice: number;
+  stock: number;
+  category: string;
+  subcategory: string;
+  nestedSubcategory: string;
+  condition: string;
+  fitment: string;
+  compatibleBikes: string[];
+};
+
 const SUBCATEGORY_MAP: Record<string, string[]> = {
   Parts: ["General", "Engine Oil", "Air Filter", "Brake Pads", "Chain Kit", "Spark Plug", "Tyres", "Battery", "Clutch Plates", "Gaskets", "Bearings", "Cables", "Sprocket"],
   Accessories: ["Phone Mount", "Frame Sliders", "Crash Guard", "Performance Exhaust", "Luggage", "Charger", "Visor", "LED Lights", "Handlebar Grips", "Mirrors", "Seat Cover"],
@@ -21,32 +34,30 @@ const NESTED_SUBCATEGORY_MAP: Record<string, string[]> = {
   "Brake Pads": ["Front Brake Pad", "Rear Brake Pad", "Disc Brake Pad", "Drum Brake Shoe"],
 };
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="bg-slate-900 hover:bg-slate-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-bold text-sm disabled:opacity-50 transition-colors shadow-lg shadow-slate-900/10"
-    >
-      <Save size={18} />
-      {pending ? "Saving..." : "Save Part"}
-    </button>
-  );
-}
-
-export default function AddPartPage() {
+export default function EditPartForm({ part }: { part: PartData }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Core fields
+  const [name, setName] = useState(part.name);
+  const [sku, setSku] = useState(part.sku);
+  const [purchasePrice, setPurchasePrice] = useState(part.purchasePrice);
+  const [retailPrice, setRetailPrice] = useState(part.retailPrice);
+  const [stock, setStock] = useState(part.stock);
+  const [condition, setCondition] = useState(part.condition);
+  const [fitment, setFitment] = useState(part.fitment);
 
   // Taxonomy state
-  const [category, setCategory] = useState("Parts");
-  const [subcategory, setSubcategory] = useState("General");
-  const [nestedSubcategory, setNestedSubcategory] = useState("");
+  const [category, setCategory] = useState(part.category);
+  const [subcategory, setSubcategory] = useState(part.subcategory);
+  const [nestedSubcategory, setNestedSubcategory] = useState(part.nestedSubcategory);
 
   // Bike compatibility state
-  const [isUniversal, setIsUniversal] = useState(true);
-  const [selectedBikeSlugs, setSelectedBikeSlugs] = useState<string[]>([]);
+  const [isUniversal, setIsUniversal] = useState(part.compatibleBikes.includes("Universal"));
+  const [selectedBikeSlugs, setSelectedBikeSlugs] = useState<string[]>(
+    part.compatibleBikes.filter((s) => s !== "Universal")
+  );
   const [bikeSearch, setBikeSearch] = useState("");
 
   const subcategoryOptions = SUBCATEGORY_MAP[category] ?? ["General"];
@@ -74,13 +85,11 @@ export default function AddPartPage() {
 
   const toggleBike = (slug: string) => {
     setSelectedBikeSlugs((prev) =>
-      prev.includes(slug)
-        ? prev.filter((s) => s !== slug)
-        : [...prev, slug]
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
     );
   };
 
-  async function action(formData: FormData) {
+  async function handleSave() {
     const compatibleBikes = isUniversal ? ["Universal"] : selectedBikeSlugs;
 
     if (!isUniversal && selectedBikeSlugs.length === 0) {
@@ -88,23 +97,27 @@ export default function AddPartPage() {
       return;
     }
 
-    const data = {
-      name: formData.get("name") as string,
-      sku: formData.get("sku") as string,
-      purchasePrice: Number(formData.get("purchasePrice")),
-      retailPrice: Number(formData.get("retailPrice")),
-      stock: Number(formData.get("stock")),
+    setSaving(true);
+    setError(null);
+
+    const res = await updatePart(part.id, {
+      name,
+      sku,
+      purchasePrice,
+      retailPrice,
+      stock,
       category,
       subcategory,
       nestedSubcategory: nestedSubcategory || undefined,
-      condition: formData.get("condition") as string,
-      fitment: formData.get("fitment") as string,
+      condition,
+      fitment,
       compatibleBikes,
-    };
+    });
 
-    const res = await createPart(data);
+    setSaving(false);
+
     if (!res.success) {
-      setError(res.error || "Failed to create part.");
+      setError(res.error || "Failed to update part.");
       return;
     }
 
@@ -119,12 +132,12 @@ export default function AddPartPage() {
         </Link>
         <div>
           <h2 className="text-2xl font-black flex items-center gap-2">
-            Add New Part
-            <span className="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-              Catalog Entry
+            Edit Part
+            <span className="text-sm font-normal text-slate-500 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">
+              Editing
             </span>
           </h2>
-          <p className="text-slate-500 text-sm mt-1">Fill out the details below. Bike compatibility powers the Smart Parts Discovery on the marketplace.</p>
+          <p className="text-slate-500 text-sm mt-1">Update part details, compatibility, and inventory.</p>
         </div>
       </div>
 
@@ -139,7 +152,7 @@ export default function AddPartPage() {
         </div>
       )}
 
-      <form action={action} className="space-y-8">
+      <div className="space-y-8">
         {/* ─── Section 1: Core Info ─── */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 border-l-2 border-slate-900 pl-3 mb-5">
@@ -149,16 +162,16 @@ export default function AddPartPage() {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Part Name *</label>
               <input
-                required name="name" type="text"
-                placeholder="e.g. Motul 10W30 Full Synthetic"
+                value={name} onChange={(e) => setName(e.target.value)}
+                type="text"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
               />
             </div>
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">SKU Number *</label>
               <input
-                required name="sku" type="text"
-                placeholder="e.g. MOTUL-10W30-FS"
+                value={sku} onChange={(e) => setSku(e.target.value)}
+                type="text"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-mono uppercase outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
               />
             </div>
@@ -191,10 +204,7 @@ export default function AddPartPage() {
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Subcategory *</label>
               <select
                 value={subcategory}
-                onChange={(e) => {
-                  setSubcategory(e.target.value);
-                  setNestedSubcategory("");
-                }}
+                onChange={(e) => { setSubcategory(e.target.value); setNestedSubcategory(""); }}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
               >
                 {subcategoryOptions.map((sub) => (
@@ -219,8 +229,7 @@ export default function AddPartPage() {
                 <input
                   value={nestedSubcategory}
                   onChange={(e) => setNestedSubcategory(e.target.value)}
-                  type="text"
-                  placeholder="Optional"
+                  type="text" placeholder="Optional"
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
                 />
               )}
@@ -228,7 +237,7 @@ export default function AddPartPage() {
           </div>
         </div>
 
-        {/* ─── Section 3: Bike Compatibility (THE KEY UPGRADE) ─── */}
+        {/* ─── Section 3: Bike Compatibility ─── */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 border-l-2 border-emerald-500 pl-3 mb-2">
             Bike Compatibility Engine
@@ -237,7 +246,6 @@ export default function AddPartPage() {
             This powers the "Find the right part for YOUR bike" feature on the marketplace.
           </p>
 
-          {/* Universal Toggle */}
           <div className="mb-5">
             <button
               type="button"
@@ -258,16 +266,14 @@ export default function AddPartPage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-bold text-slate-900">Universal Fit</p>
-                <p className="text-[11px] text-slate-500">This part works with all bikes — no specific compatibility needed</p>
+                <p className="text-[11px] text-slate-500">This part works with all bikes</p>
               </div>
               <Wrench className={`h-5 w-5 ${isUniversal ? "text-emerald-500" : "text-slate-300"}`} />
             </button>
           </div>
 
-          {/* Bike Selector (shown when not universal) */}
           {!isUniversal && (
             <div className="space-y-4">
-              {/* Selected bikes */}
               {selectedBikeSlugs.length > 0 && (
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
@@ -277,17 +283,10 @@ export default function AddPartPage() {
                     {selectedBikeSlugs.map((slug) => {
                       const bike = bikes.find((b) => b.slug === slug);
                       return (
-                        <span
-                          key={slug}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700"
-                        >
+                        <span key={slug} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
                           <BikeIcon className="h-3 w-3" />
                           {bike ? `${bike.brand} ${bike.model}` : slug}
-                          <button
-                            type="button"
-                            onClick={() => toggleBike(slug)}
-                            className="ml-0.5 hover:text-red-500 transition-colors"
-                          >
+                          <button type="button" onClick={() => toggleBike(slug)} className="ml-0.5 hover:text-red-500 transition-colors">
                             <X size={12} />
                           </button>
                         </span>
@@ -297,19 +296,15 @@ export default function AddPartPage() {
                 </div>
               )}
 
-              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
-                  type="text"
-                  value={bikeSearch}
-                  onChange={(e) => setBikeSearch(e.target.value)}
+                  type="text" value={bikeSearch} onChange={(e) => setBikeSearch(e.target.value)}
                   placeholder="Search bikes..."
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
                 />
               </div>
 
-              {/* Bike grid */}
               <div className="max-h-[320px] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50">
                 {Object.entries(groupedBikes).map(([brand, brandBikes]) => (
                   <div key={brand}>
@@ -320,19 +315,14 @@ export default function AddPartPage() {
                       const isSelected = selectedBikeSlugs.includes(bike.slug);
                       return (
                         <button
-                          key={bike.slug}
-                          type="button"
+                          key={bike.slug} type="button"
                           onClick={() => toggleBike(bike.slug)}
                           className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors border-b border-slate-100/50 ${
-                            isSelected
-                              ? "bg-emerald-50"
-                              : "hover:bg-white"
+                            isSelected ? "bg-emerald-50" : "hover:bg-white"
                           }`}
                         >
                           <div className={`flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all ${
-                            isSelected
-                              ? "border-emerald-500 bg-emerald-500"
-                              : "border-slate-300 bg-white"
+                            isSelected ? "border-emerald-500 bg-emerald-500" : "border-slate-300 bg-white"
                           }`}>
                             {isSelected && <CheckCircle2 className="h-3 w-3 text-white" />}
                           </div>
@@ -342,13 +332,6 @@ export default function AddPartPage() {
                               {bike.powertrain} • {bike.displacementCc ? `${bike.displacementCc}cc` : `${bike.motorPowerKw}kW`} • {bike.category}
                             </p>
                           </div>
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                            bike.powertrain === "EV"
-                              ? "bg-emerald-100 text-emerald-600"
-                              : "bg-slate-100 text-slate-400"
-                          }`}>
-                            {bike.powertrain}
-                          </span>
                         </button>
                       );
                     })}
@@ -356,39 +339,25 @@ export default function AddPartPage() {
                 ))}
               </div>
 
-              {/* Quick select all */}
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedBikeSlugs(bikes.map((b) => b.slug))}
-                  className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
-                >
+                <button type="button" onClick={() => setSelectedBikeSlugs(bikes.map((b) => b.slug))} className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
                   Select All
                 </button>
                 <span className="text-slate-300">•</span>
-                <button
-                  type="button"
-                  onClick={() => setSelectedBikeSlugs([])}
-                  className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
-                >
+                <button type="button" onClick={() => setSelectedBikeSlugs([])} className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors">
                   Clear All
                 </button>
               </div>
             </div>
           )}
 
-          {/* Hidden field for fitment description */}
           <div className="mt-5 pt-5 border-t border-slate-100">
             <label className="block text-sm font-bold text-slate-700 mb-1.5">Fitment Description</label>
             <input
-              required
-              name="fitment"
+              value={fitment} onChange={(e) => setFitment(e.target.value)}
               type="text"
-              defaultValue="Universal"
-              placeholder="e.g. 150cc - 200cc street bikes"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
             />
-            <p className="text-[10px] text-slate-400 mt-1">Displayed on the part card in the marketplace.</p>
           </div>
         </div>
 
@@ -403,19 +372,19 @@ export default function AddPartPage() {
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">৳</span>
                 <input
-                  required name="purchasePrice" type="number" step="0.01" min="0"
-                  placeholder="0.00"
+                  value={purchasePrice} onChange={(e) => setPurchasePrice(Number(e.target.value))}
+                  type="number" step="0.01" min="0"
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Retail Price (BDT) *</label>
+              <label className="block text-sm font-bold text-slate-700 mb-1.5">Retail Price *</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">৳</span>
                 <input
-                  required name="retailPrice" type="number" step="0.01" min="0"
-                  placeholder="0.00"
+                  value={retailPrice} onChange={(e) => setRetailPrice(Number(e.target.value))}
+                  type="number" step="0.01" min="0"
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
                 />
               </div>
@@ -423,14 +392,15 @@ export default function AddPartPage() {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Stock Quantity *</label>
               <input
-                required name="stock" type="number" min="0" defaultValue="0"
+                value={stock} onChange={(e) => setStock(Number(e.target.value))}
+                type="number" min="0"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
               />
             </div>
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Condition *</label>
               <select
-                name="condition"
+                value={condition} onChange={(e) => setCondition(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
               >
                 <option value="New">New</option>
@@ -449,9 +419,17 @@ export default function AddPartPage() {
           >
             Cancel
           </Link>
-          <SubmitButton />
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-slate-900 hover:bg-slate-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-bold text-sm disabled:opacity-50 transition-colors shadow-lg shadow-slate-900/10"
+          >
+            {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+            {saving ? "Saving..." : "Update Part"}
+          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
