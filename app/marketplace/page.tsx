@@ -385,8 +385,6 @@ export default function MarketplacePage() {
   const [isScrolledPast, setIsScrolledPast] = useState(false);
   const filterSectionRef = useRef<HTMLDivElement>(null);
   const [bikeSearchQuery, setBikeSearchQuery] = useState("");
-  const [committedBikeSearchQuery, setCommittedBikeSearchQuery] = useState("");
-  const [partSearchQuery, setPartSearchQuery] = useState("");
   const [showBikeDropdown, setShowBikeDropdown] = useState(false);
   const bikeSearchRef = useRef<HTMLDivElement>(null);
 
@@ -412,7 +410,7 @@ export default function MarketplacePage() {
   }, [bikeSearchQuery]);
 
   const committedBikeMatchSlugs = useMemo(() => {
-    const q = normalizeSearchText(committedBikeSearchQuery);
+    const q = normalizeSearchText(bikeSearchQuery);
 
     if (!q) {
       return new Set<string>();
@@ -426,7 +424,7 @@ export default function MarketplacePage() {
         })
         .map((bike) => bike.slug)
     );
-  }, [committedBikeSearchQuery]);
+  }, [bikeSearchQuery]);
 
   function findExactBikeMatch(query: string) {
     const q = normalizeSearchText(query);
@@ -443,7 +441,6 @@ export default function MarketplacePage() {
 
   function selectBikeFromSearch(bike: Bike) {
     setSelectedBikeSlug(bike.slug);
-    setCommittedBikeSearchQuery("");
     setShowBikeDropdown(false);
     setBikeSearchQuery("");
     setActiveSection("spare");
@@ -454,7 +451,7 @@ export default function MarketplacePage() {
 
     if (!trimmedQuery) {
       setSelectedBikeSlug("all");
-      setCommittedBikeSearchQuery("");
+      setBikeSearchQuery("");
       setShowBikeDropdown(false);
       setActiveSection("spare");
       return;
@@ -468,7 +465,7 @@ export default function MarketplacePage() {
     }
 
     setSelectedBikeSlug("all");
-    setCommittedBikeSearchQuery(trimmedQuery);
+    setBikeSearchQuery(trimmedQuery);
     setShowBikeDropdown(false);
     setActiveSection("spare");
   }
@@ -586,32 +583,8 @@ export default function MarketplacePage() {
         if (!item.compatibleBikes.includes("Universal") && !item.compatibleBikes.includes(selectedBikeSlug)) {
           return false;
         }
-      } else if (committedBikeSearchQuery) {
-        if (committedBikeMatchSlugs.size === 0) {
-          return false;
-        }
-
-        if (
-          !item.compatibleBikes.includes("Universal") &&
-          !item.compatibleBikes.some((slug) => committedBikeMatchSlugs.has(slug))
-        ) {
-          return false;
-        }
-      }
-
-      // Mega Menu Category Filters
-      if (selectedCategory !== "All" && item.category !== selectedCategory) return false;
-      if (selectedSubcategory !== "All" && item.subcategory !== selectedSubcategory) return false;
-      if (
-        selectedNestedSubcategory !== "All" &&
-        item.nestedSubcategory !== selectedNestedSubcategory
-      ) {
-        return false;
-      }
-
-      // Text Search Filter
-      if (partSearchQuery) {
-        const q = normalizeSearchText(partSearchQuery);
+      } else if (bikeSearchQuery.trim()) {
+        const normalizedQuery = normalizeSearchText(bikeSearchQuery);
         const compatibleBikeText = item.compatibleBikes
           .map((slug) => {
             if (slug === "Universal") {
@@ -619,7 +592,7 @@ export default function MarketplacePage() {
             }
 
             const matchedBike = bikes.find((bike) => bike.slug === slug);
-            return matchedBike ? `${matchedBike.brand} ${matchedBike.model}` : slug;
+            return matchedBike ? `${matchedBike.brand} ${matchedBike.model} ${matchedBike.category}` : slug;
           })
           .join(" ");
         const searchableText = normalizeSearchText(
@@ -634,10 +607,25 @@ export default function MarketplacePage() {
             .filter(Boolean)
             .join(" ")
         );
+        const matchesPartText = searchableText.includes(normalizedQuery);
+        const matchesBikeCompatibility =
+          committedBikeMatchSlugs.size > 0 &&
+          (item.compatibleBikes.includes("Universal") ||
+            item.compatibleBikes.some((slug) => committedBikeMatchSlugs.has(slug)));
 
-        if (!searchableText.includes(q)) {
+        if (!matchesPartText && !matchesBikeCompatibility) {
           return false;
         }
+      }
+
+      // Mega Menu Category Filters
+      if (selectedCategory !== "All" && item.category !== selectedCategory) return false;
+      if (selectedSubcategory !== "All" && item.subcategory !== selectedSubcategory) return false;
+      if (
+        selectedNestedSubcategory !== "All" &&
+        item.nestedSubcategory !== selectedNestedSubcategory
+      ) {
+        return false;
       }
 
       return true;
@@ -650,7 +638,7 @@ export default function MarketplacePage() {
       }
       return 0;
     });
-  }, [committedBikeMatchSlugs, committedBikeSearchQuery, partSearchQuery, selectedCategory, selectedSubcategory, selectedNestedSubcategory, selectedBikeSlug, spareParts]);
+  }, [bikeSearchQuery, committedBikeMatchSlugs, selectedCategory, selectedSubcategory, selectedNestedSubcategory, selectedBikeSlug, spareParts]);
 
   const filteredBikes = useMemo(() => {
     return bikes.filter((bike) => {
@@ -762,7 +750,7 @@ export default function MarketplacePage() {
       {activeSection === "spare" ? (
         <section className="mt-8">
           {/* ── SMART BIKE SELECTOR (Hero) ── */}
-          <div className="mb-8 relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+          <div className="mb-8 relative rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
             {/* Decorative background */}
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-amber-100/40 to-transparent" />
@@ -819,7 +807,6 @@ export default function MarketplacePage() {
                           onClick={() => {
                             setSelectedBikeSlug("all");
                             setBikeSearchQuery("");
-                            setCommittedBikeSearchQuery("");
                           }}
                           className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
                         >
@@ -843,7 +830,7 @@ export default function MarketplacePage() {
                               applyBikeSearch(bikeSearchQuery);
                             }
                           }}
-                          placeholder="Search your bike... (e.g. Yamaha R15, Honda NX)"
+                          placeholder="Search bike, category, or item... (e.g. Honda NX 200, Honda, Engine Oil)"
                           className="w-full bg-transparent py-4 pl-13 pr-5 text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
                         />
                       </>
@@ -853,26 +840,6 @@ export default function MarketplacePage() {
                   {/* Dropdown */}
                   {showBikeDropdown && !selectedBike && (
                     <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[360px] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                      {/* Browse all option */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedBikeSlug("all");
-                          setShowBikeDropdown(false);
-                          setBikeSearchQuery("");
-                          setCommittedBikeSearchQuery("");
-                        }}
-                        className="flex w-full items-center gap-3 border-b border-slate-100 px-5 py-3 text-left transition-colors hover:bg-slate-50"
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
-                          <Wrench className="h-4 w-4 text-slate-500" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-700">Browse All Parts</p>
-                          <p className="text-[10px] text-slate-400">Universal gear & all compatible parts</p>
-                        </div>
-                      </button>
-
                       {filteredBikeOptions.length === 0 ? (
                         <div className="px-5 py-8 text-center">
                           <p className="text-sm text-slate-400">No bikes match your search</p>
@@ -953,8 +920,8 @@ export default function MarketplacePage() {
                   <Wrench className="h-7 w-7" />
                   {selectedBike
                     ? `Parts for ${selectedBike.brand} ${selectedBike.model}`
-                    : committedBikeSearchQuery
-                      ? `Parts for ${committedBikeSearchQuery}`
+                    : bikeSearchQuery.trim()
+                      ? `Results for ${bikeSearchQuery.trim()}`
                       : "Spare Parts"}
                 </h2>
                 <Badge variant="outline" className="border-slate-300 text-slate-700">
@@ -967,55 +934,22 @@ export default function MarketplacePage() {
                   Filter Products
                 </p>
 
-                {committedBikeSearchQuery && !selectedBike ? (
+                {bikeSearchQuery.trim() && !selectedBike ? (
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
-                      Bike query: {committedBikeSearchQuery}
+                      Search query: {bikeSearchQuery.trim()}
                     </Badge>
                     <button
                       type="button"
                       onClick={() => {
-                        setCommittedBikeSearchQuery("");
                         setBikeSearchQuery("");
                       }}
                       className="text-xs font-semibold text-slate-500 transition-colors hover:text-slate-800"
                     >
-                      Clear bike search
+                      Clear search
                     </button>
                   </div>
                 ) : null}
-
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div className="relative flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="search"
-                      value={partSearchQuery}
-                      onChange={(e) => setPartSearchQuery(e.target.value)}
-                      placeholder={
-                        selectedBike
-                          ? `Search parts for ${selectedBike.brand} ${selectedBike.model}`
-                          : "Search parts by name, fitment, category, or bike"
-                      }
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-10 text-sm text-slate-700 outline-none transition focus:border-amber-300 focus:ring-4 focus:ring-amber-500/10"
-                    />
-                    {partSearchQuery ? (
-                      <button
-                        type="button"
-                        onClick={() => setPartSearchQuery("")}
-                        className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                        aria-label="Clear part search"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    ) : null}
-                  </div>
-                  {partSearchQuery ? (
-                    <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
-                      Query: {partSearchQuery}
-                    </Badge>
-                  ) : null}
-                </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <div
@@ -1148,8 +1082,8 @@ export default function MarketplacePage() {
                   <p className="mt-1 text-sm text-slate-400">
                     {selectedBike
                       ? `No matching parts for ${selectedBike.brand} ${selectedBike.model} in this category yet.`
-                      : committedBikeSearchQuery
-                        ? `No matching parts found for ${committedBikeSearchQuery}.`
+                      : bikeSearchQuery.trim()
+                        ? `No matching parts found for ${bikeSearchQuery.trim()}.`
                       : "Try adjusting your filters or browse all products."
                     }
                   </p>
