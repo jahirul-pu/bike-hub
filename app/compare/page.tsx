@@ -1027,7 +1027,7 @@ export default function ComparePage() {
                       <TableCell key={`${bike.slug}-actions`} className="align-top py-6">
                         <div className="flex flex-col gap-2">
                           <Link
-                            href={`/marketplace?query=${bike.model}`}
+                            href={`/marketplace/spare-parts?query=${bike.model}`}
                             className={cn(
                               buttonVariants({ size: "sm" }),
                               "w-full bg-slate-900 text-white shadow hover:bg-slate-800"
@@ -1046,7 +1046,7 @@ export default function ComparePage() {
                             Find Showrooms
                           </Link>
                           <Link
-                            href={`/marketplace?bike=${bike.slug}`}
+                            href={`/marketplace/spare-parts?bike=${bike.slug}`}
                             className={cn(
                               buttonVariants({ size: "sm", variant: "outline" }),
                               "w-full border-slate-300 bg-white"

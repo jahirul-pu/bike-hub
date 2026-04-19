@@ -8,3 +8,235 @@
   1198 |                       key={option.value}
   1199 |                       type="button"
 ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⚠ Fast Refresh had to perform a full reload when ./app/marketplace/page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+⚠ Fast Refresh had to perform a full reload when ./app/marketplace/page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+[browser] Uncaught Error: The default export is not a React Component in "/marketplace/page"
+[browser] Uncaught Error: The default export is not a React Component in "/marketplace/page"
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+[browser] Uncaught Error: The default export is not a React Component in "/marketplace/page"
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+[browser] Uncaught Error: The default export is not a React Component in "/marketplace/page"
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/marketplace/page"
+    at ignore-listed frames {
+  page: '/marketplace'
+}
+[browser] Uncaught Error: The default export is not a React Component in "/marketplace/page"
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/shared/lib/router/router.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ ./app/marketplace/spare-parts/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+[31m[1m>[0m [90m1 |[0m [36mimport[0m { [33mMarketplacePageContent[0m } [36mfrom[0m [32m"../page"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m2 |[0m
+  [90m3 |[0m [36mexport[0m [36mdefault[0m [36mfunction[0m [33mSparePartsMarketplacePage[0m() {
+  [90m4 |[0m   [36mreturn[0m <[33mMarketplacePageContent[0m section=[32m"spare"[0m />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+[browser] ./app/marketplace/used-vehicles/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function UsedVehiclesMarketplacePage() {
+  4 |   return <MarketplacePageContent section="used" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/spare-parts/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function SparePartsMarketplacePage() {
+  4 |   return <MarketplacePageContent section="spare" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/used-vehicles/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function UsedVehiclesMarketplacePage() {
+  4 |   return <MarketplacePageContent section="used" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/spare-parts/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function SparePartsMarketplacePage() {
+  4 |   return <MarketplacePageContent section="spare" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/used-vehicles/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function UsedVehiclesMarketplacePage() {
+  4 |   return <MarketplacePageContent section="used" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/spare-parts/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function SparePartsMarketplacePage() {
+  4 |   return <MarketplacePageContent section="spare" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/used-vehicles/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function UsedVehiclesMarketplacePage() {
+  4 |   return <MarketplacePageContent section="used" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/spare-parts/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function SparePartsMarketplacePage() {
+  4 |   return <MarketplacePageContent section="spare" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/used-vehicles/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function UsedVehiclesMarketplacePage() {
+  4 |   return <MarketplacePageContent section="used" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/spare-parts/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function SparePartsMarketplacePage() {
+  4 |   return <MarketplacePageContent section="spare" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/used-vehicles/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function UsedVehiclesMarketplacePage() {
+  4 |   return <MarketplacePageContent section="used" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./app/marketplace/spare-parts/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function SparePartsMarketplacePage() {
+  4 |   return <MarketplacePageContent section="spare" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Failed to fetch RSC payload for http://localhost:3000/marketplace/spare-parts. Falling back to browser navigation. TypeError: NetworkError when attempting to fetch resource.
+[browser] Uncaught Error: ./app/marketplace/used-vehicles/page.tsx:1:1
+Export MarketplacePageContent doesn't exist in target module
+> 1 | import { MarketplacePageContent } from "../page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export default function UsedVehiclesMarketplacePage() {
+  4 |   return <MarketplacePageContent section="used" />;
+
+The export MarketplacePageContent was not found in module [project]/app/marketplace/page.tsx [app-rsc] (ecmascript).
+Did you mean to import default?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+    at <unknown> (Error: ./app/marketplace/used-vehicles/page.tsx:1:1)
+    at <unknown> (Error: (./app/marketplace/used-vehicles/page.tsx:1:1)
