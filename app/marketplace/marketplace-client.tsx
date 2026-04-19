@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target, Star, Truck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,7 @@ const sparePartsSortDirections: Array<{ value: SparePartsSortDirection; label: s
   { value: "asc", label: "Low -> High" },
   { value: "desc", label: "High -> Low" },
 ];
+const inter = Inter({ subsets: ["latin"] });
 
 function escapeSvgText(value: string): string {
   return value
@@ -1185,28 +1187,74 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                   <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
                     Sort
                   </span>
-                  <select
-                    value={spareSortField}
-                    onChange={(e) => setSpareSortField(e.target.value as SparePartsSortField)}
-                    className="min-w-[172px] rounded-xl border border-slate-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-slate-400 sm:min-w-[188px]"
-                  >
-                    {sparePartsSortFields.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={spareSortDirection}
-                    onChange={(e) => setSpareSortDirection(e.target.value as SparePartsSortDirection)}
-                    className="min-w-[168px] rounded-xl border border-slate-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-slate-400 sm:min-w-[182px]"
-                  >
-                    {sparePartsSortDirections.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    <Popover>
+                      <PopoverTrigger>
+                        <div
+                          role="button"
+                          className={cn(
+                            inter.className,
+                            "flex min-w-[172px] cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-slate-400 sm:min-w-[188px]"
+                          )}
+                        >
+                          <span>{sparePartsSortFields.find((option) => option.value === spareSortField)?.label ?? "Popularity"}</span>
+                          <ChevronDown className="ml-3 h-3.5 w-3.5 shrink-0 text-slate-500" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className={cn(inter.className, "w-[188px] border-slate-200 p-1")}>
+                        <div className="flex flex-col">
+                          {sparePartsSortFields.map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                            onClick={() => setSpareSortField(option.value)}
+                            className={cn(
+                              "flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-[11px] font-bold uppercase tracking-[0.14em] transition-colors",
+                              spareSortField === option.value
+                                ? "bg-slate-100 text-slate-900"
+                                : "text-slate-700 hover:bg-slate-50"
+                            )}
+                          >
+                            <span>{option.label}</span>
+                            {spareSortField === option.value ? <CheckCircle2 className="h-3.5 w-3.5" /> : null}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                    <Popover>
+                      <PopoverTrigger>
+                        <div
+                          role="button"
+                          className={cn(
+                            inter.className,
+                            "flex min-w-[168px] cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-slate-400 sm:min-w-[182px]"
+                          )}
+                        >
+                          <span>{sparePartsSortDirections.find((option) => option.value === spareSortDirection)?.label ?? "High -> Low"}</span>
+                          <ChevronDown className="ml-3 h-3.5 w-3.5 shrink-0 text-slate-500" />
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className={cn(inter.className, "w-[182px] border-slate-200 p-1")}>
+                        <div className="flex flex-col">
+                          {sparePartsSortDirections.map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                            onClick={() => setSpareSortDirection(option.value)}
+                            className={cn(
+                              "flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-[11px] font-bold uppercase tracking-[0.14em] transition-colors",
+                              spareSortDirection === option.value
+                                ? "bg-slate-100 text-slate-900"
+                                : "text-slate-700 hover:bg-slate-50"
+                            )}
+                          >
+                            <span>{option.label}</span>
+                            {spareSortDirection === option.value ? <CheckCircle2 className="h-3.5 w-3.5" /> : null}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 

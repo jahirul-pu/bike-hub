@@ -240,3 +240,47 @@ All exports of the module are statically known (It doesn't have dynamic exports)
 
     at <unknown> (Error: ./app/marketplace/used-vehicles/page.tsx:1:1)
     at <unknown> (Error: (./app/marketplace/used-vehicles/page.tsx:1:1)
+[browser] In HTML, <button> cannot be a descendant of <button>.
+This will cause a hydration error.
+
+  ...
+    <SparePartsMarketplacePage>
+      <MarketplacePageContent section="spare">
+        ...
+          <div className="mb-4 flex ...">
+            <div>
+            <div className="flex flex-...">
+              <span>
+              <Popover>
+                <PopoverRoot data-slot="popover">
+                  <FloatingTree>
+                    <PopoverRootComponent props={{...}}>
+                      <PopoverTrigger asChild={true}>
+                        <PopoverTrigger data-slot="popover-tr..." asChild={true}>
+>                         <button
+>                           type="button"
+>                           onClick={function onClick}
+>                           onMouseDown={function onMouseDown}
+>                           onKeyDown={function}
+>                           onKeyUp={function onKeyUp}
+>                           onPointerDown={function onPointerDown}
+>                           tabIndex={0}
+>                           disabled={false}
+>                           data-base-ui-click-trigger=""
+>                           id="base-ui-_r_2_"
+>                           data-slot="popover-trigger"
+>                           asChild={true}
+>                           ref={function}
+>                         >
+>                           <button
+>                             type="button"
+>                             className="font-heading flex min-w-[172px] items-center justify-between rounded-xl borde..."
+>                           >
+                      ...
+              ...
+          ...
+ 
+[browser] <button> cannot contain a nested <button>.
+See this log for the ancestor stack trace. 
+[browser] React does not recognize the `asChild` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `aschild` instead. If you accidentally passed it from a parent component, remove it from the DOM element. 
+React does not recognize the `asChild` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `aschild` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
