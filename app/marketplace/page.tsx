@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, Zap, CheckCircle2, AlertTriangle, Clock, ArrowRight, Sparkles, Filter, Info, ChevronRight, Target, Shield, Gauge } from "lucide-react";
+import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -10,8 +10,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { bikes, Bike, formatBdt, headlineMetric, powertrainBadgeClass } from "@/lib/bikes-data";
-import { getBikeProfile, getSmartRecommendations, getMaintenanceSchedule, priorityConfig, urgencyConfig } from "@/lib/parts-compatibility";
-import type { PartRecommendation, MaintenanceItem } from "@/lib/parts-compatibility";
 import { useCartStore } from "@/store/useCartStore";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +65,19 @@ function makeSpareThumb(part: SparePartListing): string {
   `;
 
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+function normalizeSearchText(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function getBikeSearchTokens(bike: Bike) {
+  return {
+    brand: normalizeSearchText(bike.brand),
+    model: normalizeSearchText(bike.model),
+    full: normalizeSearchText(`${bike.brand}${bike.model}`),
+    slug: normalizeSearchText(bike.slug),
+  };
 }
 
 // ─── Smart Part Card with Compatibility Badge ────────────────────────────
@@ -184,83 +195,6 @@ function SmartPartCard({
   );
 }
 
-// ─── Recommendation Card ──────────────────────────────────────────────────
-function RecommendationCard({
-  rec,
-  matchingParts,
-  onFilterToCategory,
-}: {
-  rec: PartRecommendation;
-  matchingParts: number;
-  onFilterToCategory: (category: string, subcategory: string) => void;
-}) {
-  const config = priorityConfig[rec.priority];
-
-  return (
-    <button
-      type="button"
-      onClick={() => onFilterToCategory(rec.category, rec.subcategory)}
-      className={cn(
-        "group relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-all duration-300 hover:shadow-md hover:-translate-y-0.5",
-        config.class
-      )}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-2xl">{rec.icon}</span>
-        <div className="flex items-center gap-1.5">
-          <span className={cn("h-1.5 w-1.5 rounded-full", config.dot)} />
-          <span className="text-[9px] font-black uppercase tracking-widest opacity-70">
-            {config.label}
-          </span>
-        </div>
-      </div>
-      <p className="text-sm font-bold text-slate-900">{rec.subcategory}</p>
-      <p className="text-xs leading-relaxed text-slate-600">{rec.reason}</p>
-      <div className="mt-auto flex items-center justify-between pt-1">
-        {matchingParts > 0 ? (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-            <Package className="h-3 w-3" />
-            {matchingParts} in stock
-          </span>
-        ) : (
-          <span className="text-[10px] font-medium text-slate-400">Coming soon</span>
-        )}
-        <ChevronRight className="h-3.5 w-3.5 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-slate-500" />
-      </div>
-    </button>
-  );
-}
-
-// ─── Maintenance Card ──────────────────────────────────────────────────────
-function MaintenanceCard({ item }: { item: MaintenanceItem }) {
-  const config = urgencyConfig[item.urgency];
-
-  return (
-    <div className={cn(
-      "flex items-center gap-4 rounded-xl border px-4 py-3 transition-all",
-      config.class
-    )}>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-bold truncate">{item.part}</p>
-          <Badge variant="outline" className={cn("text-[9px] font-bold shrink-0", config.class)}>
-            {config.label}
-          </Badge>
-        </div>
-        <p className="mt-0.5 text-xs text-slate-500 truncate">{item.note}</p>
-      </div>
-      <div className="text-right shrink-0">
-        <p className="text-xs font-black text-slate-800">
-          {item.intervalKm >= 1000
-            ? `${(item.intervalKm / 1000).toFixed(0)}K km`
-            : `${item.intervalKm} km`}
-        </p>
-        <p className="text-[10px] text-slate-400">or {item.intervalMonths}mo</p>
-      </div>
-    </div>
-  );
-}
-
 type UsedPriority = "certified" | "promoted" | "user-listed";
 
 const usedPriorityStyles: Record<
@@ -337,18 +271,12 @@ export default function MarketplacePage() {
   const [selectedBikeSlug, setSelectedBikeSlug] = useState<string>("all");
   const [spareParts, setSpareParts] = useState<SparePartListing[]>([]);
   const [isLoadingParts, setIsLoadingParts] = useState(true);
-  const [activeTab, setActiveTab] = useState<"discover" | "maintenance" | "browse">("discover");
   const addItem = useCartStore((state) => state.addItem);
 
   const selectedBike = useMemo(() => {
     if (selectedBikeSlug === "all") return null;
     return bikes.find((b) => b.slug === selectedBikeSlug) ?? null;
   }, [selectedBikeSlug]);
-
-  const bikeProfile = useMemo(() => {
-    if (!selectedBike) return null;
-    return getBikeProfile(selectedBike.slug);
-  }, [selectedBike]);
 
   useEffect(() => {
     setIsLoadingParts(true);
@@ -457,6 +385,7 @@ export default function MarketplacePage() {
   const [isScrolledPast, setIsScrolledPast] = useState(false);
   const filterSectionRef = useRef<HTMLDivElement>(null);
   const [bikeSearchQuery, setBikeSearchQuery] = useState("");
+  const [committedBikeSearchQuery, setCommittedBikeSearchQuery] = useState("");
   const [partSearchQuery, setPartSearchQuery] = useState("");
   const [showBikeDropdown, setShowBikeDropdown] = useState(false);
   const bikeSearchRef = useRef<HTMLDivElement>(null);
@@ -474,16 +403,75 @@ export default function MarketplacePage() {
 
   const filteredBikeOptions = useMemo(() => {
     if (!bikeSearchQuery) return bikes;
-    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const q = norm(bikeSearchQuery);
+    const q = normalizeSearchText(bikeSearchQuery);
     
     return bikes.filter((b) => {
-      const matchBrand = norm(b.brand);
-      const matchModel = norm(b.model);
-      const matchFull = norm(`${b.brand}${b.model}`);
-      return matchBrand.includes(q) || matchModel.includes(q) || matchFull.includes(q);
+      const { brand, model, full, slug } = getBikeSearchTokens(b);
+      return brand.includes(q) || model.includes(q) || full.includes(q) || slug.includes(q);
     });
   }, [bikeSearchQuery]);
+
+  const committedBikeMatchSlugs = useMemo(() => {
+    const q = normalizeSearchText(committedBikeSearchQuery);
+
+    if (!q) {
+      return new Set<string>();
+    }
+
+    return new Set(
+      bikes
+        .filter((bike) => {
+          const { brand, model, full, slug } = getBikeSearchTokens(bike);
+          return brand.includes(q) || model.includes(q) || full.includes(q) || slug.includes(q);
+        })
+        .map((bike) => bike.slug)
+    );
+  }, [committedBikeSearchQuery]);
+
+  function findExactBikeMatch(query: string) {
+    const q = normalizeSearchText(query);
+
+    if (!q) {
+      return null;
+    }
+
+    return bikes.find((bike) => {
+      const { model, full, slug } = getBikeSearchTokens(bike);
+      return q === model || q === full || q === slug;
+    }) ?? null;
+  }
+
+  function selectBikeFromSearch(bike: Bike) {
+    setSelectedBikeSlug(bike.slug);
+    setCommittedBikeSearchQuery("");
+    setShowBikeDropdown(false);
+    setBikeSearchQuery("");
+    setActiveSection("spare");
+  }
+
+  function applyBikeSearch(query: string) {
+    const trimmedQuery = query.trim();
+
+    if (!trimmedQuery) {
+      setSelectedBikeSlug("all");
+      setCommittedBikeSearchQuery("");
+      setShowBikeDropdown(false);
+      setActiveSection("spare");
+      return;
+    }
+
+    const exactBikeMatch = findExactBikeMatch(trimmedQuery);
+
+    if (exactBikeMatch) {
+      selectBikeFromSearch(exactBikeMatch);
+      return;
+    }
+
+    setSelectedBikeSlug("all");
+    setCommittedBikeSearchQuery(trimmedQuery);
+    setShowBikeDropdown(false);
+    setActiveSection("spare");
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -598,6 +586,17 @@ export default function MarketplacePage() {
         if (!item.compatibleBikes.includes("Universal") && !item.compatibleBikes.includes(selectedBikeSlug)) {
           return false;
         }
+      } else if (committedBikeSearchQuery) {
+        if (committedBikeMatchSlugs.size === 0) {
+          return false;
+        }
+
+        if (
+          !item.compatibleBikes.includes("Universal") &&
+          !item.compatibleBikes.some((slug) => committedBikeMatchSlugs.has(slug))
+        ) {
+          return false;
+        }
       }
 
       // Mega Menu Category Filters
@@ -612,12 +611,31 @@ export default function MarketplacePage() {
 
       // Text Search Filter
       if (partSearchQuery) {
-        const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const q = norm(partSearchQuery);
-        const matchName = norm(item.name);
-        const matchSub = norm(item.subcategory);
-        const matchFit = norm(item.fitment);
-        if (!matchName.includes(q) && !matchSub.includes(q) && !matchFit.includes(q)) {
+        const q = normalizeSearchText(partSearchQuery);
+        const compatibleBikeText = item.compatibleBikes
+          .map((slug) => {
+            if (slug === "Universal") {
+              return slug;
+            }
+
+            const matchedBike = bikes.find((bike) => bike.slug === slug);
+            return matchedBike ? `${matchedBike.brand} ${matchedBike.model}` : slug;
+          })
+          .join(" ");
+        const searchableText = normalizeSearchText(
+          [
+            item.name,
+            item.subcategory,
+            item.nestedSubcategory,
+            item.fitment,
+            item.category,
+            compatibleBikeText,
+          ]
+            .filter(Boolean)
+            .join(" ")
+        );
+
+        if (!searchableText.includes(q)) {
           return false;
         }
       }
@@ -632,19 +650,7 @@ export default function MarketplacePage() {
       }
       return 0;
     });
-  }, [selectedCategory, selectedSubcategory, selectedNestedSubcategory, selectedBikeSlug, spareParts]);
-
-  // Count matching parts for recommendations
-  const getMatchingPartCount = (category: string, subcategory: string): number => {
-    return spareParts.filter((p) => {
-      if (p.category !== category) return false;
-      if (p.subcategory !== subcategory) return false;
-      if (selectedBikeSlug !== "all") {
-        return p.compatibleBikes.includes("Universal") || p.compatibleBikes.includes(selectedBikeSlug);
-      }
-      return true;
-    }).length;
-  };
+  }, [committedBikeMatchSlugs, committedBikeSearchQuery, partSearchQuery, selectedCategory, selectedSubcategory, selectedNestedSubcategory, selectedBikeSlug, spareParts]);
 
   const filteredBikes = useMemo(() => {
     return bikes.filter((bike) => {
@@ -711,23 +717,6 @@ export default function MarketplacePage() {
       image: makeSpareThumb(part),
     });
   };
-
-  const handleFilterToCategory = (category: string, subcategory: string) => {
-    setSelectedCategory(category as SparePartCategory);
-    setSelectedSubcategory(subcategory);
-    setSelectedNestedSubcategory("All");
-    setActiveTab("browse");
-  };
-
-  // Quick bike selector data
-  const groupedBikes = useMemo(() => {
-    const groups: Record<string, Bike[]> = {};
-    bikes.forEach((b) => {
-      if (!groups[b.brand]) groups[b.brand] = [];
-      groups[b.brand].push(b);
-    });
-    return groups;
-  }, []);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -830,7 +819,7 @@ export default function MarketplacePage() {
                           onClick={() => {
                             setSelectedBikeSlug("all");
                             setBikeSearchQuery("");
-                            setActiveTab("discover");
+                            setCommittedBikeSearchQuery("");
                           }}
                           className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
                         >
@@ -848,6 +837,12 @@ export default function MarketplacePage() {
                             setShowBikeDropdown(true);
                           }}
                           onFocus={() => setShowBikeDropdown(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              applyBikeSearch(bikeSearchQuery);
+                            }
+                          }}
                           placeholder="Search your bike... (e.g. Yamaha R15, Honda NX)"
                           className="w-full bg-transparent py-4 pl-13 pr-5 text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
                         />
@@ -865,6 +860,7 @@ export default function MarketplacePage() {
                           setSelectedBikeSlug("all");
                           setShowBikeDropdown(false);
                           setBikeSearchQuery("");
+                          setCommittedBikeSearchQuery("");
                         }}
                         className="flex w-full items-center gap-3 border-b border-slate-100 px-5 py-3 text-left transition-colors hover:bg-slate-50"
                       >
@@ -897,12 +893,7 @@ export default function MarketplacePage() {
                               <button
                                 key={bike.slug}
                                 type="button"
-                                onClick={() => {
-                                  setSelectedBikeSlug(bike.slug);
-                                  setShowBikeDropdown(false);
-                                  setBikeSearchQuery("");
-                                  setActiveTab("discover");
-                                }}
+                                onClick={() => selectBikeFromSearch(bike)}
                                 className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors hover:bg-amber-50/50"
                               >
                                 <div className={cn(
@@ -943,10 +934,7 @@ export default function MarketplacePage() {
                       <button
                         key={bike.slug}
                         type="button"
-                        onClick={() => {
-                          setSelectedBikeSlug(bike.slug);
-                          setActiveTab("discover");
-                        }}
+                        onClick={() => selectBikeFromSearch(bike)}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
                       >
                         <BikeIcon className="h-3 w-3" />
@@ -959,165 +947,15 @@ export default function MarketplacePage() {
             </div>
           </div>
 
-          {/* ── BIKE-SELECTED: Intelligence Tabs ── */}
-          {selectedBike && bikeProfile && (
-            <div className="mb-6">
-              {/* Tab Navigation */}
-              <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50/50 p-1.5 mb-6">
-                {[
-                  { id: "discover" as const, label: "Smart Recommendations", icon: <Sparkles className="h-3.5 w-3.5" />, count: bikeProfile.recommendations.length },
-                  { id: "maintenance" as const, label: "Maintenance Schedule", icon: <Clock className="h-3.5 w-3.5" />, count: bikeProfile.maintenanceSchedule.length },
-                  { id: "browse" as const, label: "Browse Parts", icon: <Search className="h-3.5 w-3.5" />, count: filteredSpareParts.length },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                      "flex-1 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300",
-                      activeTab === tab.id
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-400 hover:text-slate-600"
-                    )}
-                  >
-                    {tab.icon}
-                    <span className="hidden sm:inline">{tab.label}</span>
-                    <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
-                    <span className={cn(
-                      "flex h-5 min-w-5 items-center justify-center rounded-full text-[9px] font-black px-1",
-                      activeTab === tab.id
-                        ? "bg-slate-900 text-white"
-                        : "bg-slate-200 text-slate-500"
-                    )}>
-                      {tab.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* ── Tab: Smart Recommendations ── */}
-              {activeTab === "discover" && (
-                <div className="space-y-6">
-                  {/* Bike Profile Card */}
-                  <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white">
-                        <BikeIcon className="h-7 w-7" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-black text-slate-900">
-                          {selectedBike.brand} {selectedBike.model}
-                        </h3>
-                        <div className="mt-1 flex flex-wrap gap-2">
-                          <Badge variant="outline" className={cn("text-[10px] font-bold", powertrainBadgeClass(selectedBike.powertrain))}>
-                            {selectedBike.powertrain}
-                          </Badge>
-                          {selectedBike.displacementCc && (
-                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
-                              {selectedBike.displacementCc}cc
-                            </Badge>
-                          )}
-                          {selectedBike.coolingSystem && (
-                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
-                              {selectedBike.coolingSystem}
-                            </Badge>
-                          )}
-                          {selectedBike.category && (
-                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
-                              {selectedBike.category}
-                            </Badge>
-                          )}
-                          {selectedBike.frontBrake && (
-                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
-                              {selectedBike.absType ? `${selectedBike.absType} ABS` : "No ABS"}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <Link
-                        href={`/bikes/${selectedBike.slug}`}
-                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "hidden sm:inline-flex border-slate-300 text-xs")}
-                      >
-                        Full Specs
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Priority Groups */}
-                  {(["essential", "recommended", "upgrade"] as const).map((priority) => {
-                    const recs = bikeProfile.recommendations.filter((r) => r.priority === priority);
-                    if (recs.length === 0) return null;
-                    const config = priorityConfig[priority];
-                    return (
-                      <div key={priority}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className={cn("h-2 w-2 rounded-full", config.dot)} />
-                          <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-600">
-                            {config.label} Parts
-                          </h3>
-                          <span className="text-[10px] text-slate-400">
-                            — {priority === "essential" ? "Replace/check regularly" : priority === "recommended" ? "Improve performance & safety" : "Performance upgrades"}
-                          </span>
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                          {recs.map((rec, i) => (
-                            <RecommendationCard
-                              key={`${rec.category}-${rec.subcategory}-${i}`}
-                              rec={rec}
-                              matchingParts={getMatchingPartCount(rec.category, rec.subcategory)}
-                              onFilterToCategory={handleFilterToCategory}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* ── Tab: Maintenance Schedule ── */}
-              {activeTab === "maintenance" && (
-                <div className="space-y-4">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
-                        <Clock className="h-5 w-5 text-slate-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-black text-slate-900">
-                          Maintenance Schedule for {selectedBike.brand} {selectedBike.model}
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          Sorted by service interval — keep your bike running at peak performance
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      {bikeProfile.maintenanceSchedule.map((item, i) => (
-                        <MaintenanceCard key={`${item.part}-${i}`} item={item} />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/50 px-4 py-3">
-                    <Info className="h-4 w-4 text-amber-500 shrink-0" />
-                    <p className="text-xs text-amber-700">
-                      These intervals are general guidelines based on your bike{"'"}s specifications. Always refer to your owner{"'"}s manual for exact service schedules.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── BROWSE PARTS TAB (always visible when no bike selected, or when browse tab is active) ── */}
-          {(!selectedBike || activeTab === "browse") && (
-            <>
+          <>
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 font-heading text-4xl uppercase tracking-wide text-slate-900">
                   <Wrench className="h-7 w-7" />
-                  {selectedBike ? `Parts for ${selectedBike.brand} ${selectedBike.model}` : "Spare Parts"}
+                  {selectedBike
+                    ? `Parts for ${selectedBike.brand} ${selectedBike.model}`
+                    : committedBikeSearchQuery
+                      ? `Parts for ${committedBikeSearchQuery}`
+                      : "Spare Parts"}
                 </h2>
                 <Badge variant="outline" className="border-slate-300 text-slate-700">
                   {filteredSpareParts.length} listings
@@ -1128,6 +966,56 @@ export default function MarketplacePage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                   Filter Products
                 </p>
+
+                {committedBikeSearchQuery && !selectedBike ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                      Bike query: {committedBikeSearchQuery}
+                    </Badge>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCommittedBikeSearchQuery("");
+                        setBikeSearchQuery("");
+                      }}
+                      className="text-xs font-semibold text-slate-500 transition-colors hover:text-slate-800"
+                    >
+                      Clear bike search
+                    </button>
+                  </div>
+                ) : null}
+
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="search"
+                      value={partSearchQuery}
+                      onChange={(e) => setPartSearchQuery(e.target.value)}
+                      placeholder={
+                        selectedBike
+                          ? `Search parts for ${selectedBike.brand} ${selectedBike.model}`
+                          : "Search parts by name, fitment, category, or bike"
+                      }
+                      className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-10 text-sm text-slate-700 outline-none transition focus:border-amber-300 focus:ring-4 focus:ring-amber-500/10"
+                    />
+                    {partSearchQuery ? (
+                      <button
+                        type="button"
+                        onClick={() => setPartSearchQuery("")}
+                        className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                        aria-label="Clear part search"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    ) : null}
+                  </div>
+                  {partSearchQuery ? (
+                    <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                      Query: {partSearchQuery}
+                    </Badge>
+                  ) : null}
+                </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <div
@@ -1260,6 +1148,8 @@ export default function MarketplacePage() {
                   <p className="mt-1 text-sm text-slate-400">
                     {selectedBike
                       ? `No matching parts for ${selectedBike.brand} ${selectedBike.model} in this category yet.`
+                      : committedBikeSearchQuery
+                        ? `No matching parts found for ${committedBikeSearchQuery}.`
                       : "Try adjusting your filters or browse all products."
                     }
                   </p>
@@ -1285,8 +1175,7 @@ export default function MarketplacePage() {
                   ))}
                 </div>
               )}
-            </>
-          )}
+          </>
         </section>
       ) : null}
 
