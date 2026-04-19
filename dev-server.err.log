@@ -1,0 +1,10 @@
+[browser] Uncaught ReferenceError: sparePartsSortOptions is not defined
+    at MarketplacePage (app/marketplace/page.tsx:1196:20)
+  1194 |                     Sort
+  1195 |                   </span>
+> 1196 |                   {sparePartsSortOptions.map((option) => (
+       |                    ^
+  1197 |                     <button
+  1198 |                       key={option.value}
+  1199 |                       type="button"
+⚠ Fast Refresh had to perform a full reload due to a runtime error.

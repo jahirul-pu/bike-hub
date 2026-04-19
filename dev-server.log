@@ -1,0 +1,1440 @@
+
+> bike-hub@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.3 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.103:3000
+- Environments: .env.local, .env
+✓ Ready in 753ms
+
+ GET / 200 in 969ms (next.js: 320ms, application-code: 649ms)
+ GET /marketplace 200 in 99ms (next.js: 60ms, application-code: 39ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 1830ms (next.js: 157ms, application-code: 1673ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 607ms (next.js: 5ms, application-code: 602ms)
+ GET / 200 in 74ms (next.js: 6ms, application-code: 69ms)
+ GET /marketplace 200 in 32ms (next.js: 5ms, application-code: 27ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 734ms (next.js: 5ms, application-code: 729ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 611ms (next.js: 3ms, application-code: 608ms)
+✓ Compiled in 1677ms
+ GET /marketplace 200 in 340ms (next.js: 176ms, application-code: 164ms)
+ GET /marketplace 200 in 174ms (next.js: 5ms, application-code: 169ms)
+ GET /marketplace 200 in 148ms (next.js: 35ms, application-code: 113ms)
+ GET /marketplace 200 in 150ms (next.js: 7ms, application-code: 143ms)
+ GET /marketplace 200 in 150ms (next.js: 56ms, application-code: 94ms)
+ GET /marketplace 200 in 60ms (next.js: 29ms, application-code: 30ms)
+ GET /marketplace 200 in 62ms (next.js: 5ms, application-code: 58ms)
+ GET /marketplace 200 in 249ms (next.js: 4ms, application-code: 245ms)
+✓ Compiled in 592ms
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+ GET /marketplace 200 in 357ms (next.js: 165ms, application-code: 192ms)
+ GET /marketplace 200 in 145ms (next.js: 82ms, application-code: 64ms)
+ GET /marketplace 200 in 36ms (next.js: 6ms, application-code: 30ms)
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 1535ms (next.js: 65ms, application-code: 1469ms)
+ GET /marketplace 200 in 217ms (next.js: 4ms, application-code: 212ms)
+ GET / 200 in 200ms (next.js: 38ms, application-code: 162ms)
+ GET /marketplace 200 in 23ms (next.js: 4ms, application-code: 19ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 722ms (next.js: 4ms, application-code: 718ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 602ms (next.js: 4ms, application-code: 597ms)
+ GET /checkout 200 in 1422ms (next.js: 1392ms, application-code: 30ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 721ms (next.js: 3ms, application-code: 717ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 594ms (next.js: 3ms, application-code: 590ms)
+ GET /admin 200 in 1912ms (next.js: 67ms, proxy.ts: 218ms, application-code: 1628ms)
+ GET /admin/inventory/vehicles 200 in 717ms (next.js: 55ms, proxy.ts: 12ms, application-code: 650ms)
+ GET /admin/inventory/parts 200 in 771ms (next.js: 103ms, proxy.ts: 13ms, application-code: 656ms)
+ GET /admin/inventory/parts/cmo5ani270000j1tgldvz55rd/edit 200 in 1544ms (next.js: 880ms, proxy.ts: 11ms, application-code: 653ms)
+✓ Compiled in 204ms
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+ GET /marketplace 200 in 418ms (next.js: 226ms, application-code: 192ms)
+ GET /marketplace 200 in 423ms (next.js: 176ms, application-code: 248ms)
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 802ms (next.js: 66ms, application-code: 736ms)
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 806ms (next.js: 80ms, application-code: 726ms)
+ GET /admin/inventory/parts/cmo5ani270000j1tgldvz55rd/edit 200 in 1246ms (next.js: 58ms, proxy.ts: 423ms, application-code: 765ms)
+✓ Compiled in 181ms
+ GET /marketplace 200 in 319ms (next.js: 161ms, application-code: 157ms)
+ GET /marketplace 200 in 319ms (next.js: 208ms, application-code: 111ms)
+ GET /admin/inventory/parts/cmo5ani270000j1tgldvz55rd/edit 200 in 1023ms (next.js: 65ms, proxy.ts: 318ms, application-code: 640ms)
+ GET /marketplace 200 in 279ms (next.js: 4ms, application-code: 275ms)
+✓ Compiled in 176ms
+ GET /marketplace 200 in 338ms (next.js: 176ms, application-code: 162ms)
+ GET /marketplace 200 in 339ms (next.js: 230ms, application-code: 110ms)
+ GET /admin/inventory/parts/cmo5ani270000j1tgldvz55rd/edit 200 in 1169ms (next.js: 76ms, proxy.ts: 336ms, application-code: 757ms)
+✓ Compiled in 148ms
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+ GET /api/parts 200 in 118ms (next.js: 86ms, application-code: 32ms)
+ GET /marketplace 200 in 773ms (next.js: 161ms, application-code: 612ms)
+ GET /marketplace 200 in 775ms (next.js: 444ms, application-code: 331ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /admin/inventory/parts/cmo5ani270000j1tgldvz55rd/edit 200 in 1507ms (next.js: 68ms, proxy.ts: 658ms, application-code: 782ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 747ms (next.js: 4ms, application-code: 743ms)
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 615ms (next.js: 4ms, application-code: 611ms)
+ GET /marketplace 200 in 87ms (next.js: 5ms, application-code: 82ms)
+ GET /marketplace 200 in 89ms (next.js: 6ms, application-code: 82ms)
