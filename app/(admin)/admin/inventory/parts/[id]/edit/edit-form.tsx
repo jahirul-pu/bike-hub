@@ -53,6 +53,17 @@ export default function EditPartForm({ part }: { part: PartData }) {
   const [subcategory, setSubcategory] = useState(part.subcategory);
   const [nestedSubcategory, setNestedSubcategory] = useState(part.nestedSubcategory);
 
+  // Custom entry mode toggles
+  const [customCategory, setCustomCategory] = useState(!["Parts", "Accessories", "Additives"].includes(part.category));
+  const [customSubcategory, setCustomSubcategory] = useState(
+    part.category ? (!SUBCATEGORY_MAP[part.category]?.includes(part.subcategory)) : false
+  );
+  const [customNested, setCustomNested] = useState(
+    part.subcategory && NESTED_SUBCATEGORY_MAP[part.subcategory] 
+      ? (!NESTED_SUBCATEGORY_MAP[part.subcategory].includes(part.nestedSubcategory) && part.nestedSubcategory !== "") 
+      : false
+  );
+
   // Bike compatibility state
   const [isUniversal, setIsUniversal] = useState(part.compatibleBikes.includes("Universal"));
   const [selectedBikeSlugs, setSelectedBikeSlugs] = useState<string[]>(
@@ -184,52 +195,153 @@ export default function EditPartForm({ part }: { part: PartData }) {
             Classification & Taxonomy
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Category */}
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Category *</label>
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setSubcategory(SUBCATEGORY_MAP[e.target.value]?.[0] ?? "General");
-                  setNestedSubcategory("");
-                }}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
-              >
-                <option value="Parts">Parts</option>
-                <option value="Accessories">Accessories</option>
-                <option value="Additives">Additives</option>
-              </select>
+              {customCategory ? (
+                <div className="flex gap-1.5">
+                  <input
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    type="text"
+                    placeholder="Enter custom category"
+                    autoFocus
+                    className="flex-1 rounded-xl border border-blue-300 bg-blue-50/30 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomCategory(false);
+                      setCategory("Parts");
+                    }}
+                    className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+                    title="Back to presets"
+                  >
+                    ← List
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={category}
+                  onChange={(e) => {
+                    if (e.target.value === "__add_new__") {
+                      setCustomCategory(true);
+                      setCategory("");
+                      return;
+                    }
+                    setCategory(e.target.value);
+                    setCustomSubcategory(false);
+                    setSubcategory(SUBCATEGORY_MAP[e.target.value]?.[0] ?? "General");
+                    setNestedSubcategory("");
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
+                >
+                  <option value="Parts">Parts</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Additives">Additives</option>
+                  <option value="__add_new__" className="text-blue-600">+ Add New Category</option>
+                </select>
+              )}
             </div>
+
+            {/* Subcategory */}
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Subcategory *</label>
-              <select
-                value={subcategory}
-                onChange={(e) => { setSubcategory(e.target.value); setNestedSubcategory(""); }}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
-              >
-                {subcategoryOptions.map((sub) => (
-                  <option key={sub} value={sub}>{sub}</option>
-                ))}
-              </select>
+              {customSubcategory ? (
+                <div className="flex gap-1.5">
+                  <input
+                    value={subcategory}
+                    onChange={(e) => setSubcategory(e.target.value)}
+                    type="text"
+                    placeholder="Enter custom subcategory"
+                    autoFocus
+                    className="flex-1 rounded-xl border border-blue-300 bg-blue-50/30 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomSubcategory(false);
+                      setSubcategory(subcategoryOptions[0] ?? "General");
+                    }}
+                    className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+                    title="Back to presets"
+                  >
+                    ← List
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={subcategory}
+                  onChange={(e) => {
+                    if (e.target.value === "__add_new__") {
+                      setCustomSubcategory(true);
+                      setSubcategory("");
+                      return;
+                    }
+                    setSubcategory(e.target.value);
+                    setCustomNested(false);
+                    setNestedSubcategory("");
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
+                >
+                  {subcategoryOptions.map((sub) => (
+                    <option key={sub} value={sub}>{sub}</option>
+                  ))}
+                  <option value="__add_new__" className="text-blue-600">+ Add New Subcategory</option>
+                </select>
+              )}
             </div>
+
+            {/* Nested Subcategory */}
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Nested Subcategory</label>
-              {nestedOptions.length > 0 ? (
+              {customNested ? (
+                <div className="flex gap-1.5">
+                  <input
+                    value={nestedSubcategory}
+                    onChange={(e) => setNestedSubcategory(e.target.value)}
+                    type="text"
+                    placeholder="Enter custom nested sub"
+                    autoFocus
+                    className="flex-1 rounded-xl border border-blue-300 bg-blue-50/30 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomNested(false);
+                      setNestedSubcategory("");
+                    }}
+                    className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+                    title="Back to presets"
+                  >
+                    ← List
+                  </button>
+                </div>
+              ) : nestedOptions.length > 0 ? (
                 <select
                   value={nestedSubcategory}
-                  onChange={(e) => setNestedSubcategory(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value === "__add_new__") {
+                      setCustomNested(true);
+                      setNestedSubcategory("");
+                      return;
+                    }
+                    setNestedSubcategory(e.target.value);
+                  }}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
                 >
                   <option value="">None</option>
                   {nestedOptions.map((n) => (
                     <option key={n} value={n}>{n}</option>
                   ))}
+                  <option value="__add_new__" className="text-blue-600">+ Add New</option>
                 </select>
               ) : (
                 <input
                   value={nestedSubcategory}
                   onChange={(e) => setNestedSubcategory(e.target.value)}
-                  type="text" placeholder="Optional"
+                  type="text"
+                  placeholder="Optional"
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
                 />
               )}
