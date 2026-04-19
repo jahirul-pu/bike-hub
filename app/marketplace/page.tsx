@@ -457,6 +457,7 @@ export default function MarketplacePage() {
   const [isScrolledPast, setIsScrolledPast] = useState(false);
   const filterSectionRef = useRef<HTMLDivElement>(null);
   const [bikeSearchQuery, setBikeSearchQuery] = useState("");
+  const [partSearchQuery, setPartSearchQuery] = useState("");
   const [showBikeDropdown, setShowBikeDropdown] = useState(false);
   const bikeSearchRef = useRef<HTMLDivElement>(null);
 
@@ -473,13 +474,15 @@ export default function MarketplacePage() {
 
   const filteredBikeOptions = useMemo(() => {
     if (!bikeSearchQuery) return bikes;
-    const q = bikeSearchQuery.toLowerCase();
-    return bikes.filter(
-      (b) =>
-        b.brand.toLowerCase().includes(q) ||
-        b.model.toLowerCase().includes(q) ||
-        `${b.brand} ${b.model}`.toLowerCase().includes(q)
-    );
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const q = norm(bikeSearchQuery);
+    
+    return bikes.filter((b) => {
+      const matchBrand = norm(b.brand);
+      const matchModel = norm(b.model);
+      const matchFull = norm(`${b.brand}${b.model}`);
+      return matchBrand.includes(q) || matchModel.includes(q) || matchFull.includes(q);
+    });
   }, [bikeSearchQuery]);
 
   useEffect(() => {
@@ -605,6 +608,18 @@ export default function MarketplacePage() {
         item.nestedSubcategory !== selectedNestedSubcategory
       ) {
         return false;
+      }
+
+      // Text Search Filter
+      if (partSearchQuery) {
+        const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const q = norm(partSearchQuery);
+        const matchName = norm(item.name);
+        const matchSub = norm(item.subcategory);
+        const matchFit = norm(item.fitment);
+        if (!matchName.includes(q) && !matchSub.includes(q) && !matchFit.includes(q)) {
+          return false;
+        }
       }
 
       return true;

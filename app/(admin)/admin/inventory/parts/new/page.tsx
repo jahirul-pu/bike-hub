@@ -59,13 +59,14 @@ export default function AddPartPage() {
 
   const filteredBikes = useMemo(() => {
     if (!bikeSearch) return bikes;
-    const q = bikeSearch.toLowerCase();
-    return bikes.filter(
-      (b) =>
-        b.brand.toLowerCase().includes(q) ||
-        b.model.toLowerCase().includes(q) ||
-        `${b.brand} ${b.model}`.toLowerCase().includes(q)
-    );
+    const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const q = normalize(bikeSearch);
+    return bikes.filter((b) => {
+      const matchBrand = normalize(b.brand);
+      const matchModel = normalize(b.model);
+      const matchFull = normalize(`${b.brand}${b.model}`);
+      return matchBrand.includes(q) || matchModel.includes(q) || matchFull.includes(q);
+    });
   }, [bikeSearch]);
 
   const groupedBikes = useMemo(() => {
@@ -406,6 +407,11 @@ export default function AddPartPage() {
                   type="text"
                   value={bikeSearch}
                   onChange={(e) => setBikeSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="Search bikes..."
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
                 />
