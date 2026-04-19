@@ -5,7 +5,14 @@ import Link from 'next/link';
 import { bikes } from '@/lib/bikes-data';
 import { DeletePartButton, QuickStockEditor } from './parts-client';
 
-export default async function PartsPage() {
+type PartsPageProps = {
+  searchParams: Promise<{
+    category?: string;
+  }>;
+};
+
+export default async function PartsPage({ searchParams }: PartsPageProps) {
+  const resolvedSearchParams = await searchParams;
   const parts = await db.part.findMany({
     orderBy: { createdAt: 'desc' },
   });
@@ -22,6 +29,21 @@ export default async function PartsPage() {
     acc[p.category] = (acc[p.category] || 0) + 1;
     return acc;
   }, {});
+  const categoryEntries = Object.entries(categories).sort((a, b) => {
+    if (b[1] !== a[1]) {
+      return b[1] - a[1];
+    }
+
+    return a[0].localeCompare(b[0]);
+  });
+  const selectedCategory =
+    typeof resolvedSearchParams.category === 'string' &&
+    Object.hasOwn(categories, resolvedSearchParams.category)
+      ? resolvedSearchParams.category
+      : null;
+  const visibleParts = selectedCategory
+    ? parts.filter((part) => part.category === selectedCategory)
+    : parts;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -69,14 +91,48 @@ export default async function PartsPage() {
       {/* Category Pills */}
       <div className="flex flex-wrap gap-2 mb-6">
         <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 self-center mr-1">By Category:</span>
-        {Object.entries(categories).map(([cat, count]) => (
-          <span key={cat} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600">
-            {cat}
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-100 px-1 text-[10px] font-black text-slate-500">
-              {count}
-            </span>
+        <Link
+          href="/admin/inventory/parts"
+          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
+            selectedCategory === null
+              ? 'border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/10'
+              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          All
+          <span
+            className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-black ${
+              selectedCategory === null ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500'
+            }`}
+          >
+            {parts.length}
           </span>
-        ))}
+        </Link>
+        {categoryEntries.map(([cat, count]) => {
+          const isActive = selectedCategory === cat;
+
+          return (
+            <Link
+              key={cat}
+              href={isActive ? '/admin/inventory/parts' : `/admin/inventory/parts?category=${encodeURIComponent(cat)}`}
+              aria-pressed={isActive}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
+                isActive
+                  ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-600/15'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+              }`}
+            >
+              {cat}
+              <span
+                className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-black ${
+                  isActive ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500'
+                }`}
+              >
+                {count}
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Parts Table */}
@@ -96,7 +152,7 @@ export default async function PartsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {parts.length === 0 ? (
+              {visibleParts.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-16 text-center">
                     <Package className="mx-auto h-10 w-10 text-slate-300" />
@@ -111,7 +167,7 @@ export default async function PartsPage() {
                   </td>
                 </tr>
               ) : (
-                parts.map((part) => {
+                visibleParts.map((part) => {
                   const compatibleBikes: string[] = part.compatibleBikes
                     ? JSON.parse(part.compatibleBikes as string)
                     : ["Universal"];
