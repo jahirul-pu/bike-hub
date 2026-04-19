@@ -658,3 +658,127 @@ Enriched parts: [
   }
 ]
  GET /api/parts 200 in 614ms (next.js: 4ms, application-code: 610ms)
+ GET /admin/inventory/parts/cmo3fbqec00017lv3n0ja0a6p/edit 200 in 798ms (next.js: 19ms, proxy.ts: 13ms, application-code: 766ms)
+ POST /admin/inventory/parts/cmo3fbqec00017lv3n0ja0a6p/edit 200 in 1295ms (next.js: 21ms, proxy.ts: 15ms, application-code: 1259ms)
+  └─ ƒ updatePart("cmo3fbqec00017lv3n0ja0a6p", {"category":"Parts","compatibleBikes":["honda-nx-200","honda-cb350rs"],"condition":"New","...":"8 items not stringified"}) in 610ms app/(admin)/admin/inventory/parts/actions.ts
+ GET /admin/inventory/parts 200 in 763ms (next.js: 7ms, proxy.ts: 12ms, application-code: 744ms)
+ GET /admin/inventory/parts 200 in 768ms (next.js: 6ms, proxy.ts: 11ms, application-code: 751ms)
+ GET /marketplace 200 in 69ms (next.js: 5ms, application-code: 65ms)
+Received query params: { bikeSlug: null, category: null, subcategory: null }
+Fetched parts from database: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    imageUrl: 'https://cdn.othoba.com/images/thumbs/0676795_motul-3100-10w30-semi-synthetic.webp',
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: '["honda-nx-200","honda-cb350rs"]',
+    createdAt: 2026-04-19T04:56:49.593Z
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    imageUrl: 'https://partschai.com/public/uploads/all/Tw85LHGWbepxuTA3SBPNSNoACnYUmHuW1kYIf8Vx.png',
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: '["honda-nx-200","honda-cb350rs"]',
+    createdAt: 2026-04-17T21:32:06.249Z
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    imageUrl: null,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: '["Universal"]',
+    createdAt: 2026-04-17T21:27:36.615Z
+  }
+]
+Enriched parts: [
+  {
+    id: 'cmo5ani270000j1tgldvz55rd',
+    name: 'Indicator',
+    sku: 'indicator',
+    stock: 100,
+    retailPrice: 300,
+    price: 200,
+    imageUrl: 'https://cdn.othoba.com/images/thumbs/0676795_motul-3100-10w30-semi-synthetic.webp',
+    category: 'Accessories',
+    subcategory: 'LED Lights',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'NX 200',
+    compatibleBikes: [ 'honda-nx-200', 'honda-cb350rs' ],
+    createdAt: 2026-04-19T04:56:49.593Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3fbqec00017lv3n0ja0a6p',
+    name: 'Shell 10W30',
+    sku: 'sdfask',
+    stock: 100,
+    retailPrice: 700,
+    price: 650,
+    imageUrl: 'https://partschai.com/public/uploads/all/Tw85LHGWbepxuTA3SBPNSNoACnYUmHuW1kYIf8Vx.png',
+    category: 'Parts',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Honda',
+    compatibleBikes: [ 'honda-nx-200', 'honda-cb350rs' ],
+    createdAt: 2026-04-17T21:32:06.249Z,
+    isUniversal: false
+  },
+  {
+    id: 'cmo3f5yck00007lv3g3oweu7w',
+    name: 'Motul 10W30 Full Synthetic',
+    sku: 'Motul 1030',
+    stock: 100,
+    retailPrice: 600,
+    price: 650,
+    imageUrl: null,
+    category: 'Additives',
+    subcategory: 'Engine Oil',
+    nestedSubcategory: null,
+    condition: 'New',
+    fitment: 'Universal',
+    compatibleBikes: [ 'Universal' ],
+    createdAt: 2026-04-17T21:27:36.615Z,
+    isUniversal: true
+  }
+]
+ GET /api/parts 200 in 607ms (next.js: 3ms, application-code: 604ms)
+ GET /marketplace/spare-parts 200 in 79ms (next.js: 6ms, application-code: 73ms)
+✓ Compiled in 1516ms
+ GET /marketplace 200 in 562ms (next.js: 373ms, application-code: 190ms)
+ GET /marketplace 200 in 29ms (next.js: 6ms, application-code: 24ms)
+ GET /marketplace 200 in 32ms (next.js: 4ms, application-code: 28ms)
+ GET /marketplace 200 in 29ms (next.js: 6ms, application-code: 24ms)
+ GET /marketplace 200 in 29ms (next.js: 4ms, application-code: 24ms)
+ GET /admin/inventory/parts 200 in 1289ms (next.js: 71ms, proxy.ts: 458ms, application-code: 760ms)
+ GET /admin/inventory/parts 200 in 643ms (next.js: 5ms, proxy.ts: 11ms, application-code: 627ms)
+ GET /admin/inventory/parts 200 in 650ms (next.js: 6ms, proxy.ts: 13ms, application-code: 630ms)
+ GET /admin/inventory/parts 200 in 655ms (next.js: 6ms, proxy.ts: 11ms, application-code: 638ms)
+ GET /admin/inventory/parts 200 in 644ms (next.js: 5ms, proxy.ts: 11ms, application-code: 628ms)
+ GET /marketplace/spare-parts 200 in 488ms (next.js: 206ms, application-code: 282ms)
