@@ -97,6 +97,7 @@ model Part {
   stock       Int      @default(0)
   retailPrice       Float?
   price             Float?
+  imageUrl          String?
 
   // ─── Marketplace Integration ───
   category          String   @default("Parts") // "Parts" | "Accessories" | "Additives"

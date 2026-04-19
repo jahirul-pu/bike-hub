@@ -23,6 +23,7 @@ export default async function EditPartPage({
         id: part.id,
         name: part.name,
         sku: part.sku,
+        imageUrl: part.imageUrl ?? "",
         purchasePrice: (part.price ?? 0) as number,
         retailPrice: (part.retailPrice ?? 0) as number,
         stock: part.stock,

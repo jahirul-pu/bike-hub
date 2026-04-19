@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +12,7 @@ export type InventoryPart = {
   id: string;
   name: string;
   sku: string;
+  imageUrl: string | null;
   category: string;
   subcategory: string;
   nestedSubcategory: string | null;
@@ -333,19 +335,37 @@ export function PartsInventoryTable({
                   return (
                     <tr key={part.id} className="group hover:bg-slate-50/50 transition-colors">
                       <td className="px-5 py-3.5">
-                        <div>
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                            {part.imageUrl ? (
+                              <Image
+                                src={part.imageUrl}
+                                alt={part.name}
+                                fill
+                                unoptimized
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                No Image
+                              </div>
+                            )}
+                          </div>
                           <p className="font-bold text-slate-900 text-sm">{part.name}</p>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                              part.condition === "New"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : part.condition === "Refurbished"
-                                  ? "bg-amber-100 text-amber-700"
-                                  : "bg-slate-100 text-slate-600"
-                            }`}>
-                              {part.condition}
-                            </span>
-                            <span className="text-[10px] text-slate-400">{part.fitment}</span>
+                          <div>
+                            <p className="font-bold text-slate-900 text-sm">{part.name}</p>
+                            <div className="mt-1 flex items-center gap-1.5">
+                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                                part.condition === "New"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : part.condition === "Refurbished"
+                                    ? "bg-amber-100 text-amber-700"
+                                    : "bg-slate-100 text-slate-600"
+                              }`}>
+                                {part.condition}
+                              </span>
+                              <span className="text-[10px] text-slate-400">{part.fitment}</span>
+                            </div>
                           </div>
                         </div>
                       </td>

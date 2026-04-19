@@ -7,6 +7,7 @@ import { z } from "zod";
 const PartSchema = z.object({
   name: z.string().min(2, "Name is required"),
   sku: z.string().min(3, "SKU is required"),
+  imageUrl: z.string().trim().optional().or(z.literal("")),
   purchasePrice: z.number().min(0),
   retailPrice: z.number().min(0),
   stock: z.number().int().min(0),
@@ -26,6 +27,7 @@ export async function createPart(data: z.infer<typeof PartSchema>) {
       data: {
         name: parsed.name,
         sku: parsed.sku,
+        imageUrl: parsed.imageUrl || null,
         price: parsed.purchasePrice,
         retailPrice: parsed.retailPrice,
         stock: parsed.stock,
@@ -64,6 +66,7 @@ export async function updatePart(id: string, data: z.infer<typeof PartSchema>) {
       data: {
         name: parsed.name,
         sku: parsed.sku,
+        imageUrl: parsed.imageUrl || null,
         price: parsed.purchasePrice,
         retailPrice: parsed.retailPrice,
         stock: parsed.stock,

@@ -11,6 +11,7 @@ type PartData = {
   id: string;
   name: string;
   sku: string;
+  imageUrl: string;
   purchasePrice: number;
   retailPrice: number;
   stock: number;
@@ -42,6 +43,7 @@ export default function EditPartForm({ part }: { part: PartData }) {
   // Core fields
   const [name, setName] = useState(part.name);
   const [sku, setSku] = useState(part.sku);
+  const [imageUrl, setImageUrl] = useState(part.imageUrl);
   const [purchasePrice, setPurchasePrice] = useState(part.purchasePrice);
   const [retailPrice, setRetailPrice] = useState(part.retailPrice);
   const [stock, setStock] = useState(part.stock);
@@ -115,6 +117,7 @@ export default function EditPartForm({ part }: { part: PartData }) {
     const res = await updatePart(part.id, {
       name,
       sku,
+      imageUrl,
       purchasePrice,
       retailPrice,
       stock,
@@ -170,7 +173,7 @@ export default function EditPartForm({ part }: { part: PartData }) {
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 border-l-2 border-slate-900 pl-3 mb-5">
             Core Information
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Part Name *</label>
               <input
@@ -186,6 +189,19 @@ export default function EditPartForm({ part }: { part: PartData }) {
                 type="text"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-mono uppercase outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
               />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-slate-700 mb-1.5">Product Image URL</label>
+              <input
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                type="url"
+                placeholder="/parts/engine-oil.webp or https://..."
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
+              />
+              <p className="mt-1 text-[10px] text-slate-400">
+                This image is used on the marketplace product card and in the admin inventory list.
+              </p>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target, Star, Truck } from "lucide-react";
+import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -32,6 +32,7 @@ type SparePartListing = {
   compatibleBikes: string[];
   isUniversal?: boolean;
   brand?: string;
+  imageUrl?: string | null;
   rating?: number;
   deliveryWindow?: string;
 };
@@ -161,37 +162,40 @@ function getCompatibilityLabel(part: SparePartListing, selectedBike: Bike | null
 function getStockMeta(part: SparePartListing): {
   stockLabel: string;
   stockClassName: string;
-  deliveryLabel: string;
 } {
   if (part.stock <= 0) {
     return {
       stockLabel: "Out of stock",
       stockClassName: "border-red-200 bg-red-50 text-red-700",
-      deliveryLabel: part.deliveryWindow ?? "Restock update in 3-5 days",
     };
   }
 
   if (part.stock < 5) {
     return {
-      stockLabel: `Only ${part.stock} left`,
+      stockLabel: "Low stock",
       stockClassName: "border-amber-200 bg-amber-50 text-amber-700",
-      deliveryLabel: part.deliveryWindow ?? "Delivery in 2-4 days",
     };
   }
 
   if (part.stock < 15) {
     return {
-      stockLabel: `Low stock (${part.stock})`,
+      stockLabel: "In stock",
       stockClassName: "border-orange-200 bg-orange-50 text-orange-700",
-      deliveryLabel: part.deliveryWindow ?? "Delivery in 1-3 days",
     };
   }
 
   return {
-    stockLabel: `In stock (${part.stock})`,
+    stockLabel: "In stock",
     stockClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    deliveryLabel: part.deliveryWindow ?? "Dispatches within 24 hrs",
   };
+}
+
+function getPartImage(part: SparePartListing): string {
+  if (part.imageUrl?.trim()) {
+    return part.imageUrl.trim();
+  }
+
+  return makeSpareThumb(part);
 }
 
 function getPartSearchText(part: SparePartListing): string {
@@ -238,38 +242,55 @@ function SmartPartCard({
   selectedBike,
   onAddToCart,
   onBuyNow,
-  onCheckCompatibility,
 }: {
   part: SparePartListing;
   selectedBike: Bike | null;
   onAddToCart: (part: SparePartListing) => void;
   onBuyNow: (part: SparePartListing) => void;
-  onCheckCompatibility: () => void;
 }) {
   const isExactFit = selectedBike && part.compatibleBikes.includes(selectedBike.slug);
   const isUniversal = part.compatibleBikes.includes("Universal");
   const brand = getPartBrand(part);
-  const rating = getPartRating(part);
   const compatibilityLabel = getCompatibilityLabel(part, selectedBike);
   const stockMeta = getStockMeta(part);
+  const partImage = getPartImage(part);
+  const compatibleBikePreviews = part.compatibleBikes
+    .filter((slug) => slug !== "Universal")
+    .map((slug) => bikes.find((bike) => bike.slug === slug))
+    .filter((bike): bike is Bike => Boolean(bike));
+  const leadFitLabel = selectedBike
+    ? isExactFit
+      ? `Fits ${selectedBike.brand} ${selectedBike.model}`
+      : isUniversal
+        ? `Compatible with ${selectedBike.brand} ${selectedBike.model}`
+        : compatibilityLabel
+    : isUniversal
+      ? "Universal fit for most bikes"
+      : compatibleBikePreviews.length > 0
+        ? compatibleBikePreviews.length === 1
+          ? `Fits ${compatibleBikePreviews[0].brand} ${compatibleBikePreviews[0].model}`
+          : `Fits ${compatibleBikePreviews[0].brand} ${compatibleBikePreviews[0].model} +${compatibleBikePreviews.length - 1} more`
+        : compatibilityLabel;
 
   return (
-    <Card className={cn(
-      "group relative overflow-hidden border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl",
-      isExactFit
-        ? "border-emerald-300 bg-gradient-to-br from-emerald-50/90 via-white to-white shadow-emerald-100/60"
-        : isUniversal
-          ? "border-slate-200 bg-gradient-to-br from-white via-white to-slate-50/90"
-          : "border-slate-200 bg-gradient-to-br from-white via-white to-slate-100/60"
-    )}>
+    <Card
+      className={cn(
+        "group relative overflow-hidden border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl",
+        isExactFit
+          ? "border-emerald-300 bg-gradient-to-br from-emerald-50/90 via-white to-white shadow-emerald-100/60"
+          : isUniversal
+            ? "border-slate-200 bg-gradient-to-br from-white via-white to-slate-50/90"
+            : "border-slate-200 bg-gradient-to-br from-white via-white to-slate-100/60"
+      )}
+    >
       {/* Compatibility badge strip */}
       {selectedBike && (
-        <div className={cn(
-          "flex items-center gap-1.5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest",
-          isExactFit
-            ? "bg-emerald-500 text-white"
-            : "bg-slate-100 text-slate-500"
-        )}>
+        <div
+          className={cn(
+            "flex items-center gap-1.5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest",
+            isExactFit ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-500"
+          )}
+        >
           {isExactFit ? (
             <>
               <CheckCircle2 className="h-3 w-3" />
@@ -284,11 +305,11 @@ function SmartPartCard({
         </div>
       )}
 
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex gap-4">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-inner">
             <img
-              src={makeSpareThumb(part)}
+              src={partImage}
               alt={part.name}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -296,81 +317,53 @@ function SmartPartCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-                  {brand}
-                </p>
-                <CardTitle className="mt-1 line-clamp-2 font-heading text-2xl uppercase tracking-wide leading-tight text-slate-900">
+                <CardTitle className="line-clamp-2 font-heading text-2xl uppercase leading-tight tracking-wide text-slate-900">
                   {part.name}
                 </CardTitle>
+                <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <Wrench
+                    className={cn(
+                      "h-4 w-4 shrink-0",
+                      isExactFit ? "text-emerald-600" : "text-slate-400"
+                    )}
+                  />
+                  <span className="line-clamp-1">{leadFitLabel}</span>
+                </div>
               </div>
-              <Badge variant="outline" className={cn(
-                "border text-[10px] font-bold shrink-0",
-                part.condition === "New"
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                  : "border-slate-300 text-slate-700"
-              )}>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "shrink-0 border text-[10px] font-bold",
+                  part.condition === "New"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-slate-300 text-slate-700"
+                )}
+              >
                 {part.condition}
               </Badge>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
-                <Star className="h-3.5 w-3.5 fill-current" />
-                {rating.toFixed(1)}
-              </div>
-              <Badge variant="outline" className="border-slate-200 bg-white/80 text-[10px] font-semibold text-slate-600">
-                {compatibilityLabel}
-              </Badge>
-              <Badge variant="outline" className="border-slate-200 bg-white/80 text-[10px] font-semibold text-slate-500">
-                {part.category}
-              </Badge>
-              <Badge variant="outline" className="border-slate-200 bg-white/80 text-[10px] font-semibold text-slate-500">
-                {part.subcategory}
-              </Badge>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+                <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                <span>
+                  <span className="font-semibold">Brand:</span> {brand}
+                </span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+                <Target className="h-3.5 w-3.5 text-slate-400" />
+                <span>
+                  <span className="font-semibold">Category:</span> {part.subcategory}
+                </span>
+              </span>
             </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Brand</p>
-            <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Building2 className="h-4 w-4 text-slate-400" />
-              <span>{brand}</span>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Compatibility</p>
-            <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Wrench className="h-4 w-4 text-slate-400" />
-              <span>{compatibilityLabel}</span>
-            </div>
-          </div>
-        </div>
-
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Target className="h-3.5 w-3.5" />
-          <span>{part.fitment}</span>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Stock</p>
-            <div className="mt-2">
-              <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold", stockMeta.stockClassName)}>
-                <Package className="mr-1.5 h-3.5 w-3.5" />
-                {stockMeta.stockLabel}
-              </span>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Delivery</p>
-            <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Truck className="h-4 w-4 text-slate-400" />
-              <span>{stockMeta.deliveryLabel}</span>
-            </div>
-          </div>
+          <Target className="h-3.5 w-3.5 shrink-0" />
+          <span className="line-clamp-2">{part.fitment}</span>
         </div>
 
         {/* Compatible bikes list (when no bike is selected) */}
@@ -393,47 +386,45 @@ function SmartPartCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-200/80 pt-3">
-          <div>
+        <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Price</p>
-            <p className="text-lg font-black text-slate-900">{formatBdt(part.priceBdt)}</p>
-          </div>
-          <div className="grid min-w-[220px] gap-2 sm:min-w-[250px]">
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => onAddToCart(part)}
+            <p className="text-2xl font-black text-slate-900">{formatBdt(part.priceBdt)}</p>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span
                 className={cn(
-                  buttonVariants({ size: "sm" }),
-                  "bg-slate-900 text-white transition-all hover:bg-slate-700 group-hover:shadow-md",
-                  isExactFit && "bg-emerald-600 hover:bg-emerald-700"
+                  "inline-flex w-fit items-center rounded-full border px-2.5 py-1 font-semibold",
+                  stockMeta.stockClassName
                 )}
               >
-                <ShoppingCart className="h-3.5 w-3.5" />
-                Add to Cart
-              </button>
-              <button
-                type="button"
-                onClick={() => onBuyNow(part)}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  "border-slate-300 bg-white text-slate-900 transition-all hover:border-slate-400 hover:bg-slate-50"
-                )}
-              >
-                <Wallet className="h-3.5 w-3.5" />
-                Buy Now
-              </button>
+                <Package className="mr-1.5 h-3.5 w-3.5" />
+                {stockMeta.stockLabel}
+              </span>
             </div>
+          </div>
+          <div className="grid min-w-[220px] gap-2 sm:min-w-[250px] sm:grid-cols-2">
             <button
               type="button"
-              onClick={onCheckCompatibility}
+              onClick={() => onAddToCart(part)}
               className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "w-full border-dashed border-slate-300 bg-white/80 text-slate-700 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-800"
+                buttonVariants({ size: "sm" }),
+                "bg-slate-900 text-white transition-all hover:bg-slate-700 group-hover:shadow-md",
+                isExactFit && "bg-emerald-600 hover:bg-emerald-700"
               )}
             >
-              <Wrench className="h-3.5 w-3.5" />
-              Check Compatibility
+              <ShoppingCart className="h-3.5 w-3.5" />
+              Add to Cart
+            </button>
+            <button
+              type="button"
+              onClick={() => onBuyNow(part)}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "border-slate-300 bg-white text-slate-900 transition-all hover:border-slate-400 hover:bg-slate-50"
+              )}
+            >
+              <Wallet className="h-3.5 w-3.5" />
+              Buy Now
             </button>
           </div>
         </div>
@@ -548,6 +539,7 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
               : ["Universal"],
           isUniversal: d.isUniversal,
           brand: typeof d.brand === "string" ? d.brand : undefined,
+          imageUrl: typeof d.imageUrl === "string" ? d.imageUrl : undefined,
           rating: typeof d.rating === "number" ? d.rating : undefined,
           deliveryWindow: typeof d.deliveryWindow === "string" ? d.deliveryWindow : undefined,
         }));
@@ -946,19 +938,13 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
       name: part.name,
       price: part.priceBdt,
       quantity: 1,
-      image: makeSpareThumb(part),
+      image: getPartImage(part),
     });
   };
 
   const buySparePartNow = (part: SparePartListing) => {
     addSparePartToCart(part);
     router.push("/checkout");
-  };
-
-  const scrollToCompatibilitySelector = () => {
-    requestAnimationFrame(() => {
-      bikeSearchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
   };
 
   return (
@@ -1435,7 +1421,6 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                       selectedBike={selectedBike}
                       onAddToCart={addSparePartToCart}
                       onBuyNow={buySparePartNow}
-                      onCheckCompatibility={scrollToCompatibilitySelector}
                     />
                   ))}
                 </div>
