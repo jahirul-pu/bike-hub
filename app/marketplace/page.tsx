@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet } from "lucide-react";
+import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, Zap, CheckCircle2, AlertTriangle, Clock, ArrowRight, Sparkles, Filter, Info, ChevronRight, Target, Shield, Gauge } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -10,6 +10,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { bikes, Bike, formatBdt, headlineMetric, powertrainBadgeClass } from "@/lib/bikes-data";
+import { getBikeProfile, getSmartRecommendations, getMaintenanceSchedule, priorityConfig, urgencyConfig } from "@/lib/parts-compatibility";
+import type { PartRecommendation, MaintenanceItem } from "@/lib/parts-compatibility";
 import { useCartStore } from "@/store/useCartStore";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +27,8 @@ type SparePartListing = {
   subcategory: string;
   nestedSubcategory?: string;
   compatibleBikes: string[];
+  isUniversal?: boolean;
 };
-
-// Removed hardcoded spare parts array; fetching from PostgreSQL DB instead.
 
 const certifiedSlugs = new Set(["yamaha-r15-v4", "suzuki-vstrom-250", "ultraviolette-f77"]);
 const promotedSlugs = new Set(["honda-cb350rs", "ather-450x-gen3", "revolt-rv400-brz"]);
@@ -68,40 +69,195 @@ function makeSpareThumb(part: SparePartListing): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
-function SparePartCard({
+// ─── Smart Part Card with Compatibility Badge ────────────────────────────
+function SmartPartCard({
   part,
+  selectedBike,
   onAddToCart,
 }: {
   part: SparePartListing;
+  selectedBike: Bike | null;
   onAddToCart: (part: SparePartListing) => void;
 }) {
+  const isExactFit = selectedBike && part.compatibleBikes.includes(selectedBike.slug);
+  const isUniversal = part.compatibleBikes.includes("Universal");
+
   return (
-    <Card className="border-slate-200 bg-white/90">
-      <CardHeader>
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
-            {part.name}
-          </CardTitle>
-          <Badge variant="outline" className="border-slate-300 text-slate-700">
+    <Card className={cn(
+      "group relative overflow-hidden border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5",
+      isExactFit
+        ? "border-emerald-300 bg-gradient-to-br from-emerald-50/80 to-white shadow-emerald-100/50"
+        : isUniversal
+          ? "border-slate-200 bg-white/90"
+          : "border-slate-200 bg-white/90"
+    )}>
+      {/* Compatibility badge strip */}
+      {selectedBike && (
+        <div className={cn(
+          "flex items-center gap-1.5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest",
+          isExactFit
+            ? "bg-emerald-500 text-white"
+            : "bg-slate-100 text-slate-500"
+        )}>
+          {isExactFit ? (
+            <>
+              <CheckCircle2 className="h-3 w-3" />
+              Verified fit for {selectedBike.brand} {selectedBike.model}
+            </>
+          ) : (
+            <>
+              <Wrench className="h-3 w-3" />
+              Universal — fits all bikes
+            </>
+          )}
+        </div>
+      )}
+
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <CardTitle className="font-heading text-2xl uppercase tracking-wide text-slate-900 leading-tight">
+              {part.name}
+            </CardTitle>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <Badge variant="outline" className="border-slate-200 text-[10px] font-semibold text-slate-500">
+                {part.category}
+              </Badge>
+              <Badge variant="outline" className="border-slate-200 text-[10px] font-semibold text-slate-500">
+                {part.subcategory}
+              </Badge>
+            </div>
+          </div>
+          <Badge variant="outline" className={cn(
+            "border text-[10px] font-bold shrink-0",
+            part.condition === "New"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-slate-300 text-slate-700"
+          )}>
             {part.condition}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm text-slate-700">
-        <p>{part.fitment}</p>
-        <p className="font-semibold text-slate-900">{formatBdt(part.priceBdt)}</p>
-        <div className="flex flex-wrap gap-2">
+      <CardContent className="space-y-3 pt-0">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <Target className="h-3.5 w-3.5" />
+          <span>{part.fitment}</span>
+        </div>
+
+        {/* Compatible bikes list (when no bike is selected) */}
+        {!selectedBike && !isUniversal && part.compatibleBikes.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {part.compatibleBikes.slice(0, 3).map((slug) => {
+              const bike = bikes.find((b) => b.slug === slug);
+              return bike ? (
+                <span key={slug} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                  <BikeIcon className="h-2.5 w-2.5" />
+                  {bike.brand} {bike.model}
+                </span>
+              ) : null;
+            })}
+            {part.compatibleBikes.length > 3 && (
+              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-400">
+                +{part.compatibleBikes.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-lg font-black text-slate-900">{formatBdt(part.priceBdt)}</p>
           <button
             type="button"
             onClick={() => onAddToCart(part)}
-            className={cn(buttonVariants({ size: "sm" }), "bg-slate-900 text-white hover:bg-slate-700")}
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "bg-slate-900 text-white hover:bg-slate-700 transition-all group-hover:shadow-md",
+              isExactFit && "bg-emerald-600 hover:bg-emerald-700"
+            )}
           >
-            <ShoppingCart className="h-4 w-4" />
+            <ShoppingCart className="h-3.5 w-3.5" />
             Add to Cart
           </button>
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Recommendation Card ──────────────────────────────────────────────────
+function RecommendationCard({
+  rec,
+  matchingParts,
+  onFilterToCategory,
+}: {
+  rec: PartRecommendation;
+  matchingParts: number;
+  onFilterToCategory: (category: string, subcategory: string) => void;
+}) {
+  const config = priorityConfig[rec.priority];
+
+  return (
+    <button
+      type="button"
+      onClick={() => onFilterToCategory(rec.category, rec.subcategory)}
+      className={cn(
+        "group relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-all duration-300 hover:shadow-md hover:-translate-y-0.5",
+        config.class
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-2xl">{rec.icon}</span>
+        <div className="flex items-center gap-1.5">
+          <span className={cn("h-1.5 w-1.5 rounded-full", config.dot)} />
+          <span className="text-[9px] font-black uppercase tracking-widest opacity-70">
+            {config.label}
+          </span>
+        </div>
+      </div>
+      <p className="text-sm font-bold text-slate-900">{rec.subcategory}</p>
+      <p className="text-xs leading-relaxed text-slate-600">{rec.reason}</p>
+      <div className="mt-auto flex items-center justify-between pt-1">
+        {matchingParts > 0 ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+            <Package className="h-3 w-3" />
+            {matchingParts} in stock
+          </span>
+        ) : (
+          <span className="text-[10px] font-medium text-slate-400">Coming soon</span>
+        )}
+        <ChevronRight className="h-3.5 w-3.5 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-slate-500" />
+      </div>
+    </button>
+  );
+}
+
+// ─── Maintenance Card ──────────────────────────────────────────────────────
+function MaintenanceCard({ item }: { item: MaintenanceItem }) {
+  const config = urgencyConfig[item.urgency];
+
+  return (
+    <div className={cn(
+      "flex items-center gap-4 rounded-xl border px-4 py-3 transition-all",
+      config.class
+    )}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-bold truncate">{item.part}</p>
+          <Badge variant="outline" className={cn("text-[9px] font-bold shrink-0", config.class)}>
+            {config.label}
+          </Badge>
+        </div>
+        <p className="mt-0.5 text-xs text-slate-500 truncate">{item.note}</p>
+      </div>
+      <div className="text-right shrink-0">
+        <p className="text-xs font-black text-slate-800">
+          {item.intervalKm >= 1000
+            ? `${(item.intervalKm / 1000).toFixed(0)}K km`
+            : `${item.intervalKm} km`}
+        </p>
+        <p className="text-[10px] text-slate-400">or {item.intervalMonths}mo</p>
+      </div>
+    </div>
   );
 }
 
@@ -180,9 +336,22 @@ export default function MarketplacePage() {
   const [activeSection, setActiveSection] = useState<"spare" | "used">("spare");
   const [selectedBikeSlug, setSelectedBikeSlug] = useState<string>("all");
   const [spareParts, setSpareParts] = useState<SparePartListing[]>([]);
+  const [isLoadingParts, setIsLoadingParts] = useState(true);
+  const [activeTab, setActiveTab] = useState<"discover" | "maintenance" | "browse">("discover");
   const addItem = useCartStore((state) => state.addItem);
 
+  const selectedBike = useMemo(() => {
+    if (selectedBikeSlug === "all") return null;
+    return bikes.find((b) => b.slug === selectedBikeSlug) ?? null;
+  }, [selectedBikeSlug]);
+
+  const bikeProfile = useMemo(() => {
+    if (!selectedBike) return null;
+    return getBikeProfile(selectedBike.slug);
+  }, [selectedBike]);
+
   useEffect(() => {
+    setIsLoadingParts(true);
     fetch("/api/parts")
       .then((res) => res.json())
       .then((data: any[]) => {
@@ -195,11 +364,20 @@ export default function MarketplacePage() {
           category: d.category as SparePartCategory,
           subcategory: d.subcategory,
           nestedSubcategory: d.nestedSubcategory,
-          compatibleBikes: d.compatibleBikes ? JSON.parse(d.compatibleBikes) : ["Universal"],
+          compatibleBikes: Array.isArray(d.compatibleBikes)
+            ? d.compatibleBikes
+            : d.compatibleBikes
+              ? JSON.parse(d.compatibleBikes)
+              : ["Universal"],
+          isUniversal: d.isUniversal,
         }));
         setSpareParts(payload);
+        setIsLoadingParts(false);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        setIsLoadingParts(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -278,10 +456,34 @@ export default function MarketplacePage() {
   
   const [isScrolledPast, setIsScrolledPast] = useState(false);
   const filterSectionRef = useRef<HTMLDivElement>(null);
+  const [bikeSearchQuery, setBikeSearchQuery] = useState("");
+  const [showBikeDropdown, setShowBikeDropdown] = useState(false);
+  const bikeSearchRef = useRef<HTMLDivElement>(null);
+
+  // Close bike dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (bikeSearchRef.current && !bikeSearchRef.current.contains(e.target as Node)) {
+        setShowBikeDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredBikeOptions = useMemo(() => {
+    if (!bikeSearchQuery) return bikes;
+    const q = bikeSearchQuery.toLowerCase();
+    return bikes.filter(
+      (b) =>
+        b.brand.toLowerCase().includes(q) ||
+        b.model.toLowerCase().includes(q) ||
+        `${b.brand} ${b.model}`.toLowerCase().includes(q)
+    );
+  }, [bikeSearchQuery]);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Very low threshold to ensure it works
       setIsScrolledPast(window.scrollY > 200);
     };
     window.addEventListener("scroll", handleScroll);
@@ -303,7 +505,7 @@ export default function MarketplacePage() {
     );
 
     return ["All", ...Array.from(new Set(base.map((item) => item.subcategory)))];
-  }, [hoverCategory]);
+  }, [hoverCategory, spareParts]);
 
   const hoverNestedSubcategoryOptions = useMemo(() => {
     const base = spareParts.filter(
@@ -317,7 +519,7 @@ export default function MarketplacePage() {
     );
 
     return ["All", ...nested];
-  }, [hoverCategory, hoverSubcategory]);
+  }, [hoverCategory, hoverSubcategory, spareParts]);
 
   function cancelScheduledClose() {
     if (closeMenuTimerRef.current) {
@@ -385,6 +587,7 @@ export default function MarketplacePage() {
     closeMenu();
   }
 
+  // Filter spare parts with smart compatibility awareness
   const filteredSpareParts = useMemo(() => {
     return spareParts.filter((item) => {
       // Bike-Based Entry Filter
@@ -405,25 +608,38 @@ export default function MarketplacePage() {
       }
 
       return true;
+    }).sort((a, b) => {
+      // When a bike is selected, sort exact-fit parts first
+      if (selectedBikeSlug !== "all") {
+        const aExact = a.compatibleBikes.includes(selectedBikeSlug) ? 0 : 1;
+        const bExact = b.compatibleBikes.includes(selectedBikeSlug) ? 0 : 1;
+        if (aExact !== bExact) return aExact - bExact;
+      }
+      return 0;
     });
-  }, [selectedCategory, selectedSubcategory, selectedNestedSubcategory, selectedBikeSlug]);
+  }, [selectedCategory, selectedSubcategory, selectedNestedSubcategory, selectedBikeSlug, spareParts]);
+
+  // Count matching parts for recommendations
+  const getMatchingPartCount = (category: string, subcategory: string): number => {
+    return spareParts.filter((p) => {
+      if (p.category !== category) return false;
+      if (p.subcategory !== subcategory) return false;
+      if (selectedBikeSlug !== "all") {
+        return p.compatibleBikes.includes("Universal") || p.compatibleBikes.includes(selectedBikeSlug);
+      }
+      return true;
+    }).length;
+  };
 
   const filteredBikes = useMemo(() => {
     return bikes.filter((bike) => {
-      // Powertrain filter
       if (powertrainFilter !== "All" && bike.powertrain !== powertrainFilter) return false;
-
-      // Type filter
       if (typeFilter !== "All") {
         const isScooter = bike.category === "Scooter";
         if (typeFilter === "Motorcycle" && isScooter) return false;
         if (typeFilter === "Scooter" && !isScooter) return false;
       }
-
-      // Price filter
       if (bike.priceBdt < priceRange[0] || bike.priceBdt > priceRange[1]) return false;
-
-      // Metric filter (CC or Range)
       if (metricFilter !== "All") {
         if (bike.powertrain === "ICE") {
           const cc = bike.displacementCc ?? 0;
@@ -433,16 +649,12 @@ export default function MarketplacePage() {
           if (metricFilter === "201-350" && (cc < 201 || cc > 350)) return false;
           if (metricFilter === "350+" && cc <= 350) return false;
         } else {
-          // For EV, we'll approximate battery kWh based on motor power for filtering if not explicitly present, 
-          // but the user requested battery kWh chips.
           const pwr = bike.motorPowerKw ?? 0;
           if (metricFilter === "1-2" && (pwr < 1 || pwr > 2)) return false;
           if (metricFilter === "2-4" && (pwr < 2.1 || pwr > 4)) return false;
           if (metricFilter === "4+" && pwr <= 4) return false;
         }
       }
-
-      // Efficiency filter (Mileage or Range)
       if (efficiencyFilter !== "All") {
         if (bike.powertrain === "ICE") {
           const mileage = bike.mileageKmpl ?? 0;
@@ -456,10 +668,7 @@ export default function MarketplacePage() {
           if (efficiencyFilter === "150+" && range < 150) return false;
         }
       }
-
-      // Brand filter
       if (brandFilter !== "All" && bike.brand !== brandFilter) return false;
-
       return true;
     }).sort((a, b) => {
       if (sortBy === "Price") return a.priceBdt - b.priceBdt;
@@ -468,7 +677,6 @@ export default function MarketplacePage() {
         const rangeB = b.powertrain === "EV" ? (b.rangeKm || 0) : (b.mileageKmpl || 0);
         return rangeB - rangeA;
       }
-      // Popularity proxy: top speed
       return b.topSpeedKph - a.topSpeedKph;
     });
   }, [powertrainFilter, typeFilter, priceRange, metricFilter, efficiencyFilter, brandFilter, sortBy]);
@@ -488,6 +696,23 @@ export default function MarketplacePage() {
       image: makeSpareThumb(part),
     });
   };
+
+  const handleFilterToCategory = (category: string, subcategory: string) => {
+    setSelectedCategory(category as SparePartCategory);
+    setSelectedSubcategory(subcategory);
+    setSelectedNestedSubcategory("All");
+    setActiveTab("browse");
+  };
+
+  // Quick bike selector data
+  const groupedBikes = useMemo(() => {
+    const groups: Record<string, Bike[]> = {};
+    bikes.forEach((b) => {
+      if (!groups[b.brand]) groups[b.brand] = [];
+      groups[b.brand].push(b);
+    });
+    return groups;
+  }, []);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -532,180 +757,521 @@ export default function MarketplacePage() {
 
       {activeSection === "spare" ? (
         <section className="mt-8">
-          {/* ── BIKE-BASED ENTRY UI ── */}
-          <div className="mb-12 relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
-            <div className="absolute -right-20 -top-20 opacity-[0.03]">
-              <Wrench strokeWidth={1} size={250} />
+          {/* ── SMART BIKE SELECTOR (Hero) ── */}
+          <div className="mb-8 relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+            {/* Decorative background */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-amber-100/40 to-transparent" />
+              <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-gradient-to-tr from-blue-100/30 to-transparent" />
+              <div className="absolute right-10 bottom-10 opacity-[0.02]">
+                <Wrench strokeWidth={1} size={200} />
+              </div>
             </div>
-            
-            <div className="relative mx-auto max-w-2xl text-center">
-              <h2 className="flex items-center justify-center gap-2 text-2xl font-bold tracking-tight text-slate-900">
-                <SlidersHorizontal className="h-6 w-6 text-amber-500" />
-                Find parts for your bike
-              </h2>
-              <p className="mt-2 text-sm text-slate-500">
-                Pick your exact model to see modifications and spare parts that fit perfectly.
-              </p>
-              
-              <div className="mx-auto mt-6 flex max-w-sm items-center justify-center">
-                <div className="relative w-full">
-                  <Wrench className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                  <select
-                    value={selectedBikeSlug}
-                    onChange={(e) => setSelectedBikeSlug(e.target.value)}
-                    className="w-full appearance-none rounded-xl border-2 border-slate-200 bg-slate-50 py-4 pl-12 pr-10 text-sm font-bold text-slate-700 outline-none transition-all hover:border-amber-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 cursor-pointer"
-                  >
-                    <option value="all">Browse All Parts & Universal Gear</option>
-                    <optgroup label="Select Your Motorcycle">
-                      {bikes.map((bike) => (
-                        <option key={bike.slug} value={bike.slug}>
-                          {bike.brand} {bike.model}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </select>
-                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                    ▼
-                  </div>
+
+            <div className="relative p-6 sm:p-8">
+              <div className="mx-auto max-w-2xl text-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 mb-4">
+                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+                    Smart Parts Discovery
+                  </span>
                 </div>
+
+                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+                  Find the right part for <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">YOUR</span> bike
+                </h2>
+                <p className="mt-3 text-sm text-slate-500 max-w-md mx-auto">
+                  Select your motorcycle below. We{"'"}ll show compatibility-verified parts, smart maintenance recommendations, and exact-fit gear.
+                </p>
+
+                {/* Bike Search / Selector */}
+                <div ref={bikeSearchRef} className="relative mx-auto mt-6 max-w-lg">
+                  <div className={cn(
+                    "relative flex items-center rounded-2xl border-2 transition-all duration-300",
+                    showBikeDropdown
+                      ? "border-amber-400 shadow-lg shadow-amber-100/50 ring-4 ring-amber-500/10"
+                      : selectedBike
+                        ? "border-emerald-300 bg-emerald-50/50"
+                        : "border-slate-200 hover:border-slate-300"
+                  )}>
+                    {selectedBike ? (
+                      <>
+                        <div className="flex items-center gap-3 py-3.5 pl-5 pr-2 flex-1">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
+                            <BikeIcon className="h-5 w-5 text-emerald-600" />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-black text-slate-900">
+                              {selectedBike.brand} {selectedBike.model}
+                            </p>
+                            <p className="text-[10px] text-slate-500">
+                              {selectedBike.powertrain} • {selectedBike.displacementCc ? `${selectedBike.displacementCc}cc` : `${selectedBike.motorPowerKw}kW`}
+                              {selectedBike.category && ` • ${selectedBike.category}`}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedBikeSlug("all");
+                            setBikeSearchQuery("");
+                            setActiveTab("discover");
+                          }}
+                          className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Search className="absolute left-5 h-5 w-5 text-slate-400" />
+                        <input
+                          type="text"
+                          value={bikeSearchQuery}
+                          onChange={(e) => {
+                            setBikeSearchQuery(e.target.value);
+                            setShowBikeDropdown(true);
+                          }}
+                          onFocus={() => setShowBikeDropdown(true)}
+                          placeholder="Search your bike... (e.g. Yamaha R15, Honda NX)"
+                          className="w-full bg-transparent py-4 pl-13 pr-5 text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
+                        />
+                      </>
+                    )}
+                  </div>
+
+                  {/* Dropdown */}
+                  {showBikeDropdown && !selectedBike && (
+                    <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[360px] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                      {/* Browse all option */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedBikeSlug("all");
+                          setShowBikeDropdown(false);
+                          setBikeSearchQuery("");
+                        }}
+                        className="flex w-full items-center gap-3 border-b border-slate-100 px-5 py-3 text-left transition-colors hover:bg-slate-50"
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
+                          <Wrench className="h-4 w-4 text-slate-500" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-700">Browse All Parts</p>
+                          <p className="text-[10px] text-slate-400">Universal gear & all compatible parts</p>
+                        </div>
+                      </button>
+
+                      {filteredBikeOptions.length === 0 ? (
+                        <div className="px-5 py-8 text-center">
+                          <p className="text-sm text-slate-400">No bikes match your search</p>
+                        </div>
+                      ) : (
+                        Object.entries(
+                          filteredBikeOptions.reduce<Record<string, Bike[]>>((acc, bike) => {
+                            if (!acc[bike.brand]) acc[bike.brand] = [];
+                            acc[bike.brand].push(bike);
+                            return acc;
+                          }, {})
+                        ).map(([brand, brandBikes]) => (
+                          <div key={brand}>
+                            <p className="sticky top-0 bg-slate-50/90 px-5 py-2 text-[9px] font-black uppercase tracking-widest text-slate-400 backdrop-blur-sm">
+                              {brand}
+                            </p>
+                            {brandBikes.map((bike) => (
+                              <button
+                                key={bike.slug}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedBikeSlug(bike.slug);
+                                  setShowBikeDropdown(false);
+                                  setBikeSearchQuery("");
+                                  setActiveTab("discover");
+                                }}
+                                className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors hover:bg-amber-50/50"
+                              >
+                                <div className={cn(
+                                  "flex h-9 w-9 items-center justify-center rounded-xl",
+                                  bike.powertrain === "EV" ? "bg-emerald-100" : "bg-slate-100"
+                                )}>
+                                  <BikeIcon className={cn(
+                                    "h-4 w-4",
+                                    bike.powertrain === "EV" ? "text-emerald-600" : "text-slate-500"
+                                  )} />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-bold text-slate-800">{bike.model}</p>
+                                  <p className="text-[10px] text-slate-400">
+                                    {bike.powertrain} • {bike.displacementCc ? `${bike.displacementCc}cc` : `${bike.motorPowerKw}kW`} • {bike.category}
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className={cn(
+                                  "text-[9px] font-bold",
+                                  bike.powertrain === "EV" ? "border-emerald-200 text-emerald-600" : "border-slate-200 text-slate-400"
+                                )}>
+                                  {bike.powertrain}
+                                </Badge>
+                              </button>
+                            ))}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick-select popular bikes */}
+                {!selectedBike && (
+                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-300 self-center mr-1">Popular:</span>
+                    {bikes.slice(0, 4).map((bike) => (
+                      <button
+                        key={bike.slug}
+                        type="button"
+                        onClick={() => {
+                          setSelectedBikeSlug(bike.slug);
+                          setActiveTab("discover");
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
+                      >
+                        <BikeIcon className="h-3 w-3" />
+                        {bike.brand} {bike.model}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 font-heading text-4xl uppercase tracking-wide text-slate-900">
-              <Wrench className="h-7 w-7" />
-              Spare Parts
-            </h2>
-            <Badge variant="outline" className="border-slate-300 text-slate-700">
-              {filteredSpareParts.length} listings
-            </Badge>
-          </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-              Filter Products
-            </p>
+          {/* ── BIKE-SELECTED: Intelligence Tabs ── */}
+          {selectedBike && bikeProfile && (
+            <div className="mb-6">
+              {/* Tab Navigation */}
+              <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50/50 p-1.5 mb-6">
+                {[
+                  { id: "discover" as const, label: "Smart Recommendations", icon: <Sparkles className="h-3.5 w-3.5" />, count: bikeProfile.recommendations.length },
+                  { id: "maintenance" as const, label: "Maintenance Schedule", icon: <Clock className="h-3.5 w-3.5" />, count: bikeProfile.maintenanceSchedule.length },
+                  { id: "browse" as const, label: "Browse Parts", icon: <Search className="h-3.5 w-3.5" />, count: filteredSpareParts.length },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300",
+                      activeTab === tab.id
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-400 hover:text-slate-600"
+                    )}
+                  >
+                    {tab.icon}
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
+                    <span className={cn(
+                      "flex h-5 min-w-5 items-center justify-center rounded-full text-[9px] font-black px-1",
+                      activeTab === tab.id
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-200 text-slate-500"
+                    )}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <div
-                className="relative pb-1"
-                onMouseEnter={openMenu}
-                onMouseLeave={scheduleCloseMenu}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (menuOpen) {
-                      closeMenu();
-                    } else {
-                      openMenu();
-                    }
-                  }}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800"
-                >
-                  Browse Categories
-                  <ChevronDown className="h-4 w-4" />
-                </button>
+              {/* ── Tab: Smart Recommendations ── */}
+              {activeTab === "discover" && (
+                <div className="space-y-6">
+                  {/* Bike Profile Card */}
+                  <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                        <BikeIcon className="h-7 w-7" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-black text-slate-900">
+                          {selectedBike.brand} {selectedBike.model}
+                        </h3>
+                        <div className="mt-1 flex flex-wrap gap-2">
+                          <Badge variant="outline" className={cn("text-[10px] font-bold", powertrainBadgeClass(selectedBike.powertrain))}>
+                            {selectedBike.powertrain}
+                          </Badge>
+                          {selectedBike.displacementCc && (
+                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
+                              {selectedBike.displacementCc}cc
+                            </Badge>
+                          )}
+                          {selectedBike.coolingSystem && (
+                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
+                              {selectedBike.coolingSystem}
+                            </Badge>
+                          )}
+                          {selectedBike.category && (
+                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
+                              {selectedBike.category}
+                            </Badge>
+                          )}
+                          {selectedBike.frontBrake && (
+                            <Badge variant="outline" className="border-slate-200 text-[10px] font-bold text-slate-500">
+                              {selectedBike.absType ? `${selectedBike.absType} ABS` : "No ABS"}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <Link
+                        href={`/bikes/${selectedBike.slug}`}
+                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "hidden sm:inline-flex border-slate-300 text-xs")}
+                      >
+                        Full Specs
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  </div>
 
-                {menuOpen ? (
+                  {/* Priority Groups */}
+                  {(["essential", "recommended", "upgrade"] as const).map((priority) => {
+                    const recs = bikeProfile.recommendations.filter((r) => r.priority === priority);
+                    if (recs.length === 0) return null;
+                    const config = priorityConfig[priority];
+                    return (
+                      <div key={priority}>
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className={cn("h-2 w-2 rounded-full", config.dot)} />
+                          <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-600">
+                            {config.label} Parts
+                          </h3>
+                          <span className="text-[10px] text-slate-400">
+                            — {priority === "essential" ? "Replace/check regularly" : priority === "recommended" ? "Improve performance & safety" : "Performance upgrades"}
+                          </span>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {recs.map((rec, i) => (
+                            <RecommendationCard
+                              key={`${rec.category}-${rec.subcategory}-${i}`}
+                              rec={rec}
+                              matchingParts={getMatchingPartCount(rec.category, rec.subcategory)}
+                              onFilterToCategory={handleFilterToCategory}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* ── Tab: Maintenance Schedule ── */}
+              {activeTab === "maintenance" && (
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
+                        <Clock className="h-5 w-5 text-slate-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-slate-900">
+                          Maintenance Schedule for {selectedBike.brand} {selectedBike.model}
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Sorted by service interval — keep your bike running at peak performance
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {bikeProfile.maintenanceSchedule.map((item, i) => (
+                        <MaintenanceCard key={`${item.part}-${i}`} item={item} />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/50 px-4 py-3">
+                    <Info className="h-4 w-4 text-amber-500 shrink-0" />
+                    <p className="text-xs text-amber-700">
+                      These intervals are general guidelines based on your bike{"'"}s specifications. Always refer to your owner{"'"}s manual for exact service schedules.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── BROWSE PARTS TAB (always visible when no bike selected, or when browse tab is active) ── */}
+          {(!selectedBike || activeTab === "browse") && (
+            <>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="flex items-center gap-2 font-heading text-4xl uppercase tracking-wide text-slate-900">
+                  <Wrench className="h-7 w-7" />
+                  {selectedBike ? `Parts for ${selectedBike.brand} ${selectedBike.model}` : "Spare Parts"}
+                </h2>
+                <Badge variant="outline" className="border-slate-300 text-slate-700">
+                  {filteredSpareParts.length} listings
+                </Badge>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  Filter Products
+                </p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   <div
-                    className="absolute left-0 top-full z-30 grid w-[min(92vw,760px)] grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-xl md:grid-cols-3"
+                    className="relative pb-1"
                     onMouseEnter={openMenu}
                     onMouseLeave={scheduleCloseMenu}
                   >
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Category</p>
-                      <div className="mt-2 space-y-1">
-                        <button
-                          type="button"
-                          onClick={selectAllProducts}
-                          onMouseEnter={() => {
-                            setHoverCategory("All");
-                            setHoverSubcategory("All");
-                          }}
-                          className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
-                        >
-                          All Products
-                        </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (menuOpen) {
+                          closeMenu();
+                        } else {
+                          openMenu();
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800"
+                    >
+                      Browse Categories
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
 
-                        {categoryOptions
-                          .filter((category) => category !== "All")
-                          .map((category) => (
+                    {menuOpen ? (
+                      <div
+                        className="absolute left-0 top-full z-30 grid w-[min(92vw,760px)] grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-xl md:grid-cols-3"
+                        onMouseEnter={openMenu}
+                        onMouseLeave={scheduleCloseMenu}
+                      >
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Category</p>
+                          <div className="mt-2 space-y-1">
                             <button
                               type="button"
-                              key={category}
-                              onClick={() => selectCategory(category as SparePartCategory)}
+                              onClick={selectAllProducts}
                               onMouseEnter={() => {
-                                setHoverCategory(category as SparePartCategory);
+                                setHoverCategory("All");
                                 setHoverSubcategory("All");
                               }}
                               className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
                             >
-                              {category}
+                              All Products
                             </button>
-                          ))}
-                      </div>
-                    </div>
 
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Subcategory</p>
-                      <div className="mt-2 space-y-1">
-                        {hoverSubcategoryOptions.map((subcategory) => (
-                          <button
-                            type="button"
-                            key={subcategory}
-                            onClick={() => selectSubcategory(subcategory)}
-                            onMouseEnter={() => setHoverSubcategory(subcategory)}
-                            className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
-                          >
-                            {subcategory}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                            {categoryOptions
+                              .filter((category) => category !== "All")
+                              .map((category) => (
+                                <button
+                                  type="button"
+                                  key={category}
+                                  onClick={() => selectCategory(category as SparePartCategory)}
+                                  onMouseEnter={() => {
+                                    setHoverCategory(category as SparePartCategory);
+                                    setHoverSubcategory("All");
+                                  }}
+                                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                                >
+                                  {category}
+                                </button>
+                              ))}
+                          </div>
+                        </div>
 
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Nested Subcategory</p>
-                      <div className="mt-2 space-y-1">
-                        {hoverNestedSubcategoryOptions.map((nestedSubcategory) => (
-                          <button
-                            type="button"
-                            key={nestedSubcategory}
-                            onClick={() => selectNestedSubcategory(nestedSubcategory)}
-                            className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
-                          >
-                            {nestedSubcategory}
-                          </button>
-                        ))}
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Subcategory</p>
+                          <div className="mt-2 space-y-1">
+                            {hoverSubcategoryOptions.map((subcategory) => (
+                              <button
+                                type="button"
+                                key={subcategory}
+                                onClick={() => selectSubcategory(subcategory)}
+                                onMouseEnter={() => setHoverSubcategory(subcategory)}
+                                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                              >
+                                {subcategory}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Nested Subcategory</p>
+                          <div className="mt-2 space-y-1">
+                            {hoverNestedSubcategoryOptions.map((nestedSubcategory) => (
+                              <button
+                                type="button"
+                                key={nestedSubcategory}
+                                onClick={() => selectNestedSubcategory(nestedSubcategory)}
+                                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                              >
+                                {nestedSubcategory}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ) : null}
                   </div>
-                ) : null}
+
+                  <button
+                    type="button"
+                    onClick={selectAllProducts}
+                    className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                  >
+                    All Products
+                  </button>
+
+                  {/* Active filter indicators */}
+                  {selectedCategory !== "All" && (
+                    <Badge variant="secondary" className="bg-slate-900 text-white pl-3 pr-1 py-1 flex items-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                      {selectedCategory} {selectedSubcategory !== "All" ? `> ${selectedSubcategory}` : ""}
+                      <button onClick={selectAllProducts} className="hover:bg-white/20 p-0.5 rounded transition-colors"><X className="w-3 h-3" /></button>
+                    </Badge>
+                  )}
+                </div>
+
+                <p className="mt-3 text-xs text-slate-600">
+                  Selected: {selectedCategory} / {selectedSubcategory} / {selectedNestedSubcategory}
+                </p>
               </div>
 
-              <button
-                type="button"
-                onClick={selectAllProducts}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700"
-              >
-                All Products
-              </button>
-            </div>
-
-            <p className="mt-3 text-xs text-slate-600">
-              Selected: {selectedCategory} / {selectedSubcategory} / {selectedNestedSubcategory}
-            </p>
-
-            <p className="mt-3 text-xs text-slate-500">
-              Additives include subcategories such as Engine Oil, Engine Flush Oil, Octane Booster, Fuel Cleaner, and Brake Fluid.
-            </p>
-          </div>
-
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredSpareParts.map((part) => (
-              <SparePartCard key={part.id} part={part} onAddToCart={addSparePartToCart} />
-            ))}
-          </div>
+              {isLoadingParts ? (
+                <div className="mt-8 flex flex-col items-center justify-center py-16">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
+                  <p className="mt-4 text-sm text-slate-500">Loading parts...</p>
+                </div>
+              ) : filteredSpareParts.length === 0 ? (
+                <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 py-16 text-center">
+                  <Package className="mx-auto h-12 w-12 text-slate-300" />
+                  <p className="mt-4 text-lg font-bold text-slate-600">No parts found</p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    {selectedBike
+                      ? `No matching parts for ${selectedBike.brand} ${selectedBike.model} in this category yet.`
+                      : "Try adjusting your filters or browse all products."
+                    }
+                  </p>
+                  {selectedBike && (
+                    <button
+                      type="button"
+                      onClick={selectAllProducts}
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4 border-slate-300")}
+                    >
+                      Show All Categories
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredSpareParts.map((part) => (
+                    <SmartPartCard
+                      key={part.id}
+                      part={part}
+                      selectedBike={selectedBike}
+                      onAddToCart={addSparePartToCart}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </section>
       ) : null}
 
@@ -760,7 +1326,6 @@ export default function MarketplacePage() {
                   key={preset.label}
                   onClick={() => {
                     if (quickUseFilter === preset.label) {
-                      // Deselect — reset all
                       setQuickUseFilter(null);
                       setPowertrainFilter("All"); setTypeFilter("All");
                       setPriceRange([0, 1000000]); setMetricFilter("All");
@@ -835,7 +1400,7 @@ export default function MarketplacePage() {
                       max={1000000}
                       step={10000}
                       value={[priceRange[0], priceRange[1]]}
-                      onValueChange={(val) => setPriceRange([val[0], val[1]])}
+                      onValueChange={(val) => { const v = val as number[]; setPriceRange([v[0], v[1]]); }}
                       className="py-1"
                     />
                     <div className="flex flex-wrap gap-1.5">
@@ -1203,7 +1768,6 @@ export default function MarketplacePage() {
         <button
           onClick={() => {
             filterSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-            // Small delay to ensure scroll target adjustment
             setTimeout(() => {
               window.scrollBy({ top: -140, behavior: "smooth" });
             }, 300);
