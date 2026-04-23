@@ -104,7 +104,6 @@ model Part {
   subcategory       String   @default("General")
   nestedSubcategory String?
   condition         String   @default("New")
-  fitment           String   @default("Universal")
   compatibleBikes   String?  // Stored as JSON string array: '["yamaha-r15-v4", "Universal"]'
 
   createdAt         DateTime @default(now())

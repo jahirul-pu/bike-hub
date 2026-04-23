@@ -105,7 +105,6 @@ export default function AddPartPage() {
       subcategory,
       nestedSubcategory: nestedSubcategory || undefined,
       condition: formData.get("condition") as string,
-      fitment: formData.get("fitment") as string,
       compatibleBikes,
     };
 
@@ -498,19 +497,6 @@ export default function AddPartPage() {
             </div>
           )}
 
-          {/* Hidden field for fitment description */}
-          <div className="mt-5 pt-5 border-t border-slate-100">
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Fitment Description</label>
-            <input
-              required
-              name="fitment"
-              type="text"
-              defaultValue="Universal"
-              placeholder="e.g. 150cc - 200cc street bikes"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
-            />
-            <p className="text-[10px] text-slate-400 mt-1">Displayed on the part card in the marketplace.</p>
-          </div>
         </div>
 
         {/* ─── Section 4: Pricing & Stock ─── */}

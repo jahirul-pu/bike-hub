@@ -16,7 +16,6 @@ export type InventoryPart = {
   category: string;
   subcategory: string;
   nestedSubcategory: string | null;
-  fitment: string;
   condition: string;
   compatibleBikes: string | null;
   stock: number;
@@ -200,7 +199,6 @@ export function PartsInventoryTable({
       part.category,
       part.subcategory,
       part.nestedSubcategory,
-      part.fitment,
       part.condition,
     ]
       .filter(Boolean)
@@ -277,7 +275,7 @@ export function PartsInventoryTable({
             setQuery(nextQuery);
             syncUrl(selectedCategory, nextQuery);
           }}
-          placeholder="Search by part name, SKU, category, or fitment"
+          placeholder="Search by part name, SKU, or category"
           className="h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
         />
         {(query || selectedCategory) ? (
@@ -364,7 +362,6 @@ export function PartsInventoryTable({
                               }`}>
                                 {part.condition}
                               </span>
-                              <span className="text-[10px] text-slate-400">{part.fitment}</span>
                             </div>
                           </div>
                         </div>

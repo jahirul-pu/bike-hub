@@ -15,7 +15,6 @@ const PartSchema = z.object({
   subcategory: z.string().default("General"),
   nestedSubcategory: z.string().optional(),
   condition: z.string().default("New"),
-  fitment: z.string().default("Universal"),
   compatibleBikes: z.array(z.string()).default(["Universal"]),
 });
 
@@ -35,7 +34,6 @@ export async function createPart(data: z.infer<typeof PartSchema>) {
         subcategory: parsed.subcategory,
         nestedSubcategory: parsed.nestedSubcategory,
         condition: parsed.condition,
-        fitment: parsed.fitment,
         compatibleBikes: JSON.stringify(parsed.compatibleBikes),
       },
     });
@@ -74,7 +72,6 @@ export async function updatePart(id: string, data: z.infer<typeof PartSchema>) {
         subcategory: parsed.subcategory,
         nestedSubcategory: parsed.nestedSubcategory,
         condition: parsed.condition,
-        fitment: parsed.fitment,
         compatibleBikes: JSON.stringify(parsed.compatibleBikes),
       },
     });

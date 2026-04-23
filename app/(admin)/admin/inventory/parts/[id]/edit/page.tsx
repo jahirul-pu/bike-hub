@@ -31,7 +31,6 @@ export default async function EditPartPage({
         subcategory: part.subcategory,
         nestedSubcategory: part.nestedSubcategory ?? "",
         condition: part.condition,
-        fitment: part.fitment,
         compatibleBikes,
       }}
     />

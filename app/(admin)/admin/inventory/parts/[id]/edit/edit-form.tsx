@@ -19,7 +19,6 @@ type PartData = {
   subcategory: string;
   nestedSubcategory: string;
   condition: string;
-  fitment: string;
   compatibleBikes: string[];
 };
 
@@ -48,7 +47,6 @@ export default function EditPartForm({ part }: { part: PartData }) {
   const [retailPrice, setRetailPrice] = useState(part.retailPrice);
   const [stock, setStock] = useState(part.stock);
   const [condition, setCondition] = useState(part.condition);
-  const [fitment, setFitment] = useState(part.fitment);
 
   // Taxonomy state
   const [category, setCategory] = useState(part.category);
@@ -125,7 +123,6 @@ export default function EditPartForm({ part }: { part: PartData }) {
       subcategory,
       nestedSubcategory: nestedSubcategory || undefined,
       condition,
-      fitment,
       compatibleBikes,
     });
 
@@ -485,14 +482,6 @@ export default function EditPartForm({ part }: { part: PartData }) {
             </div>
           )}
 
-          <div className="mt-5 pt-5 border-t border-slate-100">
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Fitment Description</label>
-            <input
-              value={fitment} onChange={(e) => setFitment(e.target.value)}
-              type="text"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 focus:bg-white"
-            />
-          </div>
         </div>
 
         {/* ─── Section 4: Pricing & Stock ─── */}

@@ -4,14 +4,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target } from "lucide-react";
+import { AlertTriangle, Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { bikes, Bike, formatBdt, headlineMetric, powertrainBadgeClass } from "@/lib/bikes-data";
+import { BikeCard } from "@/components/site/bike-card";
+import { bikes, Bike } from "@/lib/bikes-data";
 import { useCartStore } from "@/store/useCartStore";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +24,6 @@ type SparePartsSortDirection = "asc" | "desc";
 type SparePartListing = {
   id: string;
   name: string;
-  fitment: string;
   condition: string;
   priceBdt: number;
   stock: number;
@@ -215,7 +216,6 @@ function getPartSearchText(part: SparePartListing): string {
       part.name,
       part.subcategory,
       part.nestedSubcategory,
-      part.fitment,
       part.category,
       compatibleBikeText,
     ]
@@ -255,18 +255,21 @@ function SmartPartCard({
   const stockMeta = getStockMeta(part);
   const partImage = getPartImage(part);
   const priceLabel = `৳ ${new Intl.NumberFormat("en-BD").format(part.priceBdt)}`;
+  const showBrandChip = Boolean(part.brand?.trim()) || brand !== "Universal Fit";
   const compatibleBikePreviews = part.compatibleBikes
     .filter((slug) => slug !== "Universal")
     .map((slug) => bikes.find((bike) => bike.slug === slug))
     .filter((bike): bike is Bike => Boolean(bike));
+  const visibleCompatibleBikes = compatibleBikePreviews.slice(0, 2);
+  const remainingCompatibleBikeCount = Math.max(0, compatibleBikePreviews.length - visibleCompatibleBikes.length);
   const leadFitLabel = selectedBike
     ? isExactFit
       ? `Fits ${selectedBike.brand} ${selectedBike.model}`
       : isUniversal
-        ? `Compatible with ${selectedBike.brand} ${selectedBike.model}`
+        ? `Fits most ${selectedBike.brand} ${selectedBike.model} setups`
         : compatibilityLabel
     : isUniversal
-      ? "Universal fit for most bikes"
+      ? "Fits most 125-250cc bikes"
       : compatibleBikePreviews.length > 0
         ? compatibleBikePreviews.length === 1
           ? `Fits ${compatibleBikePreviews[0].brand} ${compatibleBikePreviews[0].model}`
@@ -321,15 +324,25 @@ function SmartPartCard({
                 <CardTitle className="line-clamp-2 font-heading text-2xl uppercase leading-tight tracking-wide text-slate-900">
                   {part.name}
                 </CardTitle>
-                <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <Wrench
-                    className={cn(
-                      "h-4 w-4 shrink-0",
-                      isExactFit ? "text-emerald-600" : "text-slate-400"
-                    )}
-                  />
-                  <span className="line-clamp-1">{leadFitLabel}</span>
-                </div>
+                {isUniversal ? (
+                  <div className="mt-2 space-y-1">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      Universal Fit
+                    </div>
+                    <p className="line-clamp-1 text-sm font-semibold text-slate-700">{leadFitLabel}</p>
+                  </div>
+                ) : (
+                  <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <Wrench
+                      className={cn(
+                        "h-4 w-4 shrink-0",
+                        isExactFit ? "text-emerald-600" : "text-slate-400"
+                      )}
+                    />
+                    <span className="line-clamp-1">{leadFitLabel}</span>
+                  </div>
+                )}
               </div>
               <Badge
                 variant="outline"
@@ -345,12 +358,14 @@ function SmartPartCard({
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
-                <Building2 className="h-3.5 w-3.5 text-slate-400" />
-                <span>
-                  <span className="font-semibold">Brand:</span> {brand}
+              {showBrandChip ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+                  <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                  <span>
+                    <span className="font-semibold">Brand:</span> {brand}
+                  </span>
                 </span>
-              </span>
+              ) : null}
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 <Target className="h-3.5 w-3.5 text-slate-400" />
                 <span>
@@ -362,28 +377,58 @@ function SmartPartCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Target className="h-3.5 w-3.5 shrink-0" />
-          <span className="line-clamp-2">{part.fitment}</span>
-        </div>
-
         {/* Compatible bikes list (when no bike is selected) */}
         {!selectedBike && !isUniversal && part.compatibleBikes.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {part.compatibleBikes.slice(0, 3).map((slug) => {
-              const bike = bikes.find((b) => b.slug === slug);
-              return bike ? (
-                <span key={slug} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                  <BikeIcon className="h-2.5 w-2.5" />
-                  {bike.brand} {bike.model}
-                </span>
-              ) : null;
-            })}
-            {part.compatibleBikes.length > 3 && (
-              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-400">
-                +{part.compatibleBikes.length - 3} more
+            {visibleCompatibleBikes.map((bike) => (
+              <span key={bike.slug} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                <BikeIcon className="h-2.5 w-2.5" />
+                {bike.brand} {bike.model}
               </span>
-            )}
+            ))}
+            {remainingCompatibleBikeCount > 0 ? (
+              <Dialog>
+                <DialogTrigger className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700">
+                  +{remainingCompatibleBikeCount} more bikes
+                </DialogTrigger>
+                <DialogContent className="border border-slate-200 bg-white sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-lg uppercase tracking-wide text-slate-900">
+                      Compatible Bikes
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-500">
+                      {part.name} fits the following bikes.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
+                    {compatibleBikePreviews.map((bike) => (
+                      <div
+                        key={bike.slug}
+                        className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                      >
+                        <div className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-xl",
+                          bike.powertrain === "EV" ? "bg-emerald-100" : "bg-slate-200"
+                        )}>
+                          <BikeIcon className={cn(
+                            "h-4 w-4",
+                            bike.powertrain === "EV" ? "text-emerald-600" : "text-slate-500"
+                          )} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-slate-900">
+                            {bike.brand} {bike.model}
+                          </p>
+                          <p className="text-[11px] text-slate-500">
+                            {bike.powertrain} {bike.category ? `• ${bike.category}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            ) : null}
           </div>
         )}
 
@@ -434,77 +479,6 @@ function SmartPartCard({
   );
 }
 
-type UsedPriority = "certified" | "promoted" | "user-listed";
-
-const usedPriorityStyles: Record<
-  UsedPriority,
-  {
-    cardClass: string;
-    badgeClass: string;
-  }
-> = {
-  certified: {
-    cardClass: "border-emerald-300 bg-emerald-50/70 shadow-md",
-    badgeClass: "bg-emerald-600 text-white hover:bg-emerald-600",
-  },
-  promoted: {
-    cardClass: "border-amber-300 bg-amber-50/60 shadow-sm",
-    badgeClass: "bg-amber-500 text-amber-950 hover:bg-amber-500",
-  },
-  "user-listed": {
-    cardClass: "border-slate-200 bg-white/90",
-    badgeClass: "bg-slate-700 text-white hover:bg-slate-700",
-  },
-};
-
-function UsedBikeCard({
-  bike,
-  badgeLabel,
-  priority,
-}: {
-  bike: Bike;
-  badgeLabel: string;
-  priority: UsedPriority;
-}) {
-  const style = usedPriorityStyles[priority];
-
-  return (
-    <Card className={cn("border shadow-sm", style.cardClass)}>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle className="font-heading text-3xl uppercase tracking-wide text-slate-900">
-            {bike.brand} {bike.model}
-          </CardTitle>
-          <div className="flex gap-2">
-            <Badge variant="outline" className={powertrainBadgeClass(bike.powertrain)}>
-              {bike.powertrain}
-            </Badge>
-            <Badge className={style.badgeClass}>{badgeLabel}</Badge>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm text-slate-700">
-        <p className="font-semibold text-slate-900">{formatBdt(bike.priceBdt)}</p>
-        <p className="text-xs uppercase tracking-wide text-slate-500">{headlineMetric(bike)}</p>
-        <div className="flex gap-2">
-          <Link
-            href={`/bikes/${bike.slug}`}
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-slate-300")}
-          >
-            View Specs
-          </Link>
-          <Link
-            href={`/compare?bikes=${bike.slug}`}
-            className={cn(buttonVariants({ size: "sm" }), "bg-slate-900 text-white hover:bg-slate-700")}
-          >
-            Compare
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 export function MarketplacePageContent({ section = "spare" }: { section?: "spare" | "used" }) {
   const router = useRouter();
   const activeSection = section;
@@ -526,7 +500,6 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
         const payload: SparePartListing[] = data.map((d) => ({
           id: d.id,
           name: d.name,
-          fitment: d.fitment,
           condition: d.condition,
           priceBdt: d.retailPrice ?? d.price ?? 0,
           stock: typeof d.stock === "number" ? d.stock : 0,
@@ -1877,7 +1850,7 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {bikeHubCertified.map((bike) => (
-                    <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Certified" priority="certified" />
+                    <BikeCard key={bike.slug} bike={bike} />
                   ))}
                 </div>
               </section>
@@ -1894,7 +1867,7 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {promoted.map((bike) => (
-                    <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="Promoted" priority="promoted" />
+                    <BikeCard key={bike.slug} bike={bike} />
                   ))}
                 </div>
               </section>
@@ -1911,7 +1884,7 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {userListed.map((bike) => (
-                    <UsedBikeCard key={bike.slug} bike={bike} badgeLabel="User Listed" priority="user-listed" />
+                    <BikeCard key={bike.slug} bike={bike} />
                   ))}
                 </div>
               </section>

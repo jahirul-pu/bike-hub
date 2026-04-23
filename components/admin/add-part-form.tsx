@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { Path } from "react-hook-form";
 import * as z from "zod";
-import { X, Plus } from "lucide-react";
 import { createPart } from "@/app/(admin)/admin/inventory/parts/actions";
 
 const formSchema = z.object({
@@ -16,21 +14,7 @@ const formSchema = z.object({
 });
 
 export default function AddPartForm({ onSuccess }: { onSuccess: () => void }) {
-  const [fitmentTags, setFitmentTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-
-  const { register, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<z.infer<typeof formSchema>>();
-
-  const addTag = () => {
-    if (tagInput && !fitmentTags.includes(tagInput)) {
-      setFitmentTags([...fitmentTags, tagInput]);
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setFitmentTags(fitmentTags.filter(t => t !== tagToRemove));
-  };
+  const { register, handleSubmit, reset, setError, formState: { isSubmitting } } = useForm<z.infer<typeof formSchema>>();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // Client-side Zod validation before calling the server action
@@ -46,10 +30,9 @@ export default function AddPartForm({ onSuccess }: { onSuccess: () => void }) {
       return;
     }
 
-    const result = await createPart({ ...parsed.data, fitment: fitmentTags });
+    const result = await createPart({ ...parsed.data });
     if (result.success) {
       reset();
-      setFitmentTags([]);
       onSuccess();
     } else {
       alert(result.error);
@@ -83,28 +66,6 @@ export default function AddPartForm({ onSuccess }: { onSuccess: () => void }) {
           <input type="number" {...register("stock")} className="w-full border p-2 rounded-md" />
         </div>
       </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-blue-600">Fitment (Bike Models)</label>
-        <div className="flex gap-2 mb-2 flex-wrap">
-          {fitmentTags.map(tag => (
-            <span key={tag} className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs flex items-center gap-2">
-              {tag} <X size={12} className="cursor-pointer" onClick={() => removeTag(tag)} />
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <input 
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            className="flex-1 border p-2 rounded-md" 
-            placeholder="Add model (e.g. R15 V4)"
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); }}}
-          />
-          <button type="button" onClick={addTag} className="bg-slate-100 p-2 rounded-md"><Plus size={20} /></button>
-        </div>
-      </div>
-
       <button 
         type="submit" 
         disabled={isSubmitting}
