@@ -220,6 +220,59 @@ const inspectionSections = [
 
 const defaultInspectionAnswerLabels = { passLabel: 'Pass', failLabel: 'Fail' };
 
+const inspectionQuestions: Record<string, string> = {
+  'Cold start (no struggle)': 'Does the bike cold start without struggle?',
+  'Idle stability': 'Is the engine idle stable?',
+  'Engine noise (no knocking)': 'Is the engine noise normal without knocking?',
+  'Acceleration smoothness': 'Is the acceleration smooth?',
+  'Gear shifting smooth': 'Does the bike shift gears smoothly?',
+  'Clutch response': 'Is the clutch response good?',
+  'No excessive vibration': 'Is there any excessive vibration?',
+  'No oil leakage': 'Is there any oil leakage?',
+  'Exhaust smoke normal': 'Is the exhaust smoke normal?',
+  'Engine heat normal': 'Is the engine heat normal?',
+  'Frame alignment': 'Is the frame properly aligned?',
+  'No visible bends': 'Are there any visible bends?',
+  'No major rust': 'Is there any major rust?',
+  'No weld damage': 'Is there any weld damage?',
+  'Swingarm condition': 'Is the swingarm in good condition?',
+  'Crash signs absent': 'Are crash signs absent?',
+  'Front fork leakage': 'Is there any front fork leakage?',
+  'Front suspension smooth': 'Is the front suspension smooth?',
+  'Rear suspension condition': 'Is the rear suspension in good condition?',
+  'Steering alignment': 'Is the steering aligned correctly?',
+  'Handle straight': 'Is the handle straight?',
+  'No unusual play': 'Is there any unusual play?',
+  'Front brake response': 'Is the front brake response good?',
+  'Rear brake response': 'Is the rear brake response good?',
+  'Brake pads condition': 'Are the brake pads in good condition?',
+  'Disc condition': 'Is the disc in good condition?',
+  'No brake noise': 'Is there any brake noise?',
+  'Brake fluid level OK': 'Is the brake fluid level OK?',
+  'Battery health': 'Is the battery health good?',
+  'Self-start works': 'Does the self-start work properly?',
+  'Headlight working': 'Is the headlight working?',
+  'Indicators working': 'Are the indicators working?',
+  'Brake light working': 'Is the brake light working?',
+  'Horn working': 'Is the horn working?',
+  'Tire tread depth': 'Is the tire tread depth adequate?',
+  'Tire condition (no cracks)': 'Are the tires free from cracks?',
+  'Rim condition': 'Are the rims in good condition?',
+  'Wheel alignment': 'Are the wheels properly aligned?',
+  'Wheel bearing smooth': 'Are the wheel bearings smooth?',
+  'Fuel tank condition': 'Is the fuel tank in good condition?',
+  'Fairings condition': 'Are the fairings in good condition?',
+  'Paint quality': 'Is the paint quality good?',
+  'Seat condition': 'Is the seat in good condition?',
+  'No major scratches/dents': 'Are there any major scratches or dents?',
+  'Registration valid': 'Is the registration valid?',
+  'Engine number match': 'Does the engine number match?',
+  'Chassis number match': 'Does the chassis number match?',
+  'Tax updated': 'Is the tax updated?',
+  'Insurance valid': 'Is the insurance valid?',
+  'Service history available': 'Is the service history available?',
+};
+
 const inspectionAnswerLabels: Record<string, { passLabel: string; failLabel: string }> = {
   'Cold start (no struggle)': { passLabel: 'Starts Easily', failLabel: 'Struggles' },
   'Idle stability': { passLabel: 'Stable', failLabel: 'Unstable' },
@@ -304,6 +357,7 @@ function VehicleForm({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [powertrain, setPowertrain] = useState<'ICE' | 'EV'>('ICE');
+  const [registrationStatus, setRegistrationStatus] = useState<'Registered' | 'On Test'>('Registered');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [selectedCatalogSlug, setSelectedCatalogSlug] = useState('');
@@ -449,12 +503,27 @@ function VehicleForm({
         <Field label="Asking Price (BDT)">
           <input type="number" required name="askingPrice" min="0" step="0.01" className={inputClass} />
         </Field>
-        <Field label="VIN">
-          <input required name="vin" placeholder="Vehicle identification number" className={inputClass} />
+        <Field label="Registration Status">
+          <select
+            name="registrationStatus"
+            value={registrationStatus}
+            onChange={(event) => setRegistrationStatus(event.target.value as 'Registered' | 'On Test')}
+            className={inputClass}
+          >
+            <option value="Registered">Registered</option>
+            <option value="On Test">On Test</option>
+          </select>
         </Field>
-        <Field label="Chassis Number">
-          <input required name="chassis" placeholder="Chassis number" className={inputClass} />
-        </Field>
+        {registrationStatus === 'Registered' ? (
+          <>
+            <Field label="Registration Number">
+              <input required name="registrationNumber" placeholder="e.g. DHAKA METRO-XX-1234" className={inputClass} />
+            </Field>
+            <Field label="Validity Period">
+              <input required name="registrationValidityPeriod" placeholder="e.g. Valid until Dec 2027" className={inputClass} />
+            </Field>
+          </>
+        ) : null}
         <Field label="Seller Notes" span={3}>
           <textarea
             name="description"
@@ -940,7 +1009,9 @@ function VehicleForm({
                       key={`${section.title}-${point}`}
                       className="rounded-lg border border-slate-200 bg-white p-3"
                     >
-                      <div className="mb-2 text-sm font-medium text-slate-800">{point}</div>
+                      <div className="mb-2 text-sm font-medium text-slate-800">
+                        {inspectionQuestions[point] ?? `${point}?`}
+                      </div>
                       <InspectionCheckbox
                         name={inspectionFieldName(section.title, point)}
                         passLabel={answerLabels.passLabel}

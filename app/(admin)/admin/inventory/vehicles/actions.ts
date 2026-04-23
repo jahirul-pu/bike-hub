@@ -20,8 +20,9 @@ const VehicleInputSchema = z.object({
   description: z.string().optional(),
   priceBdt: optionalNumber,
   askingPrice: optionalNumber,
-  chassis: z.string().optional(),
-  vin: z.string().optional(),
+  registrationStatus: z.enum(['Registered', 'On Test']).optional(),
+  registrationNumber: z.string().optional(),
+  registrationValidityPeriod: z.string().optional(),
   images: z.string().optional(),
   displacementCc: optionalNumber,
   engineDisplacement: optionalNumber,
@@ -100,17 +101,31 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
     const normalizedInput = normalizeInput(input);
     const parsed = VehicleInputSchema.parse(normalizedInput);
     const brandName = parsed.brand || parsed.make;
-    const chassis = parsed.chassis || parsed.vin;
     const inspectionSummary = summarizeInspection(normalizedInput);
+    const registrationStatus = parsed.registrationStatus || 'On Test';
+    const registrationNumber = parsed.registrationNumber?.trim();
+    const registrationValidityPeriod = parsed.registrationValidityPeriod?.trim();
 
-    if (!brandName || !chassis) {
-      return { success: false, error: 'Brand/make and chassis/VIN are required.' };
+    if (!brandName) {
+      return { success: false, error: 'Brand or make is required.' };
+    }
+
+    if (registrationStatus === 'Registered' && (!registrationNumber || !registrationValidityPeriod)) {
+      return {
+        success: false,
+        error: 'Registered vehicles need both a registration number and validity period.',
+      };
     }
 
     const powertrain = parsed.powertrain || parsed.powerSource || 'ICE';
     const baseSlug = slugify(`${brandName}-${parsed.model}`);
-    const generatedSlug = `${baseSlug}-${chassis.substring(0, 5).toLowerCase()}`;
-    const listingSummary = [parsed.summary, parsed.description]
+    const slugSuffix = slugify(registrationNumber || `${registrationStatus}-${Date.now().toString(36)}`).slice(0, 18);
+    const generatedSlug = `${baseSlug}-${slugSuffix || Date.now().toString(36)}`;
+    const registrationSummary =
+      registrationStatus === 'Registered'
+        ? `Registration: Registered (${registrationNumber}, ${registrationValidityPeriod})`
+        : 'Registration: On Test';
+    const listingSummary = [parsed.summary, parsed.description, registrationSummary]
       .map((value) => value?.trim())
       .filter((value): value is string => Boolean(value))
       .join(' | ');
@@ -178,8 +193,8 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
         otaUpdates: parsed.otaUpdates || null,
         tractionControl: parsed.tractionControl || null,
         cruiseControl: parsed.cruiseControl || null,
-        vin: parsed.vin || chassis,
-        chassis,
+        vin: null,
+        chassis: null,
         askingPrice: parsed.askingPrice ?? 0,
         certificationStatus: 'PENDING_APPROVAL',
         inspection: {
