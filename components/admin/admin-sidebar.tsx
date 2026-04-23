@@ -2,14 +2,13 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { CarFront, ClipboardCheck, LayoutDashboard, Bike, Package, ShoppingCart, Tags, type LucideIcon } from "lucide-react"
+import { CarFront, LayoutDashboard, Bike, Package, ShoppingCart, Tags, type LucideIcon } from "lucide-react"
 
 const navItems: { name: string; href: string; icon: LucideIcon }[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Bike Catalog", href: "/admin/inventory/bikes", icon: Bike },
   { name: "Parts Inventory", href: "/admin/inventory/parts", icon: Package },
   { name: "Vehicle Hub", href: "/admin/inventory/vehicles", icon: CarFront },
-  { name: "Certification Lab", href: "/admin/certification", icon: ClipboardCheck },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Brands", href: "/admin/brands", icon: Tags },
 ]

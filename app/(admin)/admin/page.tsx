@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bike, CarFront, ClipboardCheck, Package, ShoppingCart, Tags } from "lucide-react";
+import { Bike, CarFront, Package, ShoppingCart, Tags } from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -33,13 +33,6 @@ const adminSections = [
     tone: "from-amber-500/15 to-orange-500/10 border-amber-200/70",
   },
   {
-    title: "Certification Lab",
-    description: "View the queue and see what still needs workflow wiring.",
-    href: "/admin/certification",
-    icon: ClipboardCheck,
-    tone: "from-fuchsia-500/15 to-pink-500/10 border-fuchsia-200/70",
-  },
-  {
     title: "Orders",
     description: "Check order operations and prepare the next admin workflow.",
     href: "/admin/orders",
@@ -65,7 +58,7 @@ export default async function AdminDashboardPage() {
         <h1 className="font-heading text-4xl uppercase tracking-wide text-slate-900">Operations Dashboard</h1>
         <p className="max-w-3xl text-sm text-slate-600">
           The `/admin` route now has its own landing page. Use it as the entry point for inventory,
-          brands, certification, and order operations.
+          brands, and order operations.
         </p>
       </header>
 
