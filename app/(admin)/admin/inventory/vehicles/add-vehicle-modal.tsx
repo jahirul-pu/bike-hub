@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { ExternalLink, ImagePlus, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { bikes, type Bike } from '@/lib/bikes-data';
@@ -73,12 +73,45 @@ function YesNoSelect({ name }: { name: string }) {
   );
 }
 
-function PassFailSelect({ name }: { name: string }) {
+function InspectionCheckbox({
+  name,
+  passLabel,
+  failLabel,
+}: {
+  name: string;
+  passLabel: string;
+  failLabel: string;
+}) {
+  const [value, setValue] = useState<'pass' | 'fail'>('pass');
+  const yesId = useId();
+  const noId = useId();
+
   return (
-    <select name={name} defaultValue="pass" className={inputClass}>
-      <option value="pass">Pass</option>
-      <option value="fail">Fail</option>
-    </select>
+    <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
+      <input type="hidden" name={name} value={value} />
+
+      <label htmlFor={yesId} className="flex items-center gap-2">
+        <input
+          id={yesId}
+          type="checkbox"
+          checked={value === 'pass'}
+          onChange={() => setValue('pass')}
+          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+        />
+        <span>{passLabel}</span>
+      </label>
+
+      <label htmlFor={noId} className="flex items-center gap-2">
+        <input
+          id={noId}
+          type="checkbox"
+          checked={value === 'fail'}
+          onChange={() => setValue('fail')}
+          className="h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500"
+        />
+        <span>{failLabel}</span>
+      </label>
+    </div>
   );
 }
 
@@ -184,6 +217,61 @@ const inspectionSections = [
     ],
   },
 ];
+
+const defaultInspectionAnswerLabels = { passLabel: 'Pass', failLabel: 'Fail' };
+
+const inspectionAnswerLabels: Record<string, { passLabel: string; failLabel: string }> = {
+  'Cold start (no struggle)': { passLabel: 'Starts Easily', failLabel: 'Struggles' },
+  'Idle stability': { passLabel: 'Stable', failLabel: 'Unstable' },
+  'Engine noise (no knocking)': { passLabel: 'Normal', failLabel: 'Knocking' },
+  'Acceleration smoothness': { passLabel: 'Smooth', failLabel: 'Rough' },
+  'Gear shifting smooth': { passLabel: 'Smooth', failLabel: 'Rough' },
+  'Clutch response': { passLabel: 'Good', failLabel: 'Poor' },
+  'No excessive vibration': { passLabel: 'Normal', failLabel: 'Excessive' },
+  'No oil leakage': { passLabel: 'No Leak', failLabel: 'Leak Found' },
+  'Exhaust smoke normal': { passLabel: 'Normal', failLabel: 'Abnormal' },
+  'Engine heat normal': { passLabel: 'Normal', failLabel: 'Overheating' },
+  'Frame alignment': { passLabel: 'Aligned', failLabel: 'Misaligned' },
+  'No visible bends': { passLabel: 'None', failLabel: 'Visible' },
+  'No major rust': { passLabel: 'None', failLabel: 'Present' },
+  'No weld damage': { passLabel: 'No Damage', failLabel: 'Damage Found' },
+  'Swingarm condition': { passLabel: 'Good', failLabel: 'Poor' },
+  'Crash signs absent': { passLabel: 'Absent', failLabel: 'Present' },
+  'Front fork leakage': { passLabel: 'No Leak', failLabel: 'Leak Found' },
+  'Front suspension smooth': { passLabel: 'Smooth', failLabel: 'Rough' },
+  'Rear suspension condition': { passLabel: 'Good', failLabel: 'Poor' },
+  'Steering alignment': { passLabel: 'Aligned', failLabel: 'Misaligned' },
+  'Handle straight': { passLabel: 'Straight', failLabel: 'Bent' },
+  'No unusual play': { passLabel: 'None', failLabel: 'Present' },
+  'Front brake response': { passLabel: 'Good', failLabel: 'Poor' },
+  'Rear brake response': { passLabel: 'Good', failLabel: 'Poor' },
+  'Brake pads condition': { passLabel: 'Good', failLabel: 'Worn' },
+  'Disc condition': { passLabel: 'Good', failLabel: 'Damaged' },
+  'No brake noise': { passLabel: 'Quiet', failLabel: 'Noise Present' },
+  'Brake fluid level OK': { passLabel: 'OK', failLabel: 'Low' },
+  'Battery health': { passLabel: 'Good', failLabel: 'Weak' },
+  'Self-start works': { passLabel: 'Working', failLabel: 'Not Working' },
+  'Headlight working': { passLabel: 'Working', failLabel: 'Not Working' },
+  'Indicators working': { passLabel: 'Working', failLabel: 'Not Working' },
+  'Brake light working': { passLabel: 'Working', failLabel: 'Not Working' },
+  'Horn working': { passLabel: 'Working', failLabel: 'Not Working' },
+  'Tire tread depth': { passLabel: 'Adequate', failLabel: 'Low' },
+  'Tire condition (no cracks)': { passLabel: 'No Cracks', failLabel: 'Cracked' },
+  'Rim condition': { passLabel: 'Good', failLabel: 'Damaged' },
+  'Wheel alignment': { passLabel: 'Aligned', failLabel: 'Misaligned' },
+  'Wheel bearing smooth': { passLabel: 'Smooth', failLabel: 'Rough' },
+  'Fuel tank condition': { passLabel: 'Good', failLabel: 'Poor' },
+  'Fairings condition': { passLabel: 'Good', failLabel: 'Poor' },
+  'Paint quality': { passLabel: 'Good', failLabel: 'Poor' },
+  'Seat condition': { passLabel: 'Good', failLabel: 'Poor' },
+  'No major scratches/dents': { passLabel: 'None', failLabel: 'Present' },
+  'Registration valid': { passLabel: 'Valid', failLabel: 'Invalid' },
+  'Engine number match': { passLabel: 'Match', failLabel: 'Mismatch' },
+  'Chassis number match': { passLabel: 'Match', failLabel: 'Mismatch' },
+  'Tax updated': { passLabel: 'Updated', failLabel: 'Due' },
+  'Insurance valid': { passLabel: 'Valid', failLabel: 'Expired' },
+  'Service history available': { passLabel: 'Available', failLabel: 'Unavailable' },
+};
 
 function inspectionFieldName(sectionTitle: string, point: string) {
   return `inspection__${sectionTitle}__${point}`
@@ -844,15 +932,23 @@ function VehicleForm({
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {section.points.map((point) => (
-                  <div
-                    key={`${section.title}-${point}`}
-                    className="rounded-lg border border-slate-200 bg-white p-3"
-                  >
-                    <div className="mb-2 text-sm font-medium text-slate-800">{point}</div>
-                    <PassFailSelect name={inspectionFieldName(section.title, point)} />
-                  </div>
-                ))}
+                {section.points.map((point) => {
+                  const answerLabels = inspectionAnswerLabels[point] ?? defaultInspectionAnswerLabels;
+
+                  return (
+                    <div
+                      key={`${section.title}-${point}`}
+                      className="rounded-lg border border-slate-200 bg-white p-3"
+                    >
+                      <div className="mb-2 text-sm font-medium text-slate-800">{point}</div>
+                      <InspectionCheckbox
+                        name={inspectionFieldName(section.title, point)}
+                        passLabel={answerLabels.passLabel}
+                        failLabel={answerLabels.failLabel}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
