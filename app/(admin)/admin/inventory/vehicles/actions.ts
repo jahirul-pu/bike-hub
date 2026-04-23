@@ -121,10 +121,13 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
     const baseSlug = slugify(`${brandName}-${parsed.model}`);
     const slugSuffix = slugify(registrationNumber || `${registrationStatus}-${Date.now().toString(36)}`).slice(0, 18);
     const generatedSlug = `${baseSlug}-${slugSuffix || Date.now().toString(36)}`;
-    const registrationSummary =
-      registrationStatus === 'Registered'
-        ? `Registration: Registered (${registrationNumber}, ${registrationValidityPeriod})`
-        : 'Registration: On Test';
+    const registrationSummary = [
+      `Registration Status: ${registrationStatus}`,
+      registrationNumber ? `Registration Number: ${registrationNumber}` : null,
+      registrationValidityPeriod ? `Registration Validity: ${registrationValidityPeriod}` : null,
+    ]
+      .filter((value): value is string => Boolean(value))
+      .join(' | ');
     const listingSummary = [parsed.summary, parsed.description, registrationSummary]
       .map((value) => value?.trim())
       .filter((value): value is string => Boolean(value))

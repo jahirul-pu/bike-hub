@@ -4,16 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Bike as BikeIcon, ChevronDown, ChevronUp, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target } from "lucide-react";
+import { AlertTriangle, ArrowRight, Bike as BikeIcon, ChevronDown, ChevronUp, Gauge, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { BikeCard } from "@/components/site/bike-card";
-import { bikes, Bike } from "@/lib/bikes-data";
+import { bikes, Bike, formatBdt, powertrainBadgeClass } from "@/lib/bikes-data";
+import { formatUsedVehicleDate, type UsedVehicleFrontendListing } from "@/lib/used-vehicles";
 import { useCartStore } from "@/store/useCartStore";
 import { cn } from "@/lib/utils";
 
@@ -479,12 +480,169 @@ function SmartPartCard({
   );
 }
 
+function usedVehicleHeadlineMetric(vehicle: UsedVehicleFrontendListing): string {
+  if (vehicle.powertrain === "EV") {
+    return vehicle.motorPowerKw ? `${vehicle.motorPowerKw} kW` : "EV";
+  }
+
+  return vehicle.displacementCc ? `${vehicle.displacementCc} cc` : "ICE";
+}
+
+function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListing }) {
+  const catalogBike = bikes.find(
+    (bike) =>
+      bike.brand.toLowerCase() === vehicle.brand.toLowerCase() &&
+      bike.model.toLowerCase() === vehicle.model.toLowerCase()
+  );
+  const hasImage = vehicle.images.length > 0;
+  const priceLabel = formatBdt(vehicle.askingPrice || vehicle.priceBdt);
+  const registrationValidityLabel = formatUsedVehicleDate(vehicle.registrationValidityPeriod);
+
+  return (
+    <Card className="overflow-hidden border-slate-200 bg-white/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50">
+        {hasImage ? (
+          <img
+            src={vehicle.images[0]}
+            alt={`${vehicle.brand} ${vehicle.model}`}
+            className="h-full w-full object-cover object-center transition-transform duration-300 hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-slate-300">
+            <BikeIcon className="h-12 w-12" />
+            <span className="text-xs font-medium uppercase tracking-widest text-slate-400">No Image</span>
+          </div>
+        )}
+        <div className="absolute left-3 top-3 flex gap-2">
+          <Badge className="bg-slate-900/80 text-white backdrop-blur-sm hover:bg-slate-900/80">{vehicle.category}</Badge>
+        </div>
+        <div className="absolute right-3 top-3 flex flex-col items-end gap-2">
+          <Badge variant="outline" className={cn(powertrainBadgeClass(vehicle.powertrain), "backdrop-blur-sm")}>
+            {vehicle.powertrain}
+          </Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              "border backdrop-blur-sm",
+              vehicle.registrationStatus === "Registered"
+                ? "border-emerald-200 bg-emerald-50/90 text-emerald-700"
+                : "border-amber-200 bg-amber-50/90 text-amber-700"
+            )}
+          >
+            {vehicle.registrationStatus}
+          </Badge>
+        </div>
+      </div>
+
+      <CardHeader className="pb-3 pt-4">
+        <CardTitle className="font-heading text-3xl uppercase leading-none tracking-wide text-slate-900">
+          {vehicle.brand} {vehicle.model}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="rounded-lg bg-slate-100 p-2">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Asking Price</p>
+            <p className="font-semibold text-slate-900">{priceLabel}</p>
+          </div>
+          <div className="rounded-lg bg-slate-100 p-2">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              {vehicle.powertrain === "ICE" ? "Engine CC" : "Motor Output"}
+            </p>
+            <p className="font-semibold text-slate-900">{usedVehicleHeadlineMetric(vehicle)}</p>
+          </div>
+          <div className="rounded-lg bg-slate-100 p-2">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Top Speed</p>
+            <p className="flex items-center gap-1 font-semibold text-slate-900">
+              <Gauge className="h-3.5 w-3.5" />
+              {vehicle.topSpeedKph} km/h
+            </p>
+          </div>
+          <div className="rounded-lg bg-slate-100 p-2">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              {vehicle.powertrain === "ICE" ? "Mileage" : "Range"}
+            </p>
+            <p className="flex items-center gap-1 font-semibold text-slate-900">
+              <Sparkles className="h-3.5 w-3.5" />
+              {vehicle.powertrain === "ICE"
+                ? `${vehicle.mileageKmpl ?? 0} km/l`
+                : `${vehicle.rangeKm ?? 0} km`}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Registration</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {vehicle.registrationNumber ? (
+              <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                {vehicle.registrationNumber}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                Test Ride Vehicle
+              </Badge>
+            )}
+            {registrationValidityLabel ? (
+              <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                Valid until {registrationValidityLabel}
+              </Badge>
+            ) : null}
+          </div>
+        </div>
+
+        <p className="line-clamp-2 text-sm text-slate-600">{vehicle.summary}</p>
+      </CardContent>
+      <CardFooter className="grid grid-cols-2 gap-2">
+        {catalogBike ? (
+          <>
+            <Link
+              href={`/compare?bikes=${catalogBike.slug}`}
+              className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+            >
+              Compare
+            </Link>
+            <Link
+              href={`/bikes/${catalogBike.slug}`}
+              className={cn(buttonVariants(), "w-full bg-slate-900 text-white hover:bg-slate-700")}
+            >
+              View Specs
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </>
+        ) : (
+          <>
+            <div
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "w-full cursor-not-allowed border-slate-200 text-slate-400 opacity-70"
+              )}
+            >
+              Compare
+            </div>
+            <div
+              className={cn(
+                buttonVariants(),
+                "w-full cursor-not-allowed bg-slate-300 text-white hover:bg-slate-300"
+              )}
+            >
+              Specs Soon
+            </div>
+          </>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}
+
 export function MarketplacePageContent({ section = "spare" }: { section?: "spare" | "used" }) {
   const router = useRouter();
   const activeSection = section;
   const [selectedBikeSlug, setSelectedBikeSlug] = useState<string>("all");
   const [spareParts, setSpareParts] = useState<SparePartListing[]>([]);
   const [isLoadingParts, setIsLoadingParts] = useState(true);
+  const [usedVehicleListings, setUsedVehicleListings] = useState<UsedVehicleFrontendListing[]>([]);
+  const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
 
   const selectedBike = useMemo(() => {
@@ -523,6 +681,19 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
       .catch((err) => {
         console.error(err);
         setIsLoadingParts(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/vehicles")
+      .then((res) => res.json())
+      .then((data: UsedVehicleFrontendListing[]) => {
+        setUsedVehicleListings(Array.isArray(data) ? data : []);
+        setIsLoadingVehicles(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsLoadingVehicles(false);
       });
   }, []);
 
@@ -900,11 +1071,77 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
     });
   }, [powertrainFilter, typeFilter, priceRange, metricFilter, efficiencyFilter, brandFilter, sortBy]);
 
+  const filteredUsedVehicleListings = useMemo(() => {
+    return usedVehicleListings
+      .filter((vehicle) => {
+        if (powertrainFilter !== "All" && vehicle.powertrain !== powertrainFilter) return false;
+        if (typeFilter !== "All") {
+          const isScooter = vehicle.category === "Scooter";
+          if (typeFilter === "Motorcycle" && isScooter) return false;
+          if (typeFilter === "Scooter" && !isScooter) return false;
+        }
+
+        const askingPrice = vehicle.askingPrice || vehicle.priceBdt;
+        if (askingPrice < priceRange[0] || askingPrice > priceRange[1]) return false;
+
+        if (metricFilter !== "All") {
+          if (vehicle.powertrain === "ICE") {
+            const cc = vehicle.displacementCc ?? 0;
+            if (metricFilter === "100-125" && (cc < 100 || cc > 125)) return false;
+            if (metricFilter === "126-150" && (cc < 126 || cc > 150)) return false;
+            if (metricFilter === "151-200" && (cc < 151 || cc > 200)) return false;
+            if (metricFilter === "201-350" && (cc < 201 || cc > 350)) return false;
+            if (metricFilter === "350+" && cc <= 350) return false;
+          } else {
+            const power = vehicle.motorPowerKw ?? 0;
+            if (metricFilter === "1-2" && (power < 1 || power > 2)) return false;
+            if (metricFilter === "2-4" && (power < 2.1 || power > 4)) return false;
+            if (metricFilter === "4+" && power <= 4) return false;
+          }
+        }
+
+        if (efficiencyFilter !== "All") {
+          if (vehicle.powertrain === "ICE") {
+            const mileage = vehicle.mileageKmpl ?? 0;
+            if (efficiencyFilter === "40+" && mileage < 40) return false;
+            if (efficiencyFilter === "50+" && mileage < 50) return false;
+            if (efficiencyFilter === "60+" && mileage < 60) return false;
+          } else {
+            const range = vehicle.rangeKm ?? 0;
+            if (efficiencyFilter === "60" && range < 60) return false;
+            if (efficiencyFilter === "100" && range < 100) return false;
+            if (efficiencyFilter === "150+" && range < 150) return false;
+          }
+        }
+
+        if (brandFilter !== "All" && vehicle.brand !== brandFilter) return false;
+
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "Price") return (a.askingPrice || a.priceBdt) - (b.askingPrice || b.priceBdt);
+        if (sortBy === "Range") {
+          const rangeA = a.powertrain === "EV" ? (a.rangeKm || 0) : (a.mileageKmpl || 0);
+          const rangeB = b.powertrain === "EV" ? (b.rangeKm || 0) : (b.mileageKmpl || 0);
+          return rangeB - rangeA;
+        }
+
+        return b.topSpeedKph - a.topSpeedKph;
+      });
+  }, [brandFilter, efficiencyFilter, metricFilter, powertrainFilter, priceRange, sortBy, typeFilter, usedVehicleListings]);
+
   const bikeHubCertified = filteredBikes.filter((bike) => certifiedSlugs.has(bike.slug));
   const promoted = filteredBikes.filter((bike) => promotedSlugs.has(bike.slug) && !certifiedSlugs.has(bike.slug));
   const userListed = filteredBikes.filter(
     (bike) => !certifiedSlugs.has(bike.slug) && !promotedSlugs.has(bike.slug)
   );
+  const hasDynamicUserListings = usedVehicleListings.length > 0;
+  const usedVehicleBrands = useMemo(
+    () => Array.from(new Set([...bikes.map((bike) => bike.brand), ...usedVehicleListings.map((vehicle) => vehicle.brand)])).sort(),
+    [usedVehicleListings]
+  );
+  const displayedUserListedCount = hasDynamicUserListings ? filteredUsedVehicleListings.length : userListed.length;
+  const displayedUsedVehicleTotal = bikeHubCertified.length + promoted.length + displayedUserListedCount;
 
   const addSparePartToCart = (part: SparePartListing) => {
     addItem({
@@ -1411,7 +1648,7 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
               Used Vehicles
             </h2>
             <Badge variant="outline" className="border-slate-300 text-slate-700">
-              {bikes.length} listings
+              {displayedUsedVehicleTotal} listings
             </Badge>
           </div>
 
@@ -1581,7 +1818,7 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                         <CommandItem onSelect={() => setBrandFilter("All")} className="text-xs uppercase font-bold">
                           All Brands
                         </CommandItem>
-                        {Array.from(new Set(bikes.map(b => b.brand))).sort().map(brand => (
+                        {usedVehicleBrands.map(brand => (
                           <CommandItem key={brand} onSelect={() => setBrandFilter(brand)} className="text-xs">
                             {brand}
                           </CommandItem>
@@ -1879,14 +2116,26 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                     User Listed
                   </h3>
                   <Badge variant="outline" className="border-slate-300 text-slate-700">
-                    {userListed.length} listings
+                    {displayedUserListedCount} listings
                   </Badge>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {userListed.map((bike) => (
-                    <BikeCard key={bike.slug} bike={bike} />
-                  ))}
+                  {hasDynamicUserListings
+                    ? filteredUsedVehicleListings.map((vehicle) => (
+                        <UsedVehicleListingCard key={vehicle.id} vehicle={vehicle} />
+                      ))
+                    : userListed.map((bike) => <BikeCard key={bike.slug} bike={bike} />)}
                 </div>
+                {hasDynamicUserListings && !isLoadingVehicles && filteredUsedVehicleListings.length === 0 ? (
+                  <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                    No user-listed vehicles match the current filters.
+                  </div>
+                ) : null}
+                {isLoadingVehicles ? (
+                  <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                    Loading user-listed vehicles...
+                  </div>
+                ) : null}
               </section>
             </div>
           </div>
