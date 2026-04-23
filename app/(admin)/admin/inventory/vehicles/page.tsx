@@ -53,6 +53,11 @@ export default async function VehiclesPage() {
                         Valid until {formatUsedVehicleDate(registration.registrationValidityPeriod)}
                       </div>
                     ) : null}
+                    {registration.purchaseDate ? (
+                      <div className="text-xs text-slate-400">
+                        Purchased on {formatUsedVehicleDate(registration.purchaseDate)}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="px-6 py-4">{v.inspection?.status ?? 'Not inspected'}</td>
                   <td className="px-6 py-4">{v.createdAt ? new Date(v.createdAt).toLocaleString() : '—'}</td>

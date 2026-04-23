@@ -497,6 +497,7 @@ function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListi
   const hasImage = vehicle.images.length > 0;
   const priceLabel = formatBdt(vehicle.askingPrice || vehicle.priceBdt);
   const registrationValidityLabel = formatUsedVehicleDate(vehicle.registrationValidityPeriod);
+  const purchaseDateLabel = formatUsedVehicleDate(vehicle.purchaseDate);
 
   return (
     <Card className="overflow-hidden border-slate-200 bg-white/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -586,6 +587,11 @@ function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListi
             {registrationValidityLabel ? (
               <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
                 Valid until {registrationValidityLabel}
+              </Badge>
+            ) : null}
+            {purchaseDateLabel ? (
+              <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                Purchased {purchaseDateLabel}
               </Badge>
             ) : null}
           </div>

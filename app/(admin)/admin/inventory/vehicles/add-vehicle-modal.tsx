@@ -364,9 +364,13 @@ function VehicleForm({
   const [powertrain, setPowertrain] = useState<'ICE' | 'EV'>('ICE');
   const [registrationStatus, setRegistrationStatus] = useState<'Registered' | 'On Test'>('Registered');
   const [registrationValidityDate, setRegistrationValidityDate] = useState<Date | undefined>(undefined);
+  const [purchaseDate, setPurchaseDate] = useState<Date | undefined>(undefined);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [selectedCatalogSlug, setSelectedCatalogSlug] = useState('');
+  const currentYear = new Date().getFullYear();
+  const calendarStartMonth = new Date(currentYear - 10, 0, 1);
+  const calendarEndMonth = new Date(currentYear + 10, 11, 31);
 
   function addImageUrl() {
     const trimmed = newImageUrl.trim();
@@ -560,12 +564,42 @@ function VehicleForm({
                     selected={registrationValidityDate}
                     onSelect={setRegistrationValidityDate}
                     captionLayout="dropdown"
+                    startMonth={calendarStartMonth}
+                    endMonth={calendarEndMonth}
                   />
                 </PopoverContent>
               </Popover>
             </Field>
           </>
         ) : null}
+        <Field label="Purchase Date">
+          <input type="hidden" name="purchaseDate" value={purchaseDate ? format(purchaseDate, 'yyyy-MM-dd') : ''} />
+          <Popover>
+            <PopoverTrigger>
+              <div
+                role="button"
+                className={cn(
+                  buttonVariants({ variant: 'outline' }),
+                  'w-full justify-between rounded-lg border-slate-300 bg-white px-3 py-2 text-sm font-normal hover:bg-white',
+                  !purchaseDate && 'text-slate-500'
+                )}
+              >
+                {purchaseDate ? format(purchaseDate, 'PPP') : 'Select purchase date'}
+                <CalendarIcon className="h-4 w-4 text-slate-500" />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={purchaseDate}
+                onSelect={setPurchaseDate}
+                captionLayout="dropdown"
+                startMonth={calendarStartMonth}
+                endMonth={calendarEndMonth}
+              />
+            </PopoverContent>
+          </Popover>
+        </Field>
         <Field label="Seller Notes" span={3}>
           <textarea
             name="description"

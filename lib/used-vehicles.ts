@@ -22,6 +22,7 @@ export type UsedVehicleFrontendListing = {
   registrationStatus: RegistrationStatus;
   registrationNumber: string | null;
   registrationValidityPeriod: string | null;
+  purchaseDate: string | null;
   createdAt: string;
 };
 
@@ -49,6 +50,7 @@ type UsedVehicleRecord = {
 const registrationStatusPrefix = 'Registration Status:';
 const registrationNumberPrefix = 'Registration Number:';
 const registrationValidityPrefix = 'Registration Validity:';
+const purchaseDatePrefix = 'Purchase Date:';
 
 function normalizeCategory(category: string | null | undefined): Bike['category'] {
   if (category === 'Sport' || category === 'Adventure' || category === 'Scooter' || category === 'Commuter') {
@@ -92,6 +94,7 @@ export function extractUsedVehicleRegistration(summary: string | null | undefine
   let registrationStatus: RegistrationStatus = 'On Test';
   let registrationNumber: string | null = null;
   let registrationValidityPeriod: string | null = null;
+  let purchaseDate: string | null = null;
   const remainingSummaryParts: string[] = [];
 
   for (const part of parts) {
@@ -107,6 +110,11 @@ export function extractUsedVehicleRegistration(summary: string | null | undefine
 
     if (part.startsWith(registrationValidityPrefix)) {
       registrationValidityPeriod = part.slice(registrationValidityPrefix.length).trim() || null;
+      continue;
+    }
+
+    if (part.startsWith(purchaseDatePrefix)) {
+      purchaseDate = part.slice(purchaseDatePrefix.length).trim() || null;
       continue;
     }
 
@@ -130,6 +138,7 @@ export function extractUsedVehicleRegistration(summary: string | null | undefine
     registrationStatus,
     registrationNumber,
     registrationValidityPeriod,
+    purchaseDate,
     listingSummary: remainingSummaryParts.join(' | '),
   };
 }
@@ -182,6 +191,7 @@ export function serializeUsedVehicle(record: UsedVehicleRecord): UsedVehicleFron
     registrationStatus: registration.registrationStatus,
     registrationNumber: registration.registrationNumber,
     registrationValidityPeriod: registration.registrationValidityPeriod,
+    purchaseDate: registration.purchaseDate,
     createdAt:
       record.createdAt instanceof Date ? record.createdAt.toISOString() : new Date(record.createdAt).toISOString(),
   };

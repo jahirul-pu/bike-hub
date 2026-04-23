@@ -23,6 +23,7 @@ const VehicleInputSchema = z.object({
   registrationStatus: z.enum(['Registered', 'On Test']).optional(),
   registrationNumber: z.string().optional(),
   registrationValidityPeriod: z.string().optional(),
+  purchaseDate: z.string().optional(),
   images: z.string().optional(),
   displacementCc: optionalNumber,
   engineDisplacement: optionalNumber,
@@ -105,6 +106,7 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
     const registrationStatus = parsed.registrationStatus || 'On Test';
     const registrationNumber = parsed.registrationNumber?.trim();
     const registrationValidityPeriod = parsed.registrationValidityPeriod?.trim();
+    const purchaseDate = parsed.purchaseDate?.trim();
 
     if (!brandName) {
       return { success: false, error: 'Brand or make is required.' };
@@ -125,6 +127,7 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
       `Registration Status: ${registrationStatus}`,
       registrationNumber ? `Registration Number: ${registrationNumber}` : null,
       registrationValidityPeriod ? `Registration Validity: ${registrationValidityPeriod}` : null,
+      purchaseDate ? `Purchase Date: ${purchaseDate}` : null,
     ]
       .filter((value): value is string => Boolean(value))
       .join(' | ');
