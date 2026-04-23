@@ -1,42 +1,27 @@
 import Link from "next/link";
-import { Bike, ShoppingBag, ShoppingCart, Tags } from "lucide-react";
+import { CarFront, Package } from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const adminSections = [
+const marketplaceSections = [
   {
-    title: "Bike Catalog",
-    description: "Edit the models and specs that power the public /bikes frontend pages.",
-    href: "/admin/inventory/bikes",
-    icon: Bike,
-    tone: "from-sky-500/15 to-blue-500/10 border-sky-200/70",
+    title: "Parts Inventory",
+    description: "Manage spare parts, accessories, and additives powering the public marketplace.",
+    href: "/admin/marketplace/parts",
+    icon: Package,
+    tone: "from-blue-500/15 to-cyan-500/10 border-blue-200/70",
   },
   {
-    title: "Marketplace",
-    description: "Manage parts inventory and used vehicle submissions from one admin section.",
-    href: "/admin/marketplace",
-    icon: ShoppingBag,
-    tone: "from-emerald-500/15 to-cyan-500/10 border-emerald-200/70",
-  },
-  {
-    title: "Brands",
-    description: "Manage supported manufacturers and powertrain coverage.",
-    href: "/admin/brands",
-    icon: Tags,
-    tone: "from-amber-500/15 to-orange-500/10 border-amber-200/70",
-  },
-  {
-    title: "Orders",
-    description: "Check order operations and prepare the next admin workflow.",
-    href: "/admin/orders",
-    icon: ShoppingCart,
-    tone: "from-slate-500/15 to-slate-400/10 border-slate-200/80",
+    title: "Used Vehicles",
+    description: "Review used vehicle submissions and handle marketplace certification approvals.",
+    href: "/admin/marketplace/used-vehicles",
+    icon: CarFront,
+    tone: "from-emerald-500/15 to-teal-500/10 border-emerald-200/70",
   },
 ];
 
-export default async function AdminDashboardPage() {
-  const [brandCount, partCount, vehicleCount, pendingVehicleCount] = await Promise.all([
-    db.brand.count(),
+export default async function MarketplaceAdminPage() {
+  const [partCount, vehicleCount, pendingVehicleCount] = await Promise.all([
     db.part.count(),
     db.vehicle.count(),
     db.vehicle.count({
@@ -46,22 +31,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8 p-8">
-      <header className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Admin</p>
-        <h1 className="font-heading text-4xl uppercase tracking-wide text-slate-900">Operations Dashboard</h1>
-        <p className="max-w-3xl text-sm text-slate-600">
-          The `/admin` route now has its own landing page. Use it as the entry point for catalog,
-          marketplace, brands, and order operations.
-        </p>
-      </header>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="border-slate-200 bg-white/90">
-          <CardHeader className="pb-2">
-            <CardDescription>Registered Brands</CardDescription>
-            <CardTitle className="text-3xl text-slate-900">{brandCount}</CardTitle>
-          </CardHeader>
-        </Card>
+      <section className="grid gap-4 md:grid-cols-3">
         <Card className="border-slate-200 bg-white/90">
           <CardHeader className="pb-2">
             <CardDescription>Tracked Parts</CardDescription>
@@ -70,20 +40,20 @@ export default async function AdminDashboardPage() {
         </Card>
         <Card className="border-slate-200 bg-white/90">
           <CardHeader className="pb-2">
-            <CardDescription>Total Vehicles</CardDescription>
+            <CardDescription>Used Vehicles</CardDescription>
             <CardTitle className="text-3xl text-slate-900">{vehicleCount}</CardTitle>
           </CardHeader>
         </Card>
         <Card className="border-slate-200 bg-white/90">
           <CardHeader className="pb-2">
-            <CardDescription>Pending Certification</CardDescription>
+            <CardDescription>Pending Vehicle Review</CardDescription>
             <CardTitle className="text-3xl text-slate-900">{pendingVehicleCount}</CardTitle>
           </CardHeader>
         </Card>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {adminSections.map((section) => {
+      <section className="grid gap-4 lg:grid-cols-2">
+        {marketplaceSections.map((section) => {
           const Icon = section.icon;
 
           return (

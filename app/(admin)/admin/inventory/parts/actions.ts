@@ -39,6 +39,7 @@ export async function createPart(data: z.infer<typeof PartSchema>) {
     });
 
     revalidatePath("/admin/inventory/parts");
+    revalidatePath("/admin/marketplace/parts");
     revalidatePath("/marketplace");
     return { success: true };
   } catch (error: any) {
@@ -77,6 +78,7 @@ export async function updatePart(id: string, data: z.infer<typeof PartSchema>) {
     });
 
     revalidatePath("/admin/inventory/parts");
+    revalidatePath("/admin/marketplace/parts");
     revalidatePath("/marketplace");
     return { success: true };
   } catch (error: any) {
@@ -97,6 +99,7 @@ export async function deletePart(id: string) {
   try {
     await db.part.delete({ where: { id } });
     revalidatePath("/admin/inventory/parts");
+    revalidatePath("/admin/marketplace/parts");
     revalidatePath("/marketplace");
     return { success: true };
   } catch (error: any) {
@@ -112,6 +115,7 @@ export async function updatePartStock(id: string, stock: number) {
       data: { stock },
     });
     revalidatePath("/admin/inventory/parts");
+    revalidatePath("/admin/marketplace/parts");
     revalidatePath("/marketplace");
     return { success: true };
   } catch (error: any) {

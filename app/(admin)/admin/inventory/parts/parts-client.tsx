@@ -180,7 +180,7 @@ export function PartsInventoryTable({
       params.set("query", trimmedQuery);
     }
 
-    const nextUrl = params.size > 0 ? `/admin/inventory/parts?${params.toString()}` : "/admin/inventory/parts";
+    const nextUrl = params.size > 0 ? `/admin/marketplace/parts?${params.toString()}` : "/admin/marketplace/parts";
     window.history.replaceState(null, "", nextUrl);
   };
 
@@ -428,7 +428,7 @@ export function PartsInventoryTable({
                       <td className="px-5 py-3.5 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link
-                            href={`/admin/inventory/parts/${part.id}/edit`}
+                            href={`/admin/marketplace/parts/${part.id}/edit`}
                             className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
                           >
                             Edit

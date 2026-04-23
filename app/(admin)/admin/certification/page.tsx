@@ -40,8 +40,8 @@ export default async function CertificationPage() {
                     <p className="text-xs text-slate-500">{vehicle.vin ?? vehicle.chassis ?? "VIN/chassis pending"}</p>
                   </div>
                 </div>
-                <Link href="/admin/inventory/vehicles" className="text-sm font-semibold text-slate-900 underline-offset-4 hover:underline">
-                  Open vehicle hub
+                <Link href="/admin/marketplace/used-vehicles" className="text-sm font-semibold text-slate-900 underline-offset-4 hover:underline">
+                  Open used vehicles
                 </Link>
               </div>
             ))

@@ -54,7 +54,7 @@ export default async function PartsPage({ searchParams }: PartsPageProps) {
           </p>
         </div>
         <Link
-          href="/admin/inventory/parts/new"
+          href="/admin/marketplace/parts/new"
           className="bg-slate-900 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition-colors font-bold text-sm shadow-lg shadow-slate-900/10"
         >
           <Plus size={18} /> Add New Part

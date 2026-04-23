@@ -133,13 +133,13 @@ export default function EditPartForm({ part }: { part: PartData }) {
       return;
     }
 
-    router.push("/admin/inventory/parts");
+    router.push("/admin/marketplace/parts");
   }
 
   return (
     <div className="p-8 max-w-4xl mx-auto pb-24">
       <div className="mb-6 flex items-center gap-4">
-        <Link href="/admin/inventory/parts" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors">
+        <Link href="/admin/marketplace/parts" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors">
           <ArrowLeft size={20} />
         </Link>
         <div>
@@ -369,7 +369,7 @@ export default function EditPartForm({ part }: { part: PartData }) {
             Bike Compatibility Engine
           </h3>
           <p className="text-xs text-slate-400 mb-5 pl-5">
-            This powers the "Find the right part for YOUR bike" feature on the marketplace.
+            This powers the &quot;Find the right part for YOUR bike&quot; feature on the marketplace.
           </p>
 
           <div className="mb-5">
@@ -537,7 +537,7 @@ export default function EditPartForm({ part }: { part: PartData }) {
         {/* Footer */}
         <div className="flex justify-end gap-3 pt-2">
           <Link
-            href="/admin/inventory/parts"
+            href="/admin/marketplace/parts"
             className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm transition-colors"
           >
             Cancel

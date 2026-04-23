@@ -1,5 +1,4 @@
 import { db } from '@/lib/db';
-import { Plus } from 'lucide-react';
 import * as React from 'react';
 import { AddVehicleModal } from './add-vehicle-modal';
 
@@ -14,8 +13,8 @@ export default async function VehiclesPage() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-2xl font-bold">Pending Vehicle Certifications</h2>
-          <p className="text-slate-500">Vehicles awaiting certification approval</p>
+          <h2 className="text-2xl font-bold">Used Vehicles</h2>
+          <p className="text-slate-500">Marketplace vehicles awaiting certification approval</p>
         </div>
         <AddVehicleModal />
       </div>

@@ -93,6 +93,7 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
     });
 
     revalidatePath('/admin/inventory/vehicles');
+    revalidatePath('/admin/marketplace/used-vehicles');
     revalidatePath('/admin');
     revalidatePath('/');
 
