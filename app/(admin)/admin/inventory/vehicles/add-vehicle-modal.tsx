@@ -2,9 +2,13 @@
 
 import * as React from 'react';
 import { useId, useRef, useState } from 'react';
-import { ExternalLink, ImagePlus, Plus, X } from 'lucide-react';
+import { format } from 'date-fns';
+import { CalendarIcon, ExternalLink, ImagePlus, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { bikes, type Bike } from '@/lib/bikes-data';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createVehicle } from './actions';
 
 function Field({
@@ -28,7 +33,7 @@ function Field({
 
   return (
     <div className={`space-y-1 ${spanClass}`}>
-      <label className="text-xs font-semibold uppercase text-slate-500">{label}</label>
+      <label className="block text-xs font-semibold uppercase text-slate-500">{label}</label>
       {children}
     </div>
   );
@@ -358,6 +363,7 @@ function VehicleForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [powertrain, setPowertrain] = useState<'ICE' | 'EV'>('ICE');
   const [registrationStatus, setRegistrationStatus] = useState<'Registered' | 'On Test'>('Registered');
+  const [registrationValidityDate, setRegistrationValidityDate] = useState<Date | undefined>(undefined);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [selectedCatalogSlug, setSelectedCatalogSlug] = useState('');
@@ -517,10 +523,46 @@ function VehicleForm({
         {registrationStatus === 'Registered' ? (
           <>
             <Field label="Registration Number">
-              <input required name="registrationNumber" placeholder="e.g. DHAKA METRO-XX-1234" className={inputClass} />
+              <input
+                required
+                name="registrationNumber"
+                placeholder="e.g. DHAKA METRO-XX-XX-XXXX"
+                autoCapitalize="characters"
+                onInput={(event) => {
+                  event.currentTarget.value = event.currentTarget.value.toUpperCase();
+                }}
+                className={`${inputClass} uppercase`}
+              />
             </Field>
             <Field label="Validity Period">
-              <input required name="registrationValidityPeriod" placeholder="e.g. Valid until Dec 2027" className={inputClass} />
+              <input
+                type="hidden"
+                name="registrationValidityPeriod"
+                value={registrationValidityDate ? format(registrationValidityDate, 'yyyy-MM-dd') : ''}
+              />
+              <Popover>
+                <PopoverTrigger>
+                  <div
+                    role="button"
+                    className={cn(
+                      buttonVariants({ variant: 'outline' }),
+                      'w-full justify-between rounded-lg border-slate-300 bg-white px-3 py-2 text-sm font-normal hover:bg-white',
+                      !registrationValidityDate && 'text-slate-500'
+                    )}
+                  >
+                    {registrationValidityDate ? format(registrationValidityDate, 'PPP') : 'Select validity date'}
+                    <CalendarIcon className="h-4 w-4 text-slate-500" />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={registrationValidityDate}
+                    onSelect={setRegistrationValidityDate}
+                    captionLayout="dropdown"
+                  />
+                </PopoverContent>
+              </Popover>
             </Field>
           </>
         ) : null}
