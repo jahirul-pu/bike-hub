@@ -82,11 +82,26 @@ function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 }
 
+function summarizeInspection(input: Record<string, unknown>) {
+  const inspectionEntries = Object.entries(input).filter(([key]) => key.startsWith('inspection__'));
+  const passedCount = inspectionEntries.filter(([, value]) => value === 'pass').length;
+  const totalCount = inspectionEntries.length;
+
+  return {
+    passedCount,
+    totalCount,
+    statusLabel:
+      totalCount > 0 ? `Processing (${passedCount}/${totalCount} checks passed)` : 'Processing',
+  };
+}
+
 export async function createVehicle(input: FormData | Record<string, unknown>) {
   try {
-    const parsed = VehicleInputSchema.parse(normalizeInput(input));
+    const normalizedInput = normalizeInput(input);
+    const parsed = VehicleInputSchema.parse(normalizedInput);
     const brandName = parsed.brand || parsed.make;
     const chassis = parsed.chassis || parsed.vin;
+    const inspectionSummary = summarizeInspection(normalizedInput);
 
     if (!brandName || !chassis) {
       return { success: false, error: 'Brand/make and chassis/VIN are required.' };
@@ -169,7 +184,7 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
         certificationStatus: 'PENDING_APPROVAL',
         inspection: {
           create: {
-            status: 'Processing',
+            status: inspectionSummary.statusLabel,
           },
         },
       },

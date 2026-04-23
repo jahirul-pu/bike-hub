@@ -73,7 +73,124 @@ function YesNoSelect({ name }: { name: string }) {
   );
 }
 
+function PassFailSelect({ name }: { name: string }) {
+  return (
+    <select name={name} defaultValue="pass" className={inputClass}>
+      <option value="pass">Pass</option>
+      <option value="fail">Fail</option>
+    </select>
+  );
+}
+
 type AutofillBike = Bike & Partial<Record<'batteryType' | 'voltageV' | 'ampHours' | 'peakPowerKw', string | number>>;
+
+const inspectionSections = [
+  {
+    title: 'Engine & Transmission',
+    color: 'rose' as const,
+    points: [
+      'Cold start (no struggle)',
+      'Idle stability',
+      'Engine noise (no knocking)',
+      'Acceleration smoothness',
+      'Gear shifting smooth',
+      'Clutch response',
+      'No excessive vibration',
+      'No oil leakage',
+      'Exhaust smoke normal',
+      'Engine heat normal',
+    ],
+  },
+  {
+    title: 'Frame & Structure',
+    color: 'amber' as const,
+    points: [
+      'Frame alignment',
+      'No visible bends',
+      'No major rust',
+      'No weld damage',
+      'Swingarm condition',
+      'Crash signs absent',
+    ],
+  },
+  {
+    title: 'Suspension & Steering',
+    color: 'cyan' as const,
+    points: [
+      'Front fork leakage',
+      'Front suspension smooth',
+      'Rear suspension condition',
+      'Steering alignment',
+      'Handle straight',
+      'No unusual play',
+    ],
+  },
+  {
+    title: 'Brakes',
+    color: 'rose' as const,
+    points: [
+      'Front brake response',
+      'Rear brake response',
+      'Brake pads condition',
+      'Disc condition',
+      'No brake noise',
+      'Brake fluid level OK',
+    ],
+  },
+  {
+    title: 'Electrical System',
+    color: 'indigo' as const,
+    points: [
+      'Battery health',
+      'Self-start works',
+      'Headlight working',
+      'Indicators working',
+      'Brake light working',
+      'Horn working',
+    ],
+  },
+  {
+    title: 'Wheels & Tires',
+    color: 'teal' as const,
+    points: [
+      'Tire tread depth',
+      'Tire condition (no cracks)',
+      'Rim condition',
+      'Wheel alignment',
+      'Wheel bearing smooth',
+    ],
+  },
+  {
+    title: 'Body & Cosmetics',
+    color: 'orange' as const,
+    points: [
+      'Fuel tank condition',
+      'Fairings condition',
+      'Paint quality',
+      'Seat condition',
+      'No major scratches/dents',
+    ],
+  },
+  {
+    title: 'Documents & Legal',
+    color: 'purple' as const,
+    points: [
+      'Registration valid',
+      'Engine number match',
+      'Chassis number match',
+      'Tax updated',
+      'Insurance valid',
+      'Service history available',
+    ],
+  },
+];
+
+function inspectionFieldName(sectionTitle: string, point: string) {
+  return `inspection__${sectionTitle}__${point}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/(^_|_$)+/g, '');
+}
 
 function setNamedFieldValue(form: HTMLFormElement | null, name: string, value: string | number | undefined | null) {
   if (!form) {
@@ -705,6 +822,40 @@ function VehicleForm({
           <p className="text-xs text-slate-500">
             Add image URLs (local paths like <code>/bikes/image.webp</code> or external URLs). First image is used as the card thumbnail.
           </p>
+        </div>
+
+        <SectionHeader title="14. BikeHub 50-Point Inspection" color="teal" />
+
+        <div className="space-y-6 md:col-span-3">
+          <p className="text-sm text-slate-500">
+            Each checkpoint counts as 1 point. Pass = 1, Fail = 0.
+          </p>
+
+          {inspectionSections.map((section) => (
+            <div key={section.title} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <div className="mb-4 flex items-center gap-2">
+                <div className="h-3 w-1.5 rounded-full bg-slate-900" />
+                <h4 className="text-sm font-bold uppercase tracking-wide text-slate-900">
+                  {section.title}
+                </h4>
+                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-500">
+                  {section.points.length} points
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {section.points.map((point) => (
+                  <div
+                    key={`${section.title}-${point}`}
+                    className="rounded-lg border border-slate-200 bg-white p-3"
+                  >
+                    <div className="mb-2 text-sm font-medium text-slate-800">{point}</div>
+                    <PassFailSelect name={inspectionFieldName(section.title, point)} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
