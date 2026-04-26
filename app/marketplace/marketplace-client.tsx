@@ -282,7 +282,7 @@ function SmartPartCard({
   return (
     <Card
       className={cn(
-        "group relative overflow-hidden border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl",
+        "group @container/product-card relative overflow-hidden border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl",
         isExactFit
           ? "border-emerald-300 bg-gradient-to-br from-emerald-50/90 via-white to-white shadow-emerald-100/60"
           : isUniversal
@@ -336,24 +336,24 @@ function SmartPartCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0">
-        <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-4">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Price</p>
+      <CardContent className="mt-auto space-y-4 pt-0">
+        <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-4 @min-[320px]/product-card:flex-row @min-[320px]/product-card:items-end @min-[320px]/product-card:justify-between">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Price</p>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
               <p className="whitespace-nowrap text-2xl font-black leading-none text-slate-900">{priceLabel}</p>
+              <span
+                className={cn(
+                  "inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap",
+                  stockMeta.stockClassName
+                )}
+              >
+                <Package className="mr-1.5 h-3.5 w-3.5" />
+                {stockMeta.stockLabel}
+              </span>
             </div>
-            <span
-              className={cn(
-                "inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap",
-                stockMeta.stockClassName
-              )}
-            >
-              <Package className="mr-1.5 h-3.5 w-3.5" />
-              {stockMeta.stockLabel}
-            </span>
           </div>
-          <div className="grid w-full grid-cols-2 gap-2">
+          <div className="grid w-full grid-cols-2 gap-2 @min-[320px]/product-card:w-[144px] @min-[320px]/product-card:grid-cols-1">
             <button
               type="button"
               onClick={() => onAddToCart(part)}
