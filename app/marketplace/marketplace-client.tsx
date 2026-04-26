@@ -368,10 +368,12 @@ function SmartPartCard({
                 </span>
               ) : null}
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+                <Package className="h-3.5 w-3.5 text-slate-400" />
+                <span className="font-semibold">{part.category}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 <Target className="h-3.5 w-3.5 text-slate-400" />
-                <span>
-                  <span className="font-semibold">Category:</span> {part.subcategory}
-                </span>
+                <span>{part.subcategory}</span>
               </span>
             </div>
           </div>
