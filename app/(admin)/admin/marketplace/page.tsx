@@ -13,7 +13,7 @@ const marketplaceSections = [
   },
   {
     title: "Used Vehicles",
-    description: "Review used vehicle submissions and handle marketplace certification approvals.",
+    description: "Manage used vehicle listings and control promoted / certified sections.",
     href: "/admin/marketplace/used-vehicles",
     icon: CarFront,
     tone: "from-emerald-500/15 to-teal-500/10 border-emerald-200/70",
@@ -21,17 +21,20 @@ const marketplaceSections = [
 ];
 
 export default async function MarketplaceAdminPage() {
-  const [partCount, vehicleCount, pendingVehicleCount] = await Promise.all([
+  const [partCount, vehicleCount, certifiedCount, promotedCount] = await Promise.all([
     db.part.count(),
     db.vehicle.count(),
     db.vehicle.count({
-      where: { certificationStatus: "PENDING_APPROVAL" },
+      where: { certificationStatus: "CERTIFIED" },
+    }),
+    db.vehicle.count({
+      where: { certificationStatus: "PROMOTED" },
     }),
   ]);
 
   return (
     <div className="space-y-8 p-8">
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="border-slate-200 bg-white/90">
           <CardHeader className="pb-2">
             <CardDescription>Tracked Parts</CardDescription>
@@ -46,8 +49,14 @@ export default async function MarketplaceAdminPage() {
         </Card>
         <Card className="border-slate-200 bg-white/90">
           <CardHeader className="pb-2">
-            <CardDescription>Pending Vehicle Review</CardDescription>
-            <CardTitle className="text-3xl text-slate-900">{pendingVehicleCount}</CardTitle>
+            <CardDescription>Certified</CardDescription>
+            <CardTitle className="text-3xl text-emerald-700">{certifiedCount}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="border-slate-200 bg-white/90">
+          <CardHeader className="pb-2">
+            <CardDescription>Promoted</CardDescription>
+            <CardTitle className="text-3xl text-amber-700">{promotedCount}</CardTitle>
           </CardHeader>
         </Card>
       </section>

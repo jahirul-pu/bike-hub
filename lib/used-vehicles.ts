@@ -16,6 +16,7 @@ export type UsedVehicleFrontendListing = {
   topSpeedKph: number;
   mileageKmpl: number | null;
   rangeKm: number | null;
+  odometerKm: number | null;
   images: string[];
   summary: string;
   inspectionStatus: string | null;
@@ -24,6 +25,7 @@ export type UsedVehicleFrontendListing = {
   registrationValidityPeriod: string | null;
   purchaseDate: string | null;
   createdAt: string;
+  certificationStatus: string;
 };
 
 type UsedVehicleRecord = {
@@ -45,12 +47,14 @@ type UsedVehicleRecord = {
   createdAt: Date | string;
   brand?: { name: string | null } | null;
   inspection?: { status: string | null } | null;
+  certificationStatus?: string | null;
 };
 
 const registrationStatusPrefix = 'Registration Status:';
 const registrationNumberPrefix = 'Registration Number:';
 const registrationValidityPrefix = 'Registration Validity:';
 const purchaseDatePrefix = 'Purchase Date:';
+const odometerPrefix = 'Odometer:';
 
 function normalizeCategory(category: string | null | undefined): Bike['category'] {
   if (category === 'Sport' || category === 'Adventure' || category === 'Scooter' || category === 'Commuter') {
@@ -95,6 +99,7 @@ export function extractUsedVehicleRegistration(summary: string | null | undefine
   let registrationNumber: string | null = null;
   let registrationValidityPeriod: string | null = null;
   let purchaseDate: string | null = null;
+  let odometerKm: number | null = null;
   const remainingSummaryParts: string[] = [];
 
   for (const part of parts) {
@@ -115,6 +120,19 @@ export function extractUsedVehicleRegistration(summary: string | null | undefine
 
     if (part.startsWith(purchaseDatePrefix)) {
       purchaseDate = part.slice(purchaseDatePrefix.length).trim() || null;
+      continue;
+    }
+
+    if (part.startsWith(odometerPrefix)) {
+      const value = Number(part.slice(odometerPrefix.length).replace(/[^0-9.]/g, ''));
+      odometerKm = Number.isFinite(value) ? value : null;
+      continue;
+    }
+
+    const legacyOdometerMatch = /^(?:Odometer Reading|Used|Kilometers Used):\s*([\d,.]+)\s*km$/i.exec(part);
+    if (legacyOdometerMatch) {
+      const value = Number(legacyOdometerMatch[1]?.replace(/,/g, ''));
+      odometerKm = Number.isFinite(value) ? value : null;
       continue;
     }
 
@@ -139,6 +157,7 @@ export function extractUsedVehicleRegistration(summary: string | null | undefine
     registrationNumber,
     registrationValidityPeriod,
     purchaseDate,
+    odometerKm,
     listingSummary: remainingSummaryParts.join(' | '),
   };
 }
@@ -185,6 +204,7 @@ export function serializeUsedVehicle(record: UsedVehicleRecord): UsedVehicleFron
     topSpeedKph: record.topSpeedKph ?? 0,
     mileageKmpl: record.mileageKmpl ?? null,
     rangeKm: record.rangeKm ?? null,
+    odometerKm: registration.odometerKm,
     images: parseUsedVehicleImages(record.images),
     summary: registration.listingSummary || 'BikeHub marketplace user listing.',
     inspectionStatus: record.inspection?.status ?? null,
@@ -194,5 +214,6 @@ export function serializeUsedVehicle(record: UsedVehicleRecord): UsedVehicleFron
     purchaseDate: registration.purchaseDate,
     createdAt:
       record.createdAt instanceof Date ? record.createdAt.toISOString() : new Date(record.createdAt).toISOString(),
+    certificationStatus: record.certificationStatus ?? 'APPROVED',
   };
 }

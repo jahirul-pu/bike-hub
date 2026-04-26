@@ -35,12 +35,15 @@ const adminSections = [
 ];
 
 export default async function AdminDashboardPage() {
-  const [brandCount, partCount, vehicleCount, pendingVehicleCount] = await Promise.all([
+  const [brandCount, partCount, vehicleCount, certifiedCount, promotedCount] = await Promise.all([
     db.brand.count(),
     db.part.count(),
     db.vehicle.count(),
     db.vehicle.count({
-      where: { certificationStatus: "PENDING_APPROVAL" },
+      where: { certificationStatus: "CERTIFIED" },
+    }),
+    db.vehicle.count({
+      where: { certificationStatus: "PROMOTED" },
     }),
   ]);
 
@@ -74,10 +77,16 @@ export default async function AdminDashboardPage() {
             <CardTitle className="text-3xl text-slate-900">{vehicleCount}</CardTitle>
           </CardHeader>
         </Card>
-        <Card className="border-slate-200 bg-white/90">
+        <Card className="border-emerald-200 bg-emerald-50/60">
           <CardHeader className="pb-2">
-            <CardDescription>Pending Certification</CardDescription>
-            <CardTitle className="text-3xl text-slate-900">{pendingVehicleCount}</CardTitle>
+            <CardDescription>Certified Vehicles</CardDescription>
+            <CardTitle className="text-3xl text-emerald-700">{certifiedCount}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="border-amber-200 bg-amber-50/60">
+          <CardHeader className="pb-2">
+            <CardDescription>Promoted Vehicles</CardDescription>
+            <CardTitle className="text-3xl text-amber-700">{promotedCount}</CardTitle>
           </CardHeader>
         </Card>
       </section>

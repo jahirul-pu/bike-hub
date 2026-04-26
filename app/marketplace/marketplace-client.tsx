@@ -4,14 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BatteryCharging, Bike as BikeIcon, Building2, Cable, CheckCircle2, ChevronDown, ChevronUp, CircleDot, Disc3, Droplets, Fuel, Gauge, Lightbulb, Luggage, Map, Megaphone, Package, PlugZap, Search, Shield, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, Smartphone, Sparkles, User, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
+import { ArrowRight, BatteryCharging, Bike as BikeIcon, Building2, Cable, CheckCircle2, ChevronDown, ChevronUp, CircleDot, Disc3, Droplets, Fuel, Gauge, Lightbulb, Luggage, Map, Megaphone, Package, PlugZap, Route, Search, Shield, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, Smartphone, Sparkles, User, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { BikeCard } from "@/components/site/bike-card";
+
 import { bikes, Bike, formatBdt, powertrainBadgeClass } from "@/lib/bikes-data";
 import { formatUsedVehicleDate, type UsedVehicleFrontendListing } from "@/lib/used-vehicles";
 import { useCartStore } from "@/store/useCartStore";
@@ -38,8 +38,6 @@ type SparePartListing = {
   deliveryWindow?: string;
 };
 
-const certifiedSlugs = new Set(["yamaha-r15-v4", "suzuki-vstrom-250", "ultraviolette-f77"]);
-const promotedSlugs = new Set(["honda-cb350rs", "ather-450x-gen3", "revolt-rv400-brz"]);
 const sparePartsSortFields: Array<{ value: SparePartsSortField; label: string }> = [
   { value: "price", label: "Price" },
   { value: "rating", label: "Rating" },
@@ -392,6 +390,14 @@ function usedVehicleHeadlineMetric(vehicle: UsedVehicleFrontendListing): string 
   return vehicle.displacementCc ? `${vehicle.displacementCc} cc` : "ICE";
 }
 
+function usedVehicleOdometerLabel(vehicle: UsedVehicleFrontendListing): string {
+  if (typeof vehicle.odometerKm !== "number" || !Number.isFinite(vehicle.odometerKm)) {
+    return "Not listed";
+  }
+
+  return `${new Intl.NumberFormat("en-BD").format(vehicle.odometerKm)} km`;
+}
+
 function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListing }) {
   const catalogBike = bikes.find(
     (bike) =>
@@ -464,14 +470,10 @@ function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListi
             </p>
           </div>
           <div className="rounded-lg bg-slate-100 p-2">
-            <p className="text-xs uppercase tracking-wide text-slate-500">
-              {vehicle.powertrain === "ICE" ? "Mileage" : "Range"}
-            </p>
+            <p className="text-xs uppercase tracking-wide text-slate-500">Used</p>
             <p className="flex items-center gap-1 font-semibold text-slate-900">
-              <Sparkles className="h-3.5 w-3.5" />
-              {vehicle.powertrain === "ICE"
-                ? `${vehicle.mileageKmpl ?? 0} km/l`
-                : `${vehicle.rangeKm ?? 0} km`}
+              <Route className="h-3.5 w-3.5" />
+              {usedVehicleOdometerLabel(vehicle)}
             </p>
           </div>
         </div>
@@ -931,55 +933,6 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
     spareSortField,
   ]);
 
-  const filteredBikes = useMemo(() => {
-    return bikes.filter((bike) => {
-      if (powertrainFilter !== "All" && bike.powertrain !== powertrainFilter) return false;
-      if (typeFilter !== "All") {
-        const isScooter = bike.category === "Scooter";
-        if (typeFilter === "Motorcycle" && isScooter) return false;
-        if (typeFilter === "Scooter" && !isScooter) return false;
-      }
-      if (bike.priceBdt < priceRange[0] || bike.priceBdt > priceRange[1]) return false;
-      if (metricFilter !== "All") {
-        if (bike.powertrain === "ICE") {
-          const cc = bike.displacementCc ?? 0;
-          if (metricFilter === "100-125" && (cc < 100 || cc > 125)) return false;
-          if (metricFilter === "126-150" && (cc < 126 || cc > 150)) return false;
-          if (metricFilter === "151-200" && (cc < 151 || cc > 200)) return false;
-          if (metricFilter === "201-350" && (cc < 201 || cc > 350)) return false;
-          if (metricFilter === "350+" && cc <= 350) return false;
-        } else {
-          const pwr = bike.motorPowerKw ?? 0;
-          if (metricFilter === "1-2" && (pwr < 1 || pwr > 2)) return false;
-          if (metricFilter === "2-4" && (pwr < 2.1 || pwr > 4)) return false;
-          if (metricFilter === "4+" && pwr <= 4) return false;
-        }
-      }
-      if (efficiencyFilter !== "All") {
-        if (bike.powertrain === "ICE") {
-          const mileage = bike.mileageKmpl ?? 0;
-          if (efficiencyFilter === "40+" && mileage < 40) return false;
-          if (efficiencyFilter === "50+" && mileage < 50) return false;
-          if (efficiencyFilter === "60+" && mileage < 60) return false;
-        } else {
-          const range = bike.rangeKm ?? 0;
-          if (efficiencyFilter === "60" && range < 60) return false;
-          if (efficiencyFilter === "100" && range < 100) return false;
-          if (efficiencyFilter === "150+" && range < 150) return false;
-        }
-      }
-      if (brandFilter !== "All" && bike.brand !== brandFilter) return false;
-      return true;
-    }).sort((a, b) => {
-      if (sortBy === "Price") return a.priceBdt - b.priceBdt;
-      if (sortBy === "Range") {
-        const rangeA = a.powertrain === "EV" ? (a.rangeKm || 0) : (a.mileageKmpl || 0);
-        const rangeB = b.powertrain === "EV" ? (b.rangeKm || 0) : (b.mileageKmpl || 0);
-        return rangeB - rangeA;
-      }
-      return b.topSpeedKph - a.topSpeedKph;
-    });
-  }, [powertrainFilter, typeFilter, priceRange, metricFilter, efficiencyFilter, brandFilter, sortBy]);
 
   const filteredUsedVehicleListings = useMemo(() => {
     return usedVehicleListings
@@ -1040,18 +993,25 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
       });
   }, [brandFilter, efficiencyFilter, metricFilter, powertrainFilter, priceRange, sortBy, typeFilter, usedVehicleListings]);
 
-  const bikeHubCertified = filteredBikes.filter((bike) => certifiedSlugs.has(bike.slug));
-  const promoted = filteredBikes.filter((bike) => promotedSlugs.has(bike.slug) && !certifiedSlugs.has(bike.slug));
-  const userListed = filteredBikes.filter(
-    (bike) => !certifiedSlugs.has(bike.slug) && !promotedSlugs.has(bike.slug)
+  // Build dynamic slug sets from API vehicle certificationStatus
+  const certifiedVehicles = useMemo(() =>
+    filteredUsedVehicleListings.filter((v) => v.certificationStatus === 'CERTIFIED'), [filteredUsedVehicleListings]
   );
-  const hasDynamicUserListings = usedVehicleListings.length > 0;
+  const promotedVehicles = useMemo(() =>
+    filteredUsedVehicleListings.filter((v) => v.certificationStatus === 'PROMOTED'), [filteredUsedVehicleListings]
+  );
+  const userListedVehicles = useMemo(() =>
+    filteredUsedVehicleListings.filter((v) => v.certificationStatus !== 'CERTIFIED' && v.certificationStatus !== 'PROMOTED'), [filteredUsedVehicleListings]
+  );
+
   const usedVehicleBrands = useMemo(
     () => Array.from(new Set([...bikes.map((bike) => bike.brand), ...usedVehicleListings.map((vehicle) => vehicle.brand)])).sort(),
     [usedVehicleListings]
   );
-  const displayedUserListedCount = hasDynamicUserListings ? filteredUsedVehicleListings.length : userListed.length;
-  const displayedUsedVehicleTotal = bikeHubCertified.length + promoted.length + displayedUserListedCount;
+  const displayedUserListedCount = userListedVehicles.length;
+  const displayedCertifiedCount = certifiedVehicles.length;
+  const displayedPromotedCount = promotedVehicles.length;
+  const displayedUsedVehicleTotal = displayedCertifiedCount + displayedPromotedCount + displayedUserListedCount;
 
   const addSparePartToCart = (part: SparePartListing) => {
     addItem({
@@ -1992,13 +1952,16 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                     BikeHub Certified
                   </h3>
                   <Badge variant="outline" className="border-slate-300 text-slate-700">
-                    {bikeHubCertified.length} listings
+                    {displayedCertifiedCount} listings
                   </Badge>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {bikeHubCertified.map((bike) => (
-                    <BikeCard key={bike.slug} bike={bike} />
+                  {certifiedVehicles.map((vehicle) => (
+                    <UsedVehicleListingCard key={vehicle.id} vehicle={vehicle} />
                   ))}
+                  {certifiedVehicles.length === 0 && (
+                    <p className="col-span-full text-sm text-slate-500">No certified vehicles yet.</p>
+                  )}
                 </div>
               </section>
 
@@ -2009,13 +1972,16 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                     Promoted
                   </h3>
                   <Badge variant="outline" className="border-slate-300 text-slate-700">
-                    {promoted.length} listings
+                    {displayedPromotedCount} listings
                   </Badge>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {promoted.map((bike) => (
-                    <BikeCard key={bike.slug} bike={bike} />
+                  {promotedVehicles.map((vehicle) => (
+                    <UsedVehicleListingCard key={vehicle.id} vehicle={vehicle} />
                   ))}
+                  {promotedVehicles.length === 0 && (
+                    <p className="col-span-full text-sm text-slate-500">No promoted vehicles yet.</p>
+                  )}
                 </div>
               </section>
 
@@ -2030,13 +1996,11 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
                   </Badge>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {hasDynamicUserListings
-                    ? filteredUsedVehicleListings.map((vehicle) => (
-                        <UsedVehicleListingCard key={vehicle.id} vehicle={vehicle} />
-                      ))
-                    : userListed.map((bike) => <BikeCard key={bike.slug} bike={bike} />)}
+                  {userListedVehicles.map((vehicle) => (
+                    <UsedVehicleListingCard key={vehicle.id} vehicle={vehicle} />
+                  ))}
                 </div>
-                {hasDynamicUserListings && !isLoadingVehicles && filteredUsedVehicleListings.length === 0 ? (
+                {!isLoadingVehicles && userListedVehicles.length === 0 ? (
                   <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
                     No user-listed vehicles match the current filters.
                   </div>

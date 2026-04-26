@@ -513,6 +513,9 @@ function VehicleForm({
         <Field label="Asking Price (BDT)">
           <input type="number" required name="askingPrice" min="0" step="0.01" className={inputClass} />
         </Field>
+        <Field label="Odometer Reading (km)">
+          <input type="number" required name="odometerKm" min="0" step="1" className={inputClass} />
+        </Field>
         <Field label="Registration Status">
           <select
             name="registrationStatus"

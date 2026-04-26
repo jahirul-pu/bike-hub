@@ -31,6 +31,8 @@ const VehicleInputSchema = z.object({
   peakPowerKw: optionalNumber,
   topSpeedKph: optionalNumber,
   mileageKmpl: optionalNumber,
+  odometerKm: optionalNumber,
+  odometer: optionalNumber,
   rangeKm: optionalNumber,
   maxRangeKm: optionalNumber,
   fuelTankLiters: optionalNumber,
@@ -107,6 +109,7 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
     const registrationNumber = parsed.registrationNumber?.trim();
     const registrationValidityPeriod = parsed.registrationValidityPeriod?.trim();
     const purchaseDate = parsed.purchaseDate?.trim();
+    const odometerKm = parsed.odometerKm ?? parsed.odometer;
 
     if (!brandName) {
       return { success: false, error: 'Brand or make is required.' };
@@ -128,6 +131,7 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
       registrationNumber ? `Registration Number: ${registrationNumber}` : null,
       registrationValidityPeriod ? `Registration Validity: ${registrationValidityPeriod}` : null,
       purchaseDate ? `Purchase Date: ${purchaseDate}` : null,
+      odometerKm != null ? `Odometer: ${odometerKm} km` : null,
     ]
       .filter((value): value is string => Boolean(value))
       .join(' | ');
@@ -202,7 +206,7 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
         vin: null,
         chassis: null,
         askingPrice: parsed.askingPrice ?? 0,
-        certificationStatus: 'PENDING_APPROVAL',
+        certificationStatus: 'APPROVED',
         inspection: {
           create: {
             status: inspectionSummary.statusLabel,
@@ -220,5 +224,168 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
   } catch (error) {
     console.error('Vehicle creation failed:', error);
     return { success: false, error: 'Failed to create vehicle' };
+  }
+}
+
+export async function updateVehicle(id: string, input: FormData | Record<string, unknown>) {
+  try {
+    const normalizedInput = normalizeInput(input);
+    const parsed = VehicleInputSchema.parse(normalizedInput);
+    const brandName = parsed.brand || parsed.make;
+    const inspectionSummary = summarizeInspection(normalizedInput);
+    const registrationStatus = parsed.registrationStatus || 'On Test';
+    const registrationNumber = parsed.registrationNumber?.trim();
+    const registrationValidityPeriod = parsed.registrationValidityPeriod?.trim();
+    const purchaseDate = parsed.purchaseDate?.trim();
+    const odometerKm = parsed.odometerKm ?? parsed.odometer;
+
+    if (!brandName) {
+      return { success: false, error: 'Brand or make is required.' };
+    }
+
+    if (registrationStatus === 'Registered' && (!registrationNumber || !registrationValidityPeriod)) {
+      return {
+        success: false,
+        error: 'Registered vehicles need both a registration number and validity period.',
+      };
+    }
+
+    const powertrain = parsed.powertrain || parsed.powerSource || 'ICE';
+    const registrationSummary = [
+      `Registration Status: ${registrationStatus}`,
+      registrationNumber ? `Registration Number: ${registrationNumber}` : null,
+      registrationValidityPeriod ? `Registration Validity: ${registrationValidityPeriod}` : null,
+      purchaseDate ? `Purchase Date: ${purchaseDate}` : null,
+      odometerKm != null ? `Odometer: ${odometerKm} km` : null,
+    ]
+      .filter((value): value is string => Boolean(value))
+      .join(' | ');
+    const listingSummary = [parsed.summary, parsed.description, registrationSummary]
+      .map((value) => value?.trim())
+      .filter((value): value is string => Boolean(value))
+      .join(' | ');
+
+    await db.vehicle.update({
+      where: { id },
+      data: {
+        brand: {
+          connectOrCreate: {
+            where: { slug: slugify(brandName) },
+            create: {
+              name: brandName,
+              slug: slugify(brandName),
+              powertrain: powertrain === 'EV' ? 'EV' : 'ICE',
+            },
+          },
+        },
+        model: parsed.model,
+        name: parsed.model,
+        category: parsed.category || 'Commuter',
+        powertrain,
+        summary: listingSummary || null,
+        priceBdt: parsed.priceBdt ?? parsed.askingPrice ?? 0,
+        displacementCc: parsed.displacementCc ?? parsed.engineDisplacement ?? null,
+        motorPowerKw: parsed.motorPowerKw ?? null,
+        peakPowerKw: parsed.peakPowerKw ?? null,
+        topSpeedKph: parsed.topSpeedKph ?? null,
+        mileageKmpl: parsed.mileageKmpl ?? null,
+        rangeKm: parsed.rangeKm ?? parsed.maxRangeKm ?? null,
+        fuelTankLiters: parsed.fuelTankLiters ?? null,
+        chargingTime0100: parsed.chargingTime0100 || null,
+        batteryCycleLife: parsed.batteryCycleLife || null,
+        ipRating: parsed.ipRating || null,
+        gearbox: parsed.gearbox || null,
+        torqueNm: parsed.torqueNm ?? null,
+        weightKg: parsed.weightKg ?? null,
+        seatHeightMm: parsed.seatHeightMm ?? null,
+        wheelbaseMm: parsed.wheelbaseMm ?? null,
+        groundClearanceMm: parsed.groundClearanceMm ?? null,
+        frontTyre: parsed.frontTyre || null,
+        rearTyre: parsed.rearTyre || null,
+        images: parsed.images || null,
+        batteryType: parsed.batteryType || null,
+        voltageV: parsed.voltageV ?? null,
+        ampHours: parsed.ampHours ?? null,
+        lengthMm: parsed.lengthMm ?? null,
+        widthMm: parsed.widthMm ?? null,
+        heightMm: parsed.heightMm ?? null,
+        underseatStorage: parsed.underseatStorage || null,
+        frontBrake: parsed.frontBrake || null,
+        rearBrake: parsed.rearBrake || null,
+        absType: parsed.absType || null,
+        frontSuspension: parsed.frontSuspension || null,
+        rearSuspension: parsed.rearSuspension || null,
+        ridingModes: parsed.ridingModes || null,
+        securityFeatures: parsed.securityFeatures || null,
+        appSupport: parsed.appSupport || null,
+        displayType: parsed.displayType || null,
+        headlightType: parsed.headlightType || null,
+        bluetoothConnectivity: parsed.bluetoothConnectivity || null,
+        gpsTracking: parsed.gpsTracking || null,
+        navigation: parsed.navigation || null,
+        keylessStart: parsed.keylessStart || null,
+        usbChargingPort: parsed.usbChargingPort || null,
+        otaUpdates: parsed.otaUpdates || null,
+        tractionControl: parsed.tractionControl || null,
+        cruiseControl: parsed.cruiseControl || null,
+        askingPrice: parsed.askingPrice ?? 0,
+        inspection: {
+          upsert: {
+            create: { status: inspectionSummary.statusLabel },
+            update: { status: inspectionSummary.statusLabel },
+          },
+        },
+      },
+    });
+
+    revalidatePath('/admin/inventory/vehicles');
+    revalidatePath('/admin/marketplace/used-vehicles');
+    revalidatePath('/admin');
+    revalidatePath('/');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Vehicle update failed:', error);
+    return { success: false, error: 'Failed to update vehicle' };
+  }
+}
+
+export async function updateVehicleStatus(
+  id: string,
+  status: 'APPROVED' | 'PROMOTED' | 'CERTIFIED'
+) {
+  try {
+    await db.vehicle.update({
+      where: { id },
+      data: { certificationStatus: status },
+    });
+
+    revalidatePath('/admin/inventory/vehicles');
+    revalidatePath('/admin/marketplace/used-vehicles');
+    revalidatePath('/admin');
+    revalidatePath('/');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Status update failed:', error);
+    return { success: false, error: 'Failed to update vehicle status' };
+  }
+}
+
+export async function deleteVehicle(id: string) {
+  try {
+    // Delete related inspection first
+    await db.inspection.deleteMany({ where: { vehicleId: id } });
+    await db.vehicle.delete({ where: { id } });
+
+    revalidatePath('/admin/inventory/vehicles');
+    revalidatePath('/admin/marketplace/used-vehicles');
+    revalidatePath('/admin');
+    revalidatePath('/');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Vehicle deletion failed:', error);
+    return { success: false, error: 'Failed to delete vehicle' };
   }
 }
