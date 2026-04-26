@@ -4,10 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BatteryCharging, Bike as BikeIcon, Building2, Cable, ChevronDown, ChevronUp, CircleDot, Disc3, Droplets, Fuel, Gauge, Lightbulb, Luggage, Map, Megaphone, Package, PlugZap, Search, Shield, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, Smartphone, Sparkles, User, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
+import { ArrowRight, BatteryCharging, Bike as BikeIcon, Building2, Cable, CheckCircle2, ChevronDown, ChevronUp, CircleDot, Disc3, Droplets, Fuel, Gauge, Lightbulb, Luggage, Map, Megaphone, Package, PlugZap, Search, Shield, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, Smartphone, Sparkles, User, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { buttonVariants } from "@/components/ui/button";
@@ -69,6 +68,22 @@ const categoryIconMap: Record<SparePartCategory, LucideIcon> = {
   Accessories: ShieldCheck,
   Additives: Droplets,
 };
+const subcategoryIconMap = {
+  battery: BatteryCharging,
+  brake: Disc3,
+  chain: Cable,
+  charger: PlugZap,
+  coolant: Droplets,
+  filter: Fuel,
+  guard: Shield,
+  luggage: Luggage,
+  oil: Droplets,
+  phone: Smartphone,
+  plug: PlugZap,
+  slider: Shield,
+  tyre: CircleDot,
+  light: Lightbulb,
+} satisfies Record<string, LucideIcon>;
 const inter = Inter({ subsets: ["latin"] });
 
 function escapeSvgText(value: string): string {
@@ -131,6 +146,27 @@ function getPartBrand(part: SparePartListing): string {
   }) ?? "Generic";
 }
 
+function getSubcategoryIconKey(subcategory: string): keyof typeof subcategoryIconMap | null {
+  const normalized = subcategory.toLowerCase();
+
+  if (normalized.includes("oil")) return "oil";
+  if (normalized.includes("coolant")) return "coolant";
+  if (normalized.includes("light") || normalized.includes("indicator")) return "light";
+  if (normalized.includes("battery")) return "battery";
+  if (normalized.includes("charger")) return "charger";
+  if (normalized.includes("brake")) return "brake";
+  if (normalized.includes("tyre") || normalized.includes("tire")) return "tyre";
+  if (normalized.includes("chain")) return "chain";
+  if (normalized.includes("filter")) return "filter";
+  if (normalized.includes("guard")) return "guard";
+  if (normalized.includes("slider")) return "slider";
+  if (normalized.includes("luggage")) return "luggage";
+  if (normalized.includes("phone")) return "phone";
+  if (normalized.includes("plug")) return "plug";
+
+  return null;
+}
+
 function getPartRating(part: SparePartListing): number {
   if (typeof part.rating === "number" && Number.isFinite(part.rating)) {
     return Number(part.rating.toFixed(1));
@@ -143,23 +179,6 @@ function getPartRating(part: SparePartListing): number {
     part.category === "Accessories" ? 0.15 : part.category === "Additives" ? 0.1 : 0.05;
 
   return Math.min(4.9, Number((4 + stockBoost + compatibilityBoost + conditionBoost + categoryBoost).toFixed(1)));
-}
-
-function getCompatibilityLabel(part: SparePartListing, selectedBike: Bike | null): string {
-  if (selectedBike && part.compatibleBikes.includes(selectedBike.slug)) {
-    return "Exact fit";
-  }
-
-  if (part.compatibleBikes.includes("Universal")) {
-    return "Universal";
-  }
-
-  const bikeCount = part.compatibleBikes.length;
-  if (bikeCount <= 1) {
-    return "Single-bike fit";
-  }
-
-  return `${bikeCount} bike fit`;
 }
 
 function getStockMeta(part: SparePartListing): {
@@ -253,29 +272,12 @@ function SmartPartCard({
   const isExactFit = selectedBike && part.compatibleBikes.includes(selectedBike.slug);
   const isUniversal = part.compatibleBikes.includes("Universal");
   const brand = getPartBrand(part);
-  const compatibilityLabel = getCompatibilityLabel(part, selectedBike);
   const stockMeta = getStockMeta(part);
   const partImage = getPartImage(part);
   const priceLabel = `৳ ${new Intl.NumberFormat("en-BD").format(part.priceBdt)}`;
-  const compatibleBikePreviews = part.compatibleBikes
-    .filter((slug) => slug !== "Universal")
-    .map((slug) => bikes.find((bike) => bike.slug === slug))
-    .filter((bike): bike is Bike => Boolean(bike));
-  const visibleCompatibleBikes = compatibleBikePreviews.slice(0, 2);
-  const remainingCompatibleBikeCount = Math.max(0, compatibleBikePreviews.length - visibleCompatibleBikes.length);
-  const leadFitLabel = selectedBike
-    ? isExactFit
-      ? `Fits ${selectedBike.brand} ${selectedBike.model}`
-      : isUniversal
-        ? `Fits most ${selectedBike.brand} ${selectedBike.model} setups`
-        : compatibilityLabel
-    : isUniversal
-      ? "Fits most 125-250cc bikes"
-      : compatibleBikePreviews.length > 0
-        ? compatibleBikePreviews.length === 1
-          ? `Fits ${compatibleBikePreviews[0].brand} ${compatibleBikePreviews[0].model}`
-          : `Fits ${compatibleBikePreviews[0].brand} ${compatibleBikePreviews[0].model} +${compatibleBikePreviews.length - 1} more`
-        : compatibilityLabel;
+  const CategoryIcon = categoryIconMap[part.category];
+  const subcategoryIconKey = getSubcategoryIconKey(part.subcategory);
+  const SubcategoryIcon = subcategoryIconKey ? subcategoryIconMap[subcategoryIconKey] : Package;
 
   return (
     <Card
@@ -288,28 +290,6 @@ function SmartPartCard({
             : "border-slate-200 bg-gradient-to-br from-white via-white to-slate-100/60"
       )}
     >
-      {/* Compatibility badge strip */}
-      {selectedBike && (
-        <div
-          className={cn(
-            "flex items-center gap-1.5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest",
-            isExactFit ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-500"
-          )}
-        >
-          {isExactFit ? (
-            <>
-              <CheckCircle2 className="h-3 w-3" />
-              Verified fit for {selectedBike.brand} {selectedBike.model}
-            </>
-          ) : (
-            <>
-              <Wrench className="h-3 w-3" />
-              Universal — fits all bikes
-            </>
-          )}
-        </div>
-      )}
-
       <CardHeader className="pb-2">
         <div className="flex gap-4">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-inner">
@@ -325,24 +305,6 @@ function SmartPartCard({
                 <CardTitle className="line-clamp-2 font-heading text-2xl uppercase leading-tight tracking-wide text-slate-900">
                   {part.name}
                 </CardTitle>
-                {isUniversal ? (
-                  <div className="mt-2">
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      Universal Fit
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <Wrench
-                      className={cn(
-                        "h-4 w-4 shrink-0",
-                        isExactFit ? "text-emerald-600" : "text-slate-400"
-                      )}
-                    />
-                    <span className="line-clamp-1">{leadFitLabel}</span>
-                  </div>
-                )}
               </div>
               <Badge
                 variant="outline"
@@ -363,11 +325,11 @@ function SmartPartCard({
                 <span className="font-semibold">{brand}</span>
               </span>
               <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
-                <Package className="h-3.5 w-3.5 text-slate-400" />
+                <CategoryIcon className="h-3.5 w-3.5 text-slate-400" />
                 <span className="font-semibold">{part.category}</span>
               </span>
               <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
-                <Target className="h-3.5 w-3.5 text-slate-400" />
+                <SubcategoryIcon className="h-3.5 w-3.5 text-slate-400" />
                 <span>{part.subcategory}</span>
               </span>
             </div>
@@ -375,76 +337,21 @@ function SmartPartCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
-        {/* Compatible bikes list (when no bike is selected) */}
-        {!selectedBike && !isUniversal && part.compatibleBikes.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {visibleCompatibleBikes.map((bike) => (
-              <span key={bike.slug} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                <BikeIcon className="h-2.5 w-2.5" />
-                {bike.brand} {bike.model}
-              </span>
-            ))}
-            {remainingCompatibleBikeCount > 0 ? (
-              <Dialog>
-                <DialogTrigger className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700">
-                  +{remainingCompatibleBikeCount} more bikes
-                </DialogTrigger>
-                <DialogContent className="border border-slate-200 bg-white sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="text-lg uppercase tracking-wide text-slate-900">
-                      Compatible Bikes
-                    </DialogTitle>
-                    <DialogDescription className="text-slate-500">
-                      {part.name} fits the following bikes.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
-                    {compatibleBikePreviews.map((bike) => (
-                      <div
-                        key={bike.slug}
-                        className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
-                      >
-                        <div className={cn(
-                          "flex h-9 w-9 items-center justify-center rounded-xl",
-                          bike.powertrain === "EV" ? "bg-emerald-100" : "bg-slate-200"
-                        )}>
-                          <BikeIcon className={cn(
-                            "h-4 w-4",
-                            bike.powertrain === "EV" ? "text-emerald-600" : "text-slate-500"
-                          )} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-slate-900">
-                            {bike.brand} {bike.model}
-                          </p>
-                          <p className="text-[11px] text-slate-500">
-                            {bike.powertrain} {bike.category ? `• ${bike.category}` : ""}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ) : null}
-          </div>
-        )}
-
         <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-4">
-          <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Price</p>
-            <p className="whitespace-nowrap text-2xl font-black leading-none text-slate-900">{priceLabel}</p>
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span
-                className={cn(
-                  "inline-flex w-fit items-center rounded-full border px-2.5 py-1 font-semibold whitespace-nowrap",
-                  stockMeta.stockClassName
-                )}
-              >
-                <Package className="mr-1.5 h-3.5 w-3.5" />
-                {stockMeta.stockLabel}
-              </span>
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Price</p>
+              <p className="whitespace-nowrap text-2xl font-black leading-none text-slate-900">{priceLabel}</p>
             </div>
+            <span
+              className={cn(
+                "inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap",
+                stockMeta.stockClassName
+              )}
+            >
+              <Package className="mr-1.5 h-3.5 w-3.5" />
+              {stockMeta.stockLabel}
+            </span>
           </div>
           <div className="grid w-full grid-cols-2 gap-2">
             <button
