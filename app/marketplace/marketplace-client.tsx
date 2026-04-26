@@ -433,7 +433,7 @@ function SmartPartCard({
           </div>
         )}
 
-        <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-4">
           <div className="space-y-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Price</p>
             <p className="whitespace-nowrap text-2xl font-black leading-none text-slate-900">{priceLabel}</p>
@@ -449,13 +449,13 @@ function SmartPartCard({
               </span>
             </div>
           </div>
-          <div className="grid min-w-[250px] gap-2 sm:min-w-[280px] sm:grid-cols-2">
+          <div className="grid w-full grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => onAddToCart(part)}
               className={cn(
                 buttonVariants({ size: "sm" }),
-                "bg-slate-900 text-white transition-all hover:bg-slate-700 group-hover:shadow-md whitespace-nowrap",
+                "min-w-0 bg-slate-900 text-white transition-all hover:bg-slate-700 group-hover:shadow-md",
                 isExactFit && "bg-emerald-600 hover:bg-emerald-700"
               )}
             >
@@ -467,7 +467,7 @@ function SmartPartCard({
               onClick={() => onBuyNow(part)}
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
-                "border-slate-300 bg-white text-slate-900 transition-all hover:border-slate-400 hover:bg-slate-50 whitespace-nowrap"
+                "min-w-0 border-slate-300 bg-white text-slate-900 transition-all hover:border-slate-400 hover:bg-slate-50"
               )}
             >
               <Wallet className="h-3.5 w-3.5" />
