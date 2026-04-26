@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BatteryCharging, Bike as BikeIcon, Building2, Cable, CheckCircle2, ChevronDown, ChevronUp, CircleDot, Disc3, Droplets, Fuel, Gauge, Lightbulb, Luggage, Map, Megaphone, Package, PlugZap, Route, Search, Shield, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, Smartphone, Sparkles, User, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
+import { ArrowRight, BatteryCharging, Bike as BikeIcon, Building2, Cable, CheckCircle2, ChevronDown, ChevronUp, CircleDot, Disc3, Droplets, Fuel, Gauge, Lightbulb, Luggage, Map, Megaphone, Package, PlugZap, Route, Search, Shield, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, Smartphone, Sparkles, Star, User, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -408,6 +408,7 @@ function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListi
   const priceLabel = formatBdt(vehicle.askingPrice || vehicle.priceBdt);
   const registrationValidityLabel = formatUsedVehicleDate(vehicle.registrationValidityPeriod);
   const purchaseDateLabel = formatUsedVehicleDate(vehicle.purchaseDate);
+  const inspectionScore = vehicle.inspectionScore;
 
   return (
     <Card className="overflow-hidden border-slate-200 bg-white/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -449,6 +450,17 @@ function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListi
         <CardTitle className="font-heading text-3xl uppercase leading-none tracking-wide text-slate-900">
           {vehicle.brand} {vehicle.model}
         </CardTitle>
+        {inspectionScore != null && (
+          <div className={cn(
+            "mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold",
+            inspectionScore >= 40 ? "border-emerald-200 bg-emerald-50 text-emerald-700" :
+            inspectionScore >= 30 ? "border-amber-200 bg-amber-50 text-amber-700" :
+            "border-red-200 bg-red-50 text-red-700"
+          )}>
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">Inspection: {inspectionScore}/50</span>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -503,7 +515,6 @@ function UsedVehicleListingCard({ vehicle }: { vehicle: UsedVehicleFrontendListi
           </div>
         </div>
 
-        <p className="line-clamp-2 text-sm text-slate-600">{vehicle.summary}</p>
       </CardContent>
       <CardFooter className="grid grid-cols-2 gap-2">
         {catalogBike ? (

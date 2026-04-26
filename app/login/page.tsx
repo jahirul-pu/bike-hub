@@ -69,7 +69,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-600">
             <p className="font-semibold uppercase tracking-[0.08em] text-slate-700">Demo Credentials</p>
             <p>User: r15@bikehub.dev / r15rider123</p>
-            <p>Admin: admin@bikehub.dev / adminpass123</p>
+            <p>Admin: admin@bikehub.com / admin123</p>
             <p>Tech: tech@bikehub.dev / techpass123</p>
           </div>
 

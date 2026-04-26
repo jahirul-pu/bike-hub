@@ -1,4 +1,5 @@
 import type { Bike } from '@/lib/bikes-data';
+import { extractInspectionScore } from '@/lib/inspection';
 
 export type RegistrationStatus = 'Registered' | 'On Test';
 
@@ -20,6 +21,7 @@ export type UsedVehicleFrontendListing = {
   images: string[];
   summary: string;
   inspectionStatus: string | null;
+  inspectionScore: number | null;
   registrationStatus: RegistrationStatus;
   registrationNumber: string | null;
   registrationValidityPeriod: string | null;
@@ -179,6 +181,38 @@ export function formatUsedVehicleDate(value: string | null | undefined) {
   });
 }
 
+export function parseUsedVehicleRating(value: string | null | undefined): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const directMatch = /(?:rating:\s*)?(\d+(?:\.\d+)?)\s*\/\s*5/i.exec(value);
+  if (directMatch) {
+    const rating = Number(directMatch[1]);
+    return Number.isFinite(rating) ? Math.max(0, Math.min(5, rating)) : null;
+  }
+
+  const legacyInspectionMatch = /(\d+)\s*\/\s*(\d+)\s*checks?\s+passed/i.exec(value);
+  if (legacyInspectionMatch) {
+    const passed = Number(legacyInspectionMatch[1]);
+    const total = Number(legacyInspectionMatch[2]);
+
+    if (Number.isFinite(passed) && Number.isFinite(total) && total > 0) {
+      return Math.max(0, Math.min(5, Number(((passed / total) * 5).toFixed(1))));
+    }
+  }
+
+  return null;
+}
+
+export function formatUsedVehicleRating(value: number | null | undefined) {
+  if (value == null || !Number.isFinite(value)) {
+    return 'Not rated';
+  }
+
+  return `${value.toFixed(1)}/5`;
+}
+
 export function serializeUsedVehicle(record: UsedVehicleRecord): UsedVehicleFrontendListing {
   const registration = extractUsedVehicleRegistration(record.summary);
   const brandName = record.brand?.name?.trim() || 'BikeHub';
@@ -208,6 +242,7 @@ export function serializeUsedVehicle(record: UsedVehicleRecord): UsedVehicleFron
     images: parseUsedVehicleImages(record.images),
     summary: registration.listingSummary || 'BikeHub marketplace user listing.',
     inspectionStatus: record.inspection?.status ?? null,
+    inspectionScore: extractInspectionScore(record.inspection?.status),
     registrationStatus: registration.registrationStatus,
     registrationNumber: registration.registrationNumber,
     registrationValidityPeriod: registration.registrationValidityPeriod,

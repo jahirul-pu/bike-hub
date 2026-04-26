@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
+const adminEmail = "admin@bikehub.com";
+
 export default auth((request) => {
-  if (request.auth?.user) {
+  const pathname = request.nextUrl.pathname;
+  const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAllowed = isAdminPath
+    ? request.auth?.user?.userRole === "Admin" && request.auth.user.email?.toLowerCase() === adminEmail
+    : Boolean(request.auth?.user);
+
+  if (isAllowed) {
     return NextResponse.next();
   }
 

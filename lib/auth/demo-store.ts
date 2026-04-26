@@ -18,9 +18,9 @@ const demoAuthUsers: DemoAuthUser[] = [
   },
   {
     id: "usr_admin",
-    name: "Amina Admin",
-    email: "admin@bikehub.dev",
-    passwordHash: "$2b$10$ZRd2wXaGBdWcfrY.rCQNHeXOKIR172F7abqDhIeAWjaB9bvbaYqQS",
+    name: "BikeHub Admin",
+    email: "admin@bikehub.com",
+    passwordHash: "$2b$10$xeb86gvMkdzrF4FaeMiQIuzpD8/uQB.EpUHr8cxnO0b07Vdi9fB6G",
     userRole: "Admin",
   },
   {
@@ -77,7 +77,7 @@ const garageByEmail: Record<string, GarageProfile> = {
       },
     ],
   },
-  "admin@bikehub.dev": {
+  "admin@bikehub.com": {
     primaryBike: {
       make: "Kawasaki",
       model: "Ninja 400",

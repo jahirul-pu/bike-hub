@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { useId, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, ExternalLink, ImagePlus, Plus, X } from 'lucide-react';
+import { InspectionChecklist } from './inspection-checklist';
 import Link from 'next/link';
 import { bikes, type Bike } from '@/lib/bikes-data';
 import { cn } from '@/lib/utils';
@@ -78,265 +79,7 @@ function YesNoSelect({ name }: { name: string }) {
   );
 }
 
-function InspectionCheckbox({
-  name,
-  passLabel,
-  failLabel,
-}: {
-  name: string;
-  passLabel: string;
-  failLabel: string;
-}) {
-  const [value, setValue] = useState<'pass' | 'fail'>('pass');
-  const yesId = useId();
-  const noId = useId();
-
-  return (
-    <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
-      <input type="hidden" name={name} value={value} />
-
-      <label htmlFor={yesId} className="flex items-center gap-2">
-        <input
-          id={yesId}
-          type="checkbox"
-          checked={value === 'pass'}
-          onChange={() => setValue('pass')}
-          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-        />
-        <span>{passLabel}</span>
-      </label>
-
-      <label htmlFor={noId} className="flex items-center gap-2">
-        <input
-          id={noId}
-          type="checkbox"
-          checked={value === 'fail'}
-          onChange={() => setValue('fail')}
-          className="h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500"
-        />
-        <span>{failLabel}</span>
-      </label>
-    </div>
-  );
-}
-
 type AutofillBike = Bike & Partial<Record<'batteryType' | 'voltageV' | 'ampHours' | 'peakPowerKw', string | number>>;
-
-const inspectionSections = [
-  {
-    title: 'Engine & Transmission',
-    color: 'rose' as const,
-    points: [
-      'Cold start (no struggle)',
-      'Idle stability',
-      'Engine noise (no knocking)',
-      'Acceleration smoothness',
-      'Gear shifting smooth',
-      'Clutch response',
-      'No excessive vibration',
-      'No oil leakage',
-      'Exhaust smoke normal',
-      'Engine heat normal',
-    ],
-  },
-  {
-    title: 'Frame & Structure',
-    color: 'amber' as const,
-    points: [
-      'Frame alignment',
-      'No visible bends',
-      'No major rust',
-      'No weld damage',
-      'Swingarm condition',
-      'Crash signs absent',
-    ],
-  },
-  {
-    title: 'Suspension & Steering',
-    color: 'cyan' as const,
-    points: [
-      'Front fork leakage',
-      'Front suspension smooth',
-      'Rear suspension condition',
-      'Steering alignment',
-      'Handle straight',
-      'No unusual play',
-    ],
-  },
-  {
-    title: 'Brakes',
-    color: 'rose' as const,
-    points: [
-      'Front brake response',
-      'Rear brake response',
-      'Brake pads condition',
-      'Disc condition',
-      'No brake noise',
-      'Brake fluid level OK',
-    ],
-  },
-  {
-    title: 'Electrical System',
-    color: 'indigo' as const,
-    points: [
-      'Battery health',
-      'Self-start works',
-      'Headlight working',
-      'Indicators working',
-      'Brake light working',
-      'Horn working',
-    ],
-  },
-  {
-    title: 'Wheels & Tires',
-    color: 'teal' as const,
-    points: [
-      'Tire tread depth',
-      'Tire condition (no cracks)',
-      'Rim condition',
-      'Wheel alignment',
-      'Wheel bearing smooth',
-    ],
-  },
-  {
-    title: 'Body & Cosmetics',
-    color: 'orange' as const,
-    points: [
-      'Fuel tank condition',
-      'Fairings condition',
-      'Paint quality',
-      'Seat condition',
-      'No major scratches/dents',
-    ],
-  },
-  {
-    title: 'Documents & Legal',
-    color: 'purple' as const,
-    points: [
-      'Registration valid',
-      'Engine number match',
-      'Chassis number match',
-      'Tax updated',
-      'Insurance valid',
-      'Service history available',
-    ],
-  },
-];
-
-const defaultInspectionAnswerLabels = { passLabel: 'Pass', failLabel: 'Fail' };
-
-const inspectionQuestions: Record<string, string> = {
-  'Cold start (no struggle)': 'Does the bike cold start without struggle?',
-  'Idle stability': 'Is the engine idle stable?',
-  'Engine noise (no knocking)': 'Is the engine noise normal without knocking?',
-  'Acceleration smoothness': 'Is the acceleration smooth?',
-  'Gear shifting smooth': 'Does the bike shift gears smoothly?',
-  'Clutch response': 'Is the clutch response good?',
-  'No excessive vibration': 'Is there any excessive vibration?',
-  'No oil leakage': 'Is there any oil leakage?',
-  'Exhaust smoke normal': 'Is the exhaust smoke normal?',
-  'Engine heat normal': 'Is the engine heat normal?',
-  'Frame alignment': 'Is the frame properly aligned?',
-  'No visible bends': 'Are there any visible bends?',
-  'No major rust': 'Is there any major rust?',
-  'No weld damage': 'Is there any weld damage?',
-  'Swingarm condition': 'Is the swingarm in good condition?',
-  'Crash signs absent': 'Are crash signs absent?',
-  'Front fork leakage': 'Is there any front fork leakage?',
-  'Front suspension smooth': 'Is the front suspension smooth?',
-  'Rear suspension condition': 'Is the rear suspension in good condition?',
-  'Steering alignment': 'Is the steering aligned correctly?',
-  'Handle straight': 'Is the handle straight?',
-  'No unusual play': 'Is there any unusual play?',
-  'Front brake response': 'Is the front brake response good?',
-  'Rear brake response': 'Is the rear brake response good?',
-  'Brake pads condition': 'Are the brake pads in good condition?',
-  'Disc condition': 'Is the disc in good condition?',
-  'No brake noise': 'Is there any brake noise?',
-  'Brake fluid level OK': 'Is the brake fluid level OK?',
-  'Battery health': 'Is the battery health good?',
-  'Self-start works': 'Does the self-start work properly?',
-  'Headlight working': 'Is the headlight working?',
-  'Indicators working': 'Are the indicators working?',
-  'Brake light working': 'Is the brake light working?',
-  'Horn working': 'Is the horn working?',
-  'Tire tread depth': 'Is the tire tread depth adequate?',
-  'Tire condition (no cracks)': 'Are the tires free from cracks?',
-  'Rim condition': 'Are the rims in good condition?',
-  'Wheel alignment': 'Are the wheels properly aligned?',
-  'Wheel bearing smooth': 'Are the wheel bearings smooth?',
-  'Fuel tank condition': 'Is the fuel tank in good condition?',
-  'Fairings condition': 'Are the fairings in good condition?',
-  'Paint quality': 'Is the paint quality good?',
-  'Seat condition': 'Is the seat in good condition?',
-  'No major scratches/dents': 'Are there any major scratches or dents?',
-  'Registration valid': 'Is the registration valid?',
-  'Engine number match': 'Does the engine number match?',
-  'Chassis number match': 'Does the chassis number match?',
-  'Tax updated': 'Is the tax updated?',
-  'Insurance valid': 'Is the insurance valid?',
-  'Service history available': 'Is the service history available?',
-};
-
-const inspectionAnswerLabels: Record<string, { passLabel: string; failLabel: string }> = {
-  'Cold start (no struggle)': { passLabel: 'Starts Easily', failLabel: 'Struggles' },
-  'Idle stability': { passLabel: 'Stable', failLabel: 'Unstable' },
-  'Engine noise (no knocking)': { passLabel: 'Normal', failLabel: 'Knocking' },
-  'Acceleration smoothness': { passLabel: 'Smooth', failLabel: 'Rough' },
-  'Gear shifting smooth': { passLabel: 'Smooth', failLabel: 'Rough' },
-  'Clutch response': { passLabel: 'Good', failLabel: 'Poor' },
-  'No excessive vibration': { passLabel: 'Normal', failLabel: 'Excessive' },
-  'No oil leakage': { passLabel: 'No Leak', failLabel: 'Leak Found' },
-  'Exhaust smoke normal': { passLabel: 'Normal', failLabel: 'Abnormal' },
-  'Engine heat normal': { passLabel: 'Normal', failLabel: 'Overheating' },
-  'Frame alignment': { passLabel: 'Aligned', failLabel: 'Misaligned' },
-  'No visible bends': { passLabel: 'None', failLabel: 'Visible' },
-  'No major rust': { passLabel: 'None', failLabel: 'Present' },
-  'No weld damage': { passLabel: 'No Damage', failLabel: 'Damage Found' },
-  'Swingarm condition': { passLabel: 'Good', failLabel: 'Poor' },
-  'Crash signs absent': { passLabel: 'Absent', failLabel: 'Present' },
-  'Front fork leakage': { passLabel: 'No Leak', failLabel: 'Leak Found' },
-  'Front suspension smooth': { passLabel: 'Smooth', failLabel: 'Rough' },
-  'Rear suspension condition': { passLabel: 'Good', failLabel: 'Poor' },
-  'Steering alignment': { passLabel: 'Aligned', failLabel: 'Misaligned' },
-  'Handle straight': { passLabel: 'Straight', failLabel: 'Bent' },
-  'No unusual play': { passLabel: 'None', failLabel: 'Present' },
-  'Front brake response': { passLabel: 'Good', failLabel: 'Poor' },
-  'Rear brake response': { passLabel: 'Good', failLabel: 'Poor' },
-  'Brake pads condition': { passLabel: 'Good', failLabel: 'Worn' },
-  'Disc condition': { passLabel: 'Good', failLabel: 'Damaged' },
-  'No brake noise': { passLabel: 'Quiet', failLabel: 'Noise Present' },
-  'Brake fluid level OK': { passLabel: 'OK', failLabel: 'Low' },
-  'Battery health': { passLabel: 'Good', failLabel: 'Weak' },
-  'Self-start works': { passLabel: 'Working', failLabel: 'Not Working' },
-  'Headlight working': { passLabel: 'Working', failLabel: 'Not Working' },
-  'Indicators working': { passLabel: 'Working', failLabel: 'Not Working' },
-  'Brake light working': { passLabel: 'Working', failLabel: 'Not Working' },
-  'Horn working': { passLabel: 'Working', failLabel: 'Not Working' },
-  'Tire tread depth': { passLabel: 'Adequate', failLabel: 'Low' },
-  'Tire condition (no cracks)': { passLabel: 'No Cracks', failLabel: 'Cracked' },
-  'Rim condition': { passLabel: 'Good', failLabel: 'Damaged' },
-  'Wheel alignment': { passLabel: 'Aligned', failLabel: 'Misaligned' },
-  'Wheel bearing smooth': { passLabel: 'Smooth', failLabel: 'Rough' },
-  'Fuel tank condition': { passLabel: 'Good', failLabel: 'Poor' },
-  'Fairings condition': { passLabel: 'Good', failLabel: 'Poor' },
-  'Paint quality': { passLabel: 'Good', failLabel: 'Poor' },
-  'Seat condition': { passLabel: 'Good', failLabel: 'Poor' },
-  'No major scratches/dents': { passLabel: 'None', failLabel: 'Present' },
-  'Registration valid': { passLabel: 'Valid', failLabel: 'Invalid' },
-  'Engine number match': { passLabel: 'Match', failLabel: 'Mismatch' },
-  'Chassis number match': { passLabel: 'Match', failLabel: 'Mismatch' },
-  'Tax updated': { passLabel: 'Updated', failLabel: 'Due' },
-  'Insurance valid': { passLabel: 'Valid', failLabel: 'Expired' },
-  'Service history available': { passLabel: 'Available', failLabel: 'Unavailable' },
-};
-
-function inspectionFieldName(sectionTitle: string, point: string) {
-  return `inspection__${sectionTitle}__${point}`
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/(^_|_$)+/g, '');
-}
 
 function setNamedFieldValue(form: HTMLFormElement | null, name: string, value: string | number | undefined | null) {
   if (!form) {
@@ -513,6 +256,7 @@ function VehicleForm({
         <Field label="Asking Price (BDT)">
           <input type="number" required name="askingPrice" min="0" step="0.01" className={inputClass} />
         </Field>
+
         <Field label="Odometer Reading (km)">
           <input type="number" required name="odometerKm" min="0" step="1" className={inputClass} />
         </Field>
@@ -1060,49 +804,15 @@ function VehicleForm({
           </p>
         </div>
 
-        <SectionHeader title="14. BikeHub 50-Point Inspection" color="teal" />
+      </div>
 
-        <div className="space-y-6 md:col-span-3">
-          <p className="text-sm text-slate-500">
-            Each checkpoint counts as 1 point. Pass = 1, Fail = 0.
-          </p>
-
-          {inspectionSections.map((section) => (
-            <div key={section.title} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <div className="mb-4 flex items-center gap-2">
-                <div className="h-3 w-1.5 rounded-full bg-slate-900" />
-                <h4 className="text-sm font-bold uppercase tracking-wide text-slate-900">
-                  {section.title}
-                </h4>
-                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-500">
-                  {section.points.length} points
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {section.points.map((point) => {
-                  const answerLabels = inspectionAnswerLabels[point] ?? defaultInspectionAnswerLabels;
-
-                  return (
-                    <div
-                      key={`${section.title}-${point}`}
-                      className="rounded-lg border border-slate-200 bg-white p-3"
-                    >
-                      <div className="mb-2 text-sm font-medium text-slate-800">
-                        {inspectionQuestions[point] ?? `${point}?`}
-                      </div>
-                      <InspectionCheckbox
-                        name={inspectionFieldName(section.title, point)}
-                        passLabel={answerLabels.passLabel}
-                        failLabel={answerLabels.failLabel}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+      {/* 50-Point Inspection Checklist */}
+      <div className="mt-6">
+        <div className="mb-3 flex items-center gap-2 border-b border-slate-200 pb-2">
+          <div className="h-4 w-1.5 rounded-full bg-indigo-500" />
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-indigo-600">50-Point Inspection</h3>
         </div>
+        <InspectionChecklist />
       </div>
 
       <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">

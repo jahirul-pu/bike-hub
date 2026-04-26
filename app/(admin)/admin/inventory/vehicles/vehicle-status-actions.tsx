@@ -2,13 +2,27 @@
 
 import * as React from 'react';
 import { useState } from 'react';
+import { ChevronDown, ShieldCheck, Megaphone, User, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { updateVehicleStatus, deleteVehicle } from './actions';
 
 const statusOptions = [
-  { value: 'APPROVED' as const, label: 'User Listed', bg: 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200' },
-  { value: 'PROMOTED' as const, label: '⭐ Promoted', bg: 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200' },
-  { value: 'CERTIFIED' as const, label: '✓ Certified', bg: 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200' },
+  { value: 'APPROVED' as const, label: 'User Listed', icon: User, color: 'text-slate-600' },
+  { value: 'PROMOTED' as const, label: 'Promoted', icon: Megaphone, color: 'text-amber-600' },
+  { value: 'CERTIFIED' as const, label: 'Certified', icon: ShieldCheck, color: 'text-emerald-600' },
 ] as const;
+
+const statusBadge: Record<string, { label: string; bg: string }> = {
+  APPROVED: { label: 'User Listed', bg: 'bg-slate-100 text-slate-700 border-slate-200' },
+  PROMOTED: { label: '⭐ Promoted', bg: 'bg-amber-50 text-amber-800 border-amber-200' },
+  CERTIFIED: { label: '✓ Certified', bg: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+};
 
 export function VehicleStatusActions({
   vehicleId,
@@ -19,6 +33,8 @@ export function VehicleStatusActions({
 }) {
   const [loading, setLoading] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
+  const current = statusBadge[currentStatus] ?? statusBadge.APPROVED;
 
   async function handleStatusChange(status: 'APPROVED' | 'PROMOTED' | 'CERTIFIED') {
     if (status === currentStatus) return;
@@ -52,46 +68,63 @@ export function VehicleStatusActions({
     }
   }
 
-  return (
-    <>
-      {statusOptions
-        .filter((option) => option.value !== currentStatus)
-        .map((option) => (
-          <button
-            key={option.value}
-            disabled={loading}
-            onClick={() => handleStatusChange(option.value)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors disabled:opacity-50 ${option.bg}`}
-          >
-            {option.label}
-          </button>
-        ))}
-      {!showConfirmDelete ? (
+  if (showConfirmDelete) {
+    return (
+      <div className="flex items-center gap-1">
         <button
           disabled={loading}
-          onClick={() => setShowConfirmDelete(true)}
-          className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+          onClick={handleDelete}
+          className="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
         >
-          Delete
+          {loading ? 'Deleting...' : 'Confirm Delete'}
         </button>
-      ) : (
-        <div className="flex items-center gap-1">
-          <button
-            disabled={loading}
-            onClick={handleDelete}
-            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Deleting...' : 'Confirm'}
-          </button>
-          <button
-            disabled={loading}
-            onClick={() => setShowConfirmDelete(false)}
-            className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
-    </>
+        <button
+          disabled={loading}
+          onClick={() => setShowConfirmDelete(false)}
+          className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors disabled:opacity-50"
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        disabled={loading}
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors disabled:opacity-50 ${current.bg}`}
+      >
+        {current.label}
+        <ChevronDown className="h-3 w-3 opacity-50" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        {statusOptions.map((option) => {
+          const Icon = option.icon;
+          const isActive = option.value === currentStatus;
+
+          return (
+            <DropdownMenuItem
+              key={option.value}
+              disabled={isActive}
+              onClick={() => handleStatusChange(option.value)}
+              className={isActive ? 'font-bold bg-slate-50' : ''}
+            >
+              <Icon className={`h-4 w-4 mr-2 ${option.color}`} />
+              {option.label}
+              {isActive && <span className="ml-auto text-[10px] text-slate-400">current</span>}
+            </DropdownMenuItem>
+          );
+        })}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => setShowConfirmDelete(true)}
+          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -4,7 +4,8 @@ import * as React from 'react';
 import { useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, ImagePlus, Pencil, X } from 'lucide-react';
-import { bikes, type Bike } from '@/lib/bikes-data';
+import { InspectionChecklist } from './inspection-checklist';
+import { deserializeInspection } from '@/lib/inspection';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -28,6 +29,7 @@ type EditableVehicle = {
   powertrain: string;
   priceBdt?: number;
   askingPrice?: number;
+  inspectionStatus?: string | null;
   summary: string;
   displacementCc?: number;
   motorPowerKw?: number;
@@ -182,6 +184,7 @@ export function EditVehicleModal({ vehicle }: { vehicle: EditableVehicle }) {
             <Field label="Asking Price (BDT)">
               <input type="number" required name="askingPrice" min="0" step="0.01" defaultValue={vehicle.askingPrice} className={inputClass} />
             </Field>
+
             <Field label="Odometer Reading (km)">
               <input type="number" required name="odometerKm" min="0" step="1" defaultValue={odometerValue} className={inputClass} />
             </Field>
@@ -441,6 +444,15 @@ export function EditVehicleModal({ vehicle }: { vehicle: EditableVehicle }) {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* 50-Point Inspection Checklist */}
+          <div className="mt-6">
+            <div className="mb-3 flex items-center gap-2 border-b border-slate-200 pb-2">
+              <div className="h-4 w-1.5 rounded-full bg-indigo-500" />
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-indigo-600">50-Point Inspection</h3>
+            </div>
+            <InspectionChecklist initialScores={deserializeInspection(vehicle.inspectionStatus)} />
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">

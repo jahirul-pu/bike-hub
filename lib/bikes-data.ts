@@ -12,9 +12,13 @@ export type Bike = {
   priceBdt: number;
   displacementCc?: number;
   motorPowerKw?: number;
+  peakPowerKw?: number;
   topSpeedKph: number;
   mileageKmpl?: number;
   rangeKm?: number;
+  batteryType?: string;
+  voltageV?: number;
+  ampHours?: number;
   chargingTime0100?: string;
   batteryCycleLife?: string;
   ipRating?: string;

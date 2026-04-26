@@ -8,8 +8,10 @@ import type { UserRole } from "@/lib/auth/types";
 
 const credentialsSchema = z.object({
   email: z.email().trim(),
-  password: z.string().min(8),
+  password: z.string().min(1),
 });
+
+const adminEmail = "admin@bikehub.com";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
@@ -61,7 +63,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     authorized({ auth, request }) {
       const pathname = request.nextUrl.pathname;
-      const isProtectedPath = ["/admin", "/account", "/sell"].some(
+      const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
+      if (isAdminPath) {
+        return auth?.user?.userRole === "Admin" && auth.user.email?.toLowerCase() === adminEmail;
+      }
+
+      const isProtectedPath = ["/account", "/sell"].some(
         (path) => pathname === path || pathname.startsWith(`${path}/`)
       );
 

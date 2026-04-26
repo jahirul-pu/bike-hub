@@ -3,6 +3,7 @@
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { serializeInspection, type CheckpointScore } from '@/lib/inspection';
 
 const optionalNumber = z.preprocess(
   (value) => (value === '' || value == null ? undefined : value),
@@ -20,6 +21,7 @@ const VehicleInputSchema = z.object({
   description: z.string().optional(),
   priceBdt: optionalNumber,
   askingPrice: optionalNumber,
+  inspectionScores: z.string().optional(),
   registrationStatus: z.enum(['Registered', 'On Test']).optional(),
   registrationNumber: z.string().optional(),
   registrationValidityPeriod: z.string().optional(),
@@ -86,17 +88,15 @@ function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 }
 
-function summarizeInspection(input: Record<string, unknown>) {
-  const inspectionEntries = Object.entries(input).filter(([key]) => key.startsWith('inspection__'));
-  const passedCount = inspectionEntries.filter(([, value]) => value === 'pass').length;
-  const totalCount = inspectionEntries.length;
-
-  return {
-    passedCount,
-    totalCount,
-    statusLabel:
-      totalCount > 0 ? `Processing (${passedCount}/${totalCount} checks passed)` : 'Processing',
-  };
+function parseInspectionScores(raw: string | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const scores = JSON.parse(raw) as Record<string, CheckpointScore>;
+    if (Object.keys(scores).length === 0) return null;
+    return serializeInspection(scores);
+  } catch {
+    return null;
+  }
 }
 
 export async function createVehicle(input: FormData | Record<string, unknown>) {
@@ -104,7 +104,6 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
     const normalizedInput = normalizeInput(input);
     const parsed = VehicleInputSchema.parse(normalizedInput);
     const brandName = parsed.brand || parsed.make;
-    const inspectionSummary = summarizeInspection(normalizedInput);
     const registrationStatus = parsed.registrationStatus || 'On Test';
     const registrationNumber = parsed.registrationNumber?.trim();
     const registrationValidityPeriod = parsed.registrationValidityPeriod?.trim();
@@ -207,11 +206,12 @@ export async function createVehicle(input: FormData | Record<string, unknown>) {
         chassis: null,
         askingPrice: parsed.askingPrice ?? 0,
         certificationStatus: 'APPROVED',
-        inspection: {
-          create: {
-            status: inspectionSummary.statusLabel,
-          },
-        },
+        ...((() => {
+          const inspectionStatus = parseInspectionScores(parsed.inspectionScores);
+          return inspectionStatus
+            ? { inspection: { create: { status: inspectionStatus } } }
+            : {};
+        })()),
       },
     });
 
@@ -232,7 +232,6 @@ export async function updateVehicle(id: string, input: FormData | Record<string,
     const normalizedInput = normalizeInput(input);
     const parsed = VehicleInputSchema.parse(normalizedInput);
     const brandName = parsed.brand || parsed.make;
-    const inspectionSummary = summarizeInspection(normalizedInput);
     const registrationStatus = parsed.registrationStatus || 'On Test';
     const registrationNumber = parsed.registrationNumber?.trim();
     const registrationValidityPeriod = parsed.registrationValidityPeriod?.trim();
@@ -329,12 +328,19 @@ export async function updateVehicle(id: string, input: FormData | Record<string,
         tractionControl: parsed.tractionControl || null,
         cruiseControl: parsed.cruiseControl || null,
         askingPrice: parsed.askingPrice ?? 0,
-        inspection: {
-          upsert: {
-            create: { status: inspectionSummary.statusLabel },
-            update: { status: inspectionSummary.statusLabel },
-          },
-        },
+        ...((() => {
+          const inspectionStatus = parseInspectionScores(parsed.inspectionScores);
+          return inspectionStatus
+            ? {
+                inspection: {
+                  upsert: {
+                    create: { status: inspectionStatus },
+                    update: { status: inspectionStatus },
+                  },
+                },
+              }
+            : {};
+        })()),
       },
     });
 
@@ -374,7 +380,7 @@ export async function updateVehicleStatus(
 
 export async function deleteVehicle(id: string) {
   try {
-    // Delete related inspection first
+    // Delete related rating metadata first.
     await db.inspection.deleteMany({ where: { vehicleId: id } });
     await db.vehicle.delete({ where: { id } });
 

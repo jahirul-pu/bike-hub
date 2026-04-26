@@ -4,6 +4,7 @@ import { AddVehicleModal } from './add-vehicle-modal';
 import { EditVehicleModal } from './edit-vehicle-modal';
 import { VehicleStatusActions } from './vehicle-status-actions';
 import { extractUsedVehicleRegistration, formatUsedVehicleDate } from '@/lib/used-vehicles';
+import { extractInspectionScore } from '@/lib/inspection';
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   APPROVED: { label: 'User Listed', bg: 'bg-slate-100', text: 'text-slate-700' },
@@ -79,7 +80,15 @@ export default async function VehiclesPage() {
                       {config.label}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{v.inspection?.status ?? 'Not inspected'}</td>
+                  <td className="px-6 py-4">
+                    {(() => {
+                      const score = extractInspectionScore(v.inspection?.status);
+                      if (score == null) return <span className="text-slate-400">—</span>;
+                      const pct = (score / 50) * 100;
+                      const color = pct >= 80 ? 'text-emerald-700 bg-emerald-50' : pct >= 60 ? 'text-amber-700 bg-amber-50' : 'text-red-700 bg-red-50';
+                      return <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold ${color}`}>{score}/50</span>;
+                    })()}
+                  </td>
                   <td className="px-6 py-4 text-sm text-slate-500">
                     {v.createdAt ? new Date(v.createdAt).toLocaleDateString('en-BD', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                   </td>
@@ -93,6 +102,7 @@ export default async function VehiclesPage() {
                         powertrain: v.powertrain,
                         priceBdt: v.priceBdt ?? undefined,
                         askingPrice: v.askingPrice ?? undefined,
+                        inspectionStatus: v.inspection?.status ?? null,
                         summary: v.summary ?? '',
                         displacementCc: v.displacementCc ?? undefined,
                         motorPowerKw: v.motorPowerKw ?? undefined,

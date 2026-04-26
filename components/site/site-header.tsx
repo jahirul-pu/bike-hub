@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Bike, Calculator, House, ListChecks, LogIn, ShoppingBag, Store } from "lucide-react";
+import { Bike, Calculator, House, LayoutDashboard, ListChecks, LogIn, ShoppingBag, Store, User } from "lucide-react";
 import { CartDrawer } from "@/components/site/cart-drawer";
 import { UniversalSearch } from "@/components/site/universal-search";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { UserRole } from "@/lib/auth/types";
 
 const navItems = [
   { href: "/", label: "Home", icon: House },
@@ -17,12 +18,19 @@ const navItems = [
   { href: "/marketplace", label: "Marketplace", icon: ShoppingBag, highlight: true },
 ];
 
-export function SiteHeader() {
+type SiteHeaderUser = {
+  email: string | null;
+  name: string | null;
+  userRole: UserRole;
+};
+
+export function SiteHeader({ currentUser }: { currentUser?: SiteHeaderUser | null }) {
   const navSizerRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const loginRef = useRef<HTMLDivElement>(null);
   const [navWidth, setNavWidth] = useState<number | null>(null);
   const [sideWidth, setSideWidth] = useState<number | null>(null);
+  const isAdmin = currentUser?.userRole === "Admin" && currentUser.email?.toLowerCase() === "admin@bikehub.com";
 
   useEffect(() => {
     const element = navSizerRef.current;
@@ -100,13 +108,36 @@ export function SiteHeader() {
           >
             <div className="float-right flex items-center gap-2">
               <CartDrawer />
-              <Link
-                href="/login"
-                className={cn(buttonVariants(), "shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
-              >
-                <LogIn className="h-4 w-4" />
-                Login
-              </Link>
+              {isAdmin ? (
+                <Link
+                  href="/admin"
+                  title={`Admin: ${currentUser.email ?? "BikeHub"}`}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "shrink-0 border-emerald-300 bg-white text-emerald-800 hover:border-emerald-400 hover:bg-emerald-50"
+                  )}
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>Admin</span>
+                </Link>
+              ) : currentUser ? (
+                <Link
+                  href="/account"
+                  className={cn(buttonVariants(), "shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
+                >
+                  <User className="h-4 w-4" />
+                  Account
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className={cn(buttonVariants(), "shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
+                >
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>

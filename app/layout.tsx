@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, JetBrains_Mono, Manrope } from "next/font/google";
+import { auth } from "@/auth";
 import { SiteHeader } from "@/components/site/site-header";
 import "./globals.css";
 
@@ -24,11 +25,20 @@ export const metadata: Metadata = {
   description: "Bike specifications, comparison, and local showroom directory.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  const currentUser = session?.user
+    ? {
+        email: session.user.email ?? null,
+        name: session.user.name ?? null,
+        userRole: session.user.userRole,
+      }
+    : null;
+
   return (
     <html
       lang="en"
@@ -37,7 +47,7 @@ export default function RootLayout({
       <body className="min-h-full bg-[#fffaf1] text-slate-900">
         <div className="relative min-h-full overflow-x-clip">
           <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_5%,rgba(251,191,36,0.25),transparent_38%),radial-gradient(circle_at_90%_10%,rgba(34,197,94,0.18),transparent_30%),linear-gradient(180deg,#fffdf7_0%,#f7fbff_42%,#eef5ff_100%)]" />
-          <SiteHeader />
+          <SiteHeader currentUser={currentUser} />
           <main>{children}</main>
         </div>
       </body>
