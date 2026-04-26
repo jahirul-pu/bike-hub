@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowRight, Bike as BikeIcon, ChevronDown, ChevronUp, Gauge, Megaphone, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, User, Wrench, X, Building2, Map, Package, Wallet, Search, CheckCircle2, Sparkles, Target } from "lucide-react";
+import { ArrowRight, BatteryCharging, Bike as BikeIcon, Building2, Cable, ChevronDown, ChevronUp, CircleDot, Disc3, Droplets, Fuel, Gauge, Lightbulb, Luggage, Map, Megaphone, Package, PlugZap, Search, Shield, ShieldCheck, ShoppingBag, ShoppingCart, SlidersHorizontal, Smartphone, Sparkles, User, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -50,6 +50,25 @@ const sparePartsSortDirections: Array<{ value: SparePartsSortDirection; label: s
   { value: "asc", label: "Low -> High" },
   { value: "desc", label: "High -> Low" },
 ];
+const knownPartBrands = [
+  "Liqui Moly",
+  "Castrol",
+  "Motul",
+  "Shell",
+  "Mobil",
+  "Brembo",
+  "NGK",
+  "Honda",
+  "Yamaha",
+  "Suzuki",
+  "Bajaj",
+  "Yadea",
+];
+const categoryIconMap: Record<SparePartCategory, LucideIcon> = {
+  Parts: Wrench,
+  Accessories: ShieldCheck,
+  Additives: Droplets,
+};
 const inter = Inter({ subsets: ["latin"] });
 
 function escapeSvgText(value: string): string {
@@ -106,28 +125,10 @@ function getPartBrand(part: SparePartListing): string {
     return part.brand.trim();
   }
 
-  const compatibleBrands = Array.from(
-    new Set(
-      part.compatibleBikes
-        .filter((slug) => slug !== "Universal")
-        .map((slug) => bikes.find((bike) => bike.slug === slug)?.brand)
-        .filter((brand): brand is string => Boolean(brand))
-    )
-  );
-
-  if (compatibleBrands.length === 0) {
-    return "Universal Fit";
-  }
-
-  if (compatibleBrands.length === 1) {
-    return compatibleBrands[0];
-  }
-
-  if (compatibleBrands.length === 2) {
-    return compatibleBrands.join(" + ");
-  }
-
-  return `${compatibleBrands[0]} +${compatibleBrands.length - 1} more`;
+  return knownPartBrands.find((brand) => {
+    const pattern = new RegExp(`(^|\\s)${brand.replace(/\s+/g, "\\s+")}(\\s|$)`, "i");
+    return pattern.test(part.name);
+  }) ?? "Generic";
 }
 
 function getPartRating(part: SparePartListing): number {
@@ -256,7 +257,6 @@ function SmartPartCard({
   const stockMeta = getStockMeta(part);
   const partImage = getPartImage(part);
   const priceLabel = `৳ ${new Intl.NumberFormat("en-BD").format(part.priceBdt)}`;
-  const showBrandChip = Boolean(part.brand?.trim()) || brand !== "Universal Fit";
   const compatibleBikePreviews = part.compatibleBikes
     .filter((slug) => slug !== "Universal")
     .map((slug) => bikes.find((bike) => bike.slug === slug))
@@ -326,12 +326,11 @@ function SmartPartCard({
                   {part.name}
                 </CardTitle>
                 {isUniversal ? (
-                  <div className="mt-2 space-y-1">
+                  <div className="mt-2">
                     <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
                       <AlertTriangle className="h-3.5 w-3.5" />
                       Universal Fit
                     </div>
-                    <p className="line-clamp-1 text-sm font-semibold text-slate-700">{leadFitLabel}</p>
                   </div>
                 ) : (
                   <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -358,20 +357,16 @@ function SmartPartCard({
               </Badge>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              {showBrandChip ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
-                  <Building2 className="h-3.5 w-3.5 text-slate-400" />
-                  <span>
-                    <span className="font-semibold">Brand:</span> {brand}
-                  </span>
-                </span>
-              ) : null}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+            <div className="mt-3 grid gap-1.5 text-xs text-slate-500">
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+                <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                <span className="font-semibold">{brand}</span>
+              </span>
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 <Package className="h-3.5 w-3.5 text-slate-400" />
                 <span className="font-semibold">{part.category}</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 <Target className="h-3.5 w-3.5 text-slate-400" />
                 <span>{part.subcategory}</span>
               </span>
