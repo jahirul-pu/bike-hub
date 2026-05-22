@@ -1536,7 +1536,7 @@ export function MarketplacePageContent({ section = "spare" }: { section?: "spare
           {/* Progressive Disclosure Navigation */}
           <div className="space-y-6">
             {/* Level 1: Energy Source Tabs (Compact Sticky Pill) */}
-            <div className="sticky top-[102px] z-[60] flex justify-center py-4 transition-all duration-300 sm:top-[124px]">
+            <div className="sticky top-[102px] z-[30] flex justify-center py-4 transition-all duration-300 sm:top-[124px]">
               <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/70 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-slate-900/5">
                 {(["All", "ICE", "EV"] as const).map((p) => (
                   <button

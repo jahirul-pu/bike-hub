@@ -167,13 +167,13 @@ export function CartDrawer() {
           <Button
             variant="outline"
             size="icon"
-            className="relative h-9 w-9 border-slate-300 bg-white/80 text-slate-900 hover:bg-slate-100"
+            className="relative h-12 w-12 rounded-2xl border-slate-300 bg-white/80 text-slate-900 hover:bg-slate-100"
           />
         }
       >
-        <ShoppingCart className="h-4 w-4" />
+        <ShoppingCart className="h-5 w-5" />
         {itemCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-900 px-1.5 text-[10px] font-semibold text-white">
+          <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-900 px-1.5 text-[10px] font-semibold text-white">
             {itemCount}
           </span>
         )}

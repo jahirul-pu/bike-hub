@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import { Bike, Calculator, House, LayoutDashboard, ListChecks, LogIn, ShoppingBag, Store, User } from "lucide-react";
 import { CartDrawer } from "@/components/site/cart-drawer";
 import { UniversalSearch } from "@/components/site/universal-search";
@@ -25,147 +24,92 @@ type SiteHeaderUser = {
 };
 
 export function SiteHeader({ currentUser }: { currentUser?: SiteHeaderUser | null }) {
-  const navSizerRef = useRef<HTMLDivElement>(null);
-  const logoRef = useRef<HTMLDivElement>(null);
-  const loginRef = useRef<HTMLDivElement>(null);
-  const [navWidth, setNavWidth] = useState<number | null>(null);
-  const [sideWidth, setSideWidth] = useState<number | null>(null);
   const isAdmin = currentUser?.userRole === "Admin" && currentUser.email?.toLowerCase() === "admin@bikehub.com";
 
-  useEffect(() => {
-    const element = navSizerRef.current;
-    if (!element) return;
-
-    const updateNavWidth = () => {
-      setNavWidth(Math.round(element.getBoundingClientRect().width));
-    };
-
-    updateNavWidth();
-
-    const resizeObserver = new ResizeObserver(updateNavWidth);
-    resizeObserver.observe(element);
-    window.addEventListener("resize", updateNavWidth);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateNavWidth);
-    };
-  }, []);
-
-  useEffect(() => {
-    const logoElement = logoRef.current;
-    const loginElement = loginRef.current;
-    if (!logoElement || !loginElement) return;
-
-    const updateSideWidth = () => {
-      const logoWidth = Math.round(logoElement.getBoundingClientRect().width);
-      const loginWidth = Math.round(loginElement.getBoundingClientRect().width);
-      setSideWidth(Math.max(logoWidth, loginWidth));
-    };
-
-    updateSideWidth();
-
-    const resizeObserver = new ResizeObserver(updateSideWidth);
-    resizeObserver.observe(logoElement);
-    resizeObserver.observe(loginElement);
-    window.addEventListener("resize", updateSideWidth);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateSideWidth);
-    };
-  }, []);
-
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+    <header className="relative sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+      {/* Actions pinned to absolute top-right corner of header */}
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-3.5">
+          <CartDrawer />
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              title={`Admin: ${currentUser.email ?? "BikeHub"}`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-12 px-6 rounded-2xl shrink-0 gap-2 border-emerald-300 bg-white text-emerald-800 hover:border-emerald-400 hover:bg-emerald-50 text-base font-semibold shadow-sm"
+              )}
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <LayoutDashboard className="h-5 w-5" />
+              <span>Admin</span>
+            </Link>
+          ) : currentUser ? (
+            <Link
+              href="/account"
+              className={cn(
+                buttonVariants({ variant: "default" }),
+                "h-12 px-6 rounded-2xl shrink-0 gap-2 bg-slate-900 text-white hover:bg-slate-700 text-base font-semibold shadow-sm"
+              )}
+            >
+              <User className="h-5 w-5" />
+              Account
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className={cn(
+                buttonVariants({ variant: "default" }),
+                "h-12 px-6 rounded-2xl shrink-0 gap-2 bg-slate-900 text-white hover:bg-slate-700 text-base font-semibold shadow-sm"
+              )}
+            >
+              <LogIn className="h-5 w-5" />
+              Login
+            </Link>
+          )}
+      </div>
+
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <div className="flex min-h-16 items-center gap-3 py-2">
-          <div ref={logoRef} className="shrink-0" style={sideWidth ? { width: `${sideWidth}px` } : undefined}>
-            <Link href="/" className="inline-flex items-center gap-2">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-600 text-sm font-black text-slate-900">
-                BH
-              </span>
-              <div className="leading-tight">
-                <p className="font-heading text-lg uppercase tracking-wider text-slate-900 sm:text-xl">Bike Hub</p>
-                <p className="hidden text-[11px] uppercase tracking-[0.2em] text-slate-500 sm:block">Specs and Comparison</p>
-              </div>
+        <div className="flex items-center gap-6 py-4">
+          {/* Logo on the left */}
+          <div className="shrink-0">
+            <Link href="/" className="inline-flex items-center">
+              <img src="/logo.png" alt="BikeHub Logo" className="h-32 sm:h-40 w-auto object-contain" />
             </Link>
           </div>
 
-          <div className="min-w-0 flex-1">
-            <div
-              className="mx-auto max-w-full"
-              style={navWidth ? { width: `${navWidth}px` } : undefined}
-            >
+          {/* Search bar + nav stacked on the right */}
+          <div className="min-w-0 flex-1 flex flex-col gap-3">
+            {/* Search Bar */}
+            <div className="w-full">
               <UniversalSearch />
             </div>
-          </div>
 
-          <div
-            ref={loginRef}
-            className="shrink-0 justify-self-end"
-            style={sideWidth ? { width: `${sideWidth}px` } : undefined}
-          >
-            <div className="float-right flex items-center gap-2">
-              <CartDrawer />
-              {isAdmin ? (
-                <Link
-                  href="/admin"
-                  title={`Admin: ${currentUser.email ?? "BikeHub"}`}
-                  className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "shrink-0 border-emerald-300 bg-white text-emerald-800 hover:border-emerald-400 hover:bg-emerald-50"
-                  )}
-                >
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span>Admin</span>
-                </Link>
-              ) : currentUser ? (
-                <Link
-                  href="/account"
-                  className={cn(buttonVariants(), "shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
-                >
-                  <User className="h-4 w-4" />
-                  Account
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className={cn(buttonVariants(), "shrink-0 bg-slate-900 text-white hover:bg-slate-700")}
-                >
-                  <LogIn className="h-4 w-4" />
-                  Login
-                </Link>
-              )}
+            {/* Navigation links */}
+            <div className="overflow-x-auto pb-1">
+              <nav className="flex items-center gap-3">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        buttonVariants({ variant: item.highlight ? "default" : "ghost" }),
+                        "h-11 px-5 rounded-xl shrink-0 gap-2.5 text-base font-semibold transition-all duration-200",
+                        item.highlight
+                          ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-400/30 animate-pulse hover:shadow-lg hover:shadow-orange-500/30 hover:from-amber-400 hover:to-orange-500"
+                          : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
             </div>
-          </div>
-        </div>
-
-        <div className="mb-2 overflow-x-auto pb-2 md:mb-0 md:pb-3">
-          <div ref={navSizerRef} className="mx-auto w-fit max-w-full">
-            <nav className="flex items-center gap-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      buttonVariants({ variant: item.highlight ? "default" : "ghost", size: "sm" }),
-                      "shrink-0 gap-2",
-                      item.highlight
-                        ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-400/30 animate-pulse hover:shadow-lg hover:shadow-orange-500/30 hover:from-amber-400 hover:to-orange-500 transition-all duration-300"
-                        : "text-slate-700"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
           </div>
         </div>
       </div>
